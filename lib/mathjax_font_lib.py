@@ -461,6 +461,50 @@ def extract_italic_corrections(font):
     return ic_map
 
 
+def extract_top_accent_skews(font):
+    """Extract top accent attachment skew values from MATH table, keyed by codepoint.
+
+    Returns a dict {codepoint: sk_value} where sk = (topAccent - width/2) / upm.
+    This tells MathJax how to center accents over each glyph.
+    """
+    sk_map = {}
+    if 'MATH' not in font:
+        return sk_map
+    math_table = font['MATH'].table
+    if not hasattr(math_table, 'MathGlyphInfo') or not math_table.MathGlyphInfo:
+        return sk_map
+    taa = math_table.MathGlyphInfo.MathTopAccentAttachment
+    if not taa:
+        return sk_map
+    upm = font['head'].unitsPerEm
+    cmap = font.getBestCmap()
+    rev_cmap = {v: k for k, v in cmap.items()}
+    for i, glyph_name in enumerate(taa.TopAccentCoverage.glyphs):
+        cp = rev_cmap.get(glyph_name)
+        if cp is not None:
+            ta_value = taa.TopAccentAttachment[i].Value
+            # Get advance width for this glyph
+            if glyph_name in font['hmtx'].metrics:
+                adv = font['hmtx'].metrics[glyph_name][0]
+            else:
+                continue
+            # sk = (topAccent - width/2) / upm
+            sk = round3((ta_value - adv / 2) / upm)
+            if sk != 0:
+                sk_map[cp] = sk
+    return sk_map
+
+
+def apply_skews(data, sk_map):
+    """Merge top accent skew values into variant data. Returns count applied."""
+    applied = 0
+    for cp, sk_val in sk_map.items():
+        if cp in data:
+            data[cp]['sk'] = sk_val
+            applied += 1
+    return applied
+
+
 def override_integral_ics(ic_map, normal_val=0.12):
     """Override integral italic corrections to match newCM tuning."""
     for cp in range(0x222B, 0x2234):
@@ -656,20 +700,26 @@ def build_operator_data_chtml(math_font, codepoints, em_scale=1.0):
 # ========================================================================
 
 def format_svg_entry(cp, info):
-    """Format a single SVG entry like:  0x41: [.689, 0, .573, { p: 'M...' }]"""
+    """Format a single SVG entry like:  0x41: [.689, 0, .573, { sk: .01, p: 'M...' }]"""
     h = info['height']
     d = info['depth']
     w = info['width']
     p = info.get('path', '')
     ic = info.get('ic', None)
+    sk = info.get('sk', None)
 
+    # Build extras dict contents
+    extra_parts = []
+    if sk is not None:
+        extra_parts.append(f"sk: {sk}")
     if p:
-        extras = f"p: '{p}'"
-        if ic is not None:
-            extras += f", ic: {ic}"
+        extra_parts.append(f"p: '{p}'")
+    if ic is not None:
+        extra_parts.append(f"ic: {ic}")
+
+    if extra_parts:
+        extras = ", ".join(extra_parts)
         return f"    0x{cp:X}: [{h}, {d}, {w}, {{ {extras} }}]"
-    elif ic is not None:
-        return f"    0x{cp:X}: [{h}, {d}, {w}, {{ ic: {ic} }}]"
     else:
         return f"    0x{cp:X}: [{h}, {d}, {w}]"
 
@@ -1706,6 +1756,15 @@ def build_all_variants(output_dir, text_fonts, math_font, text_ranges, math_rang
         ic_map = extract_italic_corrections(math_font)
         override_integral_ics(ic_map)
 
+    # Extract top accent skew values for accent centering
+    sk_map = extract_top_accent_skews(math_font)
+    print(f"  Top accent skews: {len(sk_map)} glyphs")
+
+    def apply_all_corrections(data):
+        """Apply IC and sk to variant data."""
+        apply_italic_corrections(data, ic_map)
+        apply_skews(data, sk_map)
+
     # ========== SVG VARIANTS ==========
     print("Building SVG normal variant...")
     svg_normal = build_variant_data_svg(
@@ -1713,7 +1772,7 @@ def build_all_variants(output_dir, text_fonts, math_font, text_ranges, math_rang
         middle_layer_data=get_middle_layer('normal'),
         text_source=text_source, em_scale=em_scale
     )
-    apply_italic_corrections(svg_normal, ic_map)
+    apply_all_corrections(svg_normal)
     # Report source breakdown
     sources = {}
     for cp, info in svg_normal.items():
@@ -1730,7 +1789,7 @@ def build_all_variants(output_dir, text_fonts, math_font, text_ranges, math_rang
         middle_layer_data=get_middle_layer('bold'),
         text_source=text_source, em_scale=em_scale
     )
-    apply_italic_corrections(svg_bold, ic_map)
+    apply_all_corrections(svg_bold)
     write_svg_variant_file(
         os.path.join(output_dir, "cjs/svg/bold.js"), "bold", svg_bold
     )
@@ -1741,7 +1800,7 @@ def build_all_variants(output_dir, text_fonts, math_font, text_ranges, math_rang
         middle_layer_data=get_middle_layer('italic'),
         text_source=text_source, em_scale=em_scale
     )
-    apply_italic_corrections(svg_italic, ic_map)
+    apply_all_corrections(svg_italic)
     write_svg_variant_file(
         os.path.join(output_dir, "cjs/svg/italic.js"), "italic", svg_italic
     )
@@ -1752,7 +1811,7 @@ def build_all_variants(output_dir, text_fonts, math_font, text_ranges, math_rang
         middle_layer_data=get_middle_layer('bold_italic'),
         text_source=text_source, em_scale=em_scale
     )
-    apply_italic_corrections(svg_bold_italic, ic_map)
+    apply_all_corrections(svg_bold_italic)
     write_svg_variant_file(
         os.path.join(output_dir, "cjs/svg/bold-italic.js"), "boldItalic", svg_bold_italic
     )
@@ -1769,14 +1828,14 @@ def build_all_variants(output_dir, text_fonts, math_font, text_ranges, math_rang
 
     print("Building SVG smallop...")
     svg_smallop = build_size_variant_svg(math_font, size_data, 0, em_scale=em_scale)
-    apply_italic_corrections(svg_smallop, ic_map)
+    apply_all_corrections(svg_smallop)
     write_svg_variant_file(
         os.path.join(output_dir, "cjs/svg/smallop.js"), "smallop", svg_smallop
     )
 
     print("Building SVG largeop...")
     svg_largeop = build_size_variant_svg(math_font, size_data, 1, em_scale=em_scale)
-    apply_italic_corrections(svg_largeop, ic_map)
+    apply_all_corrections(svg_largeop)
     write_svg_variant_file(
         os.path.join(output_dir, "cjs/svg/largeop.js"), "largeop", svg_largeop
     )
@@ -1785,7 +1844,7 @@ def build_all_variants(output_dir, text_fonts, math_font, text_ranges, math_rang
         actual_idx = sz - 1
         print(f"Building SVG size{sz}...")
         svg_size = build_size_variant_svg(math_font, size_data, actual_idx, em_scale=em_scale)
-        apply_italic_corrections(svg_size, ic_map)
+        apply_all_corrections(svg_size)
         write_svg_variant_file(
             os.path.join(output_dir, f"cjs/svg/size{sz}.js"), f"size{sz}", svg_size
         )
