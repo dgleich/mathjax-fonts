@@ -1,0 +1,25 @@
+# Source font files (download separately, see fonts/README.md)
+fonts/*.ttf
+fonts/*.otf
+fonts/*.pfb
+fonts/**/*.ttf
+fonts/**/*.otf
+fonts/**/*.pfb
+
+# Node modules
+node_modules/
+
+# Webpack bundles (generated, large)
+*/tex-mml-svg-*.js
+
+# WOFF2 fonts (generated)
+*/chtml/woff2/
+*.woff2
+
+# Python
+__pycache__/
+*.pyc
+.venv/
+
+# OS
+.DS_Store
