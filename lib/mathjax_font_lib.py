@@ -495,6 +495,40 @@ def extract_top_accent_skews(font):
     return sk_map
 
 
+def compute_visual_skews(font):
+    """Compute accent skews from a font's actual glyph bounding boxes.
+
+    For each glyph, sk = (visual_center - advance_center) / upm.
+    This is more accurate than MATH table TopAccentAttachment when the
+    rendered glyphs come from a different font than the math font.
+    Particularly important for italic text fonts.
+    """
+    sk_map = {}
+    upm = font['head'].unitsPerEm
+    cmap = font.getBestCmap()
+    gs = font.getGlyphSet()
+
+    for cp, gn in cmap.items():
+        if gn not in gs:
+            continue
+        try:
+            bp = BoundsPen(gs)
+            gs[gn].draw(bp)
+            bounds = bp.bounds
+        except Exception:
+            continue
+        if bounds is None or bounds == (0, 0, 0, 0):
+            continue
+
+        adv = gs[gn].width
+        vis_center = (bounds[0] + bounds[2]) / 2
+        adv_center = adv / 2
+        sk = round3((vis_center - adv_center) / upm)
+        if sk != 0:
+            sk_map[cp] = sk
+    return sk_map
+
+
 def apply_skews(data, sk_map):
     """Merge top accent skew values into variant data. Returns count applied."""
     applied = 0
@@ -1757,13 +1791,26 @@ def build_all_variants(output_dir, text_fonts, math_font, text_ranges, math_rang
         override_integral_ics(ic_map)
 
     # Extract top accent skew values for accent centering
-    sk_map = extract_top_accent_skews(math_font)
-    print(f"  Top accent skews: {len(sk_map)} glyphs")
+    # Use MATH table skews as base (for math-only glyphs like Greek, operators)
+    sk_map_math = extract_top_accent_skews(math_font)
+    print(f"  MATH table accent skews: {len(sk_map_math)} glyphs")
 
-    def apply_all_corrections(data):
-        """Apply IC and sk to variant data."""
+    # Compute visual skews from the actual text fonts (more accurate for text glyphs,
+    # especially italic — the MATH font's TopAccentAttachment doesn't match the
+    # text font's glyph shapes)
+    sk_maps_text = {}
+    for variant_key in ['regular', 'bold', 'italic', 'bold_italic']:
+        sk_maps_text[variant_key] = compute_visual_skews(text_fonts[variant_key])
+    print(f"  Text font visual skews: {len(sk_maps_text['regular'])} regular, {len(sk_maps_text['italic'])} italic")
+
+    def apply_all_corrections(data, variant_key='regular'):
+        """Apply IC and sk to variant data.
+        Text glyphs get sk from the text font; math glyphs get sk from MATH table."""
         apply_italic_corrections(data, ic_map)
-        apply_skews(data, sk_map)
+        # First apply MATH table skews (covers math-only glyphs)
+        apply_skews(data, sk_map_math)
+        # Then override with text font visual skews (more accurate for rendered glyphs)
+        apply_skews(data, sk_maps_text.get(variant_key, {}))
 
     # ========== SVG VARIANTS ==========
     print("Building SVG normal variant...")
@@ -1772,7 +1819,7 @@ def build_all_variants(output_dir, text_fonts, math_font, text_ranges, math_rang
         middle_layer_data=get_middle_layer('normal'),
         text_source=text_source, em_scale=em_scale
     )
-    apply_all_corrections(svg_normal)
+    apply_all_corrections(svg_normal, 'regular')
     # Report source breakdown
     sources = {}
     for cp, info in svg_normal.items():
@@ -1789,7 +1836,7 @@ def build_all_variants(output_dir, text_fonts, math_font, text_ranges, math_rang
         middle_layer_data=get_middle_layer('bold'),
         text_source=text_source, em_scale=em_scale
     )
-    apply_all_corrections(svg_bold)
+    apply_all_corrections(svg_bold, 'bold')
     write_svg_variant_file(
         os.path.join(output_dir, "cjs/svg/bold.js"), "bold", svg_bold
     )
@@ -1800,7 +1847,7 @@ def build_all_variants(output_dir, text_fonts, math_font, text_ranges, math_rang
         middle_layer_data=get_middle_layer('italic'),
         text_source=text_source, em_scale=em_scale
     )
-    apply_all_corrections(svg_italic)
+    apply_all_corrections(svg_italic, 'italic')
     write_svg_variant_file(
         os.path.join(output_dir, "cjs/svg/italic.js"), "italic", svg_italic
     )
@@ -1811,7 +1858,7 @@ def build_all_variants(output_dir, text_fonts, math_font, text_ranges, math_rang
         middle_layer_data=get_middle_layer('bold_italic'),
         text_source=text_source, em_scale=em_scale
     )
-    apply_all_corrections(svg_bold_italic)
+    apply_all_corrections(svg_bold_italic, 'bold_italic')
     write_svg_variant_file(
         os.path.join(output_dir, "cjs/svg/bold-italic.js"), "boldItalic", svg_bold_italic
     )
