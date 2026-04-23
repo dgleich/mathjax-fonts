@@ -43,12 +43,14 @@ DEFAULT_TEXT_RANGES = [
 
 DEFAULT_MATH_RANGES = [
     (0x391, 0x3A9), (0x3B1, 0x3C9), (0x3D1, 0x3D6), (0x3F0, 0x3F6),  # Greek
+    (0x2100, 0x214F),  # Letterlike Symbols (bb C,H,N,P,Q,R,Z, hbar, ell, etc.)
     (0x2190, 0x21FF), (0x2200, 0x22FF), (0x2300, 0x23FF),  # Arrows, Math ops, Technical
     (0x2500, 0x257F), (0x25A0, 0x25FF), (0x2600, 0x26FF),  # Box, Geometric, Misc
     (0x2700, 0x27BF), (0x27C0, 0x27EF), (0x27F0, 0x27FF),  # Dingbats, Math-A, Arrows-A
     (0x2900, 0x297F), (0x2980, 0x29FF), (0x2A00, 0x2AFF), (0x2B00, 0x2BFF),  # More math
     (0x300, 0x36F), (0x2000, 0x206F), (0x20D0, 0x20FF),  # Combining, Punctuation
     (0x131, 0x131), (0x237, 0x237),  # dotless i, j
+    (0x1D400, 0x1D7FF),  # Math Alphanumeric (bold/italic/script/fraktur/bb/sans alphabets)
 ]
 
 DEFAULT_EXTRA_MATH = [
@@ -885,12 +887,18 @@ def build_delimiters(math_font, em_scale=1.0):
     pua_next = 0xE000
     pua_map = {}  # glyph_name -> PUA codepoint
 
-    def get_cp_for_glyph(glyph_name):
-        """Get codepoint for a glyph, assigning PUA if needed."""
+    def get_cp_for_glyph(glyph_name, assign_pua=False):
+        """Get codepoint for a glyph.
+
+        If assign_pua=True and glyph has no Unicode codepoint, assign a PUA codepoint.
+        If assign_pua=False (default), return 0 for unmapped glyphs.
+        """
         nonlocal pua_next
         cp = gname_to_cp.get(glyph_name)
         if cp is not None:
             return cp
+        if not assign_pua:
+            return 0
         if glyph_name in pua_map:
             return pua_map[glyph_name]
         pua_map[glyph_name] = pua_next
@@ -922,7 +930,8 @@ def build_delimiters(math_font, em_scale=1.0):
                 parts = rec.GlyphAssembly.PartRecords
                 stretch_cps = []
                 for p in parts:
-                    pcp = get_cp_for_glyph(p.glyph)
+                    is_extender = bool(p.PartFlags & 1)
+                    pcp = get_cp_for_glyph(p.glyph, assign_pua=is_extender)
                     stretch_cps.append(pcp)
 
                 if len(parts) == 3:
@@ -964,7 +973,8 @@ def build_delimiters(math_font, em_scale=1.0):
                 parts = rec.GlyphAssembly.PartRecords
                 stretch_cps = []
                 for p in parts:
-                    pcp = get_cp_for_glyph(p.glyph)
+                    is_extender = bool(p.PartFlags & 1)
+                    pcp = get_cp_for_glyph(p.glyph, assign_pua=is_extender)
                     stretch_cps.append(pcp)
 
                 if len(parts) == 2:
