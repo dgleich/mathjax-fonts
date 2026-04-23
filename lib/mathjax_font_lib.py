@@ -1862,6 +1862,22 @@ def build_all_variants(output_dir, text_fonts, math_font, text_ranges, math_rang
         # Then override with text font visual skews (more accurate for rendered glyphs)
         apply_skews(data, sk_maps_text.get(variant_key, {}))
 
+    # ========== DELIMITERS (build early to get pua_map for variant injection) ==========
+    print("Building delimiters...")
+    delimiters, pua_map = build_delimiters(math_font, em_scale=em_scale)
+
+    # Build PUA glyph data to inject into variant files
+    # MathJax looks up stretch piece codepoints in the normal variant, not just lf-tp/ext
+    pua_glyph_data = {}
+    if pua_map:
+        gs = math_font.getGlyphSet()
+        for glyph_name, pua_cp in pua_map.items():
+            info = get_glyph_data_by_name_svg(math_font, glyph_name, em_scale=em_scale)
+            if info:
+                info['source'] = 'pua-assembly'
+                pua_glyph_data[pua_cp] = info
+        print(f"    PUA assembly glyphs to inject: {len(pua_glyph_data)}")
+
     # ========== SVG VARIANTS ==========
     print("Building SVG normal variant...")
     svg_normal = build_variant_data_svg(
@@ -1870,6 +1886,7 @@ def build_all_variants(output_dir, text_fonts, math_font, text_ranges, math_rang
         text_source=text_source, em_scale=em_scale
     )
     apply_all_corrections(svg_normal, 'regular')
+    svg_normal.update(pua_glyph_data)  # inject PUA assembly glyphs
     # Report source breakdown
     sources = {}
     for cp, info in svg_normal.items():
@@ -1887,6 +1904,7 @@ def build_all_variants(output_dir, text_fonts, math_font, text_ranges, math_rang
         text_source=text_source, em_scale=em_scale
     )
     apply_all_corrections(svg_bold, 'bold')
+    svg_bold.update(pua_glyph_data)
     write_svg_variant_file(
         os.path.join(output_dir, "cjs/svg/bold.js"), "bold", svg_bold
     )
@@ -1898,6 +1916,7 @@ def build_all_variants(output_dir, text_fonts, math_font, text_ranges, math_rang
         text_source=text_source, em_scale=em_scale
     )
     apply_all_corrections(svg_italic, 'italic')
+    svg_italic.update(pua_glyph_data)
     write_svg_variant_file(
         os.path.join(output_dir, "cjs/svg/italic.js"), "italic", svg_italic
     )
@@ -1909,6 +1928,7 @@ def build_all_variants(output_dir, text_fonts, math_font, text_ranges, math_rang
         text_source=text_source, em_scale=em_scale
     )
     apply_all_corrections(svg_bold_italic, 'bold_italic')
+    svg_bold_italic.update(pua_glyph_data)
     write_svg_variant_file(
         os.path.join(output_dir, "cjs/svg/bold-italic.js"), "boldItalic", svg_bold_italic
     )
@@ -1946,9 +1966,7 @@ def build_all_variants(output_dir, text_fonts, math_font, text_ranges, math_rang
             os.path.join(output_dir, f"cjs/svg/size{sz}.js"), f"size{sz}", svg_size
         )
 
-    # ========== DELIMITERS (must come before stretchy parts to get pua_map) ==========
-    print("Building delimiters...")
-    delimiters, pua_map = build_delimiters(math_font, em_scale=em_scale)
+    # ========== WRITE DELIMITERS (already built above for pua_map) ==========
     write_delimiters_file(
         os.path.join(output_dir, "cjs/svg/delimiters.js"), delimiters
     )
