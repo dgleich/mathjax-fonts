@@ -976,21 +976,37 @@ def build_delimiters(math_font, em_scale=1.0):
             if rec.GlyphAssembly:
                 parts = rec.GlyphAssembly.PartRecords
                 # For horizontal assembly, always assign PUA for unmapped parts
-                # (unlike vertical, horizontal needs all pieces for arrows/accents)
                 stretch_cps = []
+                stretch_flags = []  # True if extender
                 for p in parts:
                     pcp = get_cp_always_pua(p.glyph)
                     stretch_cps.append(pcp)
+                    stretch_flags.append(bool(p.PartFlags & 1))
 
+                # Build stretch array and stretchv
+                # MathJax stretchv: 0=skip, 1=extension, 2=full, 3=left end, 4=right end
                 if len(parts) == 2:
-                    entry['stretch'] = [stretch_cps[0], stretch_cps[1]]
+                    # [end_or_ext, ext_or_end]
+                    sv = []
+                    for is_ext in stretch_flags:
+                        sv.append(1 if is_ext else 0)
+                    entry['stretch'] = stretch_cps
+                    entry['stretchv'] = sv
                 elif len(parts) == 3:
-                    entry['stretch'] = [stretch_cps[0], stretch_cps[1], stretch_cps[2]]
+                    # [left, ext, right]
+                    entry['stretch'] = stretch_cps
+                    entry['stretchv'] = [
+                        3 if not stretch_flags[0] else 1,
+                        1 if stretch_flags[1] else 2,
+                        4 if not stretch_flags[2] else 1,
+                    ]
                 elif len(parts) == 4:
-                    # 4-part: start, ext, mid, ext (or start, ext, end, ext)
+                    # [start, ext, mid, ext] -> stretch [start, ext, end, mid]
                     entry['stretch'] = [stretch_cps[0], stretch_cps[1], stretch_cps[3], stretch_cps[2]]
+                    entry['stretchv'] = [3, 1, 4, 2]
                 elif len(parts) == 5:
                     entry['stretch'] = [stretch_cps[0], stretch_cps[1], stretch_cps[4], stretch_cps[2]]
+                    entry['stretchv'] = [3, 1, 4, 2]
 
                 metrics = get_glyph_height_depth_width(math_font, glyph_name, em_scale=em_scale)
                 if metrics:
