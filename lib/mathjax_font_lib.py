@@ -905,6 +905,10 @@ def build_delimiters(math_font, em_scale=1.0):
         pua_next += 1
         return pua_map[glyph_name]
 
+    def get_cp_always_pua(glyph_name):
+        """Get codepoint, always assigning PUA if needed."""
+        return get_cp_for_glyph(glyph_name, assign_pua=True)
+
     delimiters = {}
 
     # Process vertical variants
@@ -971,16 +975,22 @@ def build_delimiters(math_font, em_scale=1.0):
 
             if rec.GlyphAssembly:
                 parts = rec.GlyphAssembly.PartRecords
+                # For horizontal assembly, always assign PUA for unmapped parts
+                # (unlike vertical, horizontal needs all pieces for arrows/accents)
                 stretch_cps = []
                 for p in parts:
-                    is_extender = bool(p.PartFlags & 1)
-                    pcp = get_cp_for_glyph(p.glyph, assign_pua=is_extender)
+                    pcp = get_cp_always_pua(p.glyph)
                     stretch_cps.append(pcp)
 
                 if len(parts) == 2:
-                    entry['stretch'] = [0, stretch_cps[1] if len(stretch_cps) > 1 else stretch_cps[0]]
+                    entry['stretch'] = [stretch_cps[0], stretch_cps[1]]
                 elif len(parts) == 3:
                     entry['stretch'] = [stretch_cps[0], stretch_cps[1], stretch_cps[2]]
+                elif len(parts) == 4:
+                    # 4-part: start, ext, mid, ext (or start, ext, end, ext)
+                    entry['stretch'] = [stretch_cps[0], stretch_cps[1], stretch_cps[3], stretch_cps[2]]
+                elif len(parts) == 5:
+                    entry['stretch'] = [stretch_cps[0], stretch_cps[1], stretch_cps[4], stretch_cps[2]]
 
                 metrics = get_glyph_height_depth_width(math_font, glyph_name, em_scale=em_scale)
                 if metrics:
