@@ -1529,6 +1529,9 @@ def write_package_json(filepath, font_id, font_name):
 def write_boilerplate(output_dir, font_id, font_name):
     """Generate default.js, sre/speech-worker.js, webpack configs, entry points.
 
+    Uses the proven format from our PT Sans/Lato builds that works with
+    MathJax 4's component loader system.
+
     font_id: package name, e.g. "mathjax-ptsans"
     font_name: JS class name, e.g. "MathJaxPTSansFont"
     """
@@ -1538,8 +1541,9 @@ def write_boilerplate(output_dir, font_id, font_name):
     with open(default_svg_path, 'w') as f:
         f.write(f'''"use strict";
 Object.defineProperty(exports, "__esModule", {{ value: true }});
+exports.Font = void 0;
 var svg_js_1 = require("../svg.js");
-exports.default = svg_js_1.{font_name};
+exports.Font = {{ fontName: '{font_id}', DefaultFont: svg_js_1.{font_name} }};
 ''')
 
     # cjs/chtml/default.js
@@ -1548,111 +1552,99 @@ exports.default = svg_js_1.{font_name};
     with open(default_chtml_path, 'w') as f:
         f.write(f'''"use strict";
 Object.defineProperty(exports, "__esModule", {{ value: true }});
+exports.Font = void 0;
 var chtml_js_1 = require("../chtml.js");
-exports.default = chtml_js_1.{font_name};
+exports.Font = {{ fontName: '{font_id}', DefaultFont: chtml_js_1.{font_name} }};
 ''')
 
     # sre/speech-worker.js
     sre_dir = os.path.join(output_dir, "sre")
     os.makedirs(sre_dir, exist_ok=True)
     with open(os.path.join(sre_dir, "speech-worker.js"), 'w') as f:
-        f.write('''"use strict";
-// SRE speech worker stub for custom font packages
-if (typeof importScripts !== 'undefined') {
-    importScripts('https://cdn.jsdelivr.net/npm/speech-rule-engine@4.1.0/lib/sre_browser.js');
-}
-''')
+        f.write('self.onmessage = function(e) { self.postMessage({id: e.data.id, result: \'\'}); };\n')
+        f.write('self.postMessage({id: \'ready\'});\n')
 
-    # build/webpack.config.cjs
+    # build/ directory
     build_dir = os.path.join(output_dir, "build")
     os.makedirs(build_dir, exist_ok=True)
 
-    webpack_config = f'''\
-const path = require('path');
-
-module.exports = {{
-  mode: 'production',
-  entry: path.resolve(__dirname, 'tex-mml-svg-{font_id}.js'),
-  output: {{
-    filename: 'tex-mml-svg-{font_id}.js',
-    path: path.resolve(__dirname, '..', 'dist'),
-    library: 'MathJax',
-    libraryTarget: 'umd',
-    globalObject: 'this'
-  }},
-  resolve: {{
-    alias: {{
-      '@mathjax/{font_id}-font': path.resolve(__dirname, '..')
-    }}
-  }},
-  performance: {{
-    maxAssetSize: 5000000,
-    maxEntrypointSize: 5000000
-  }}
-}};
-'''
+    # build/webpack.config.cjs (full bundle with a11y)
     with open(os.path.join(build_dir, "webpack.config.cjs"), 'w') as f:
-        f.write(webpack_config)
-
-    # build/webpack-nosre.config.cjs
-    webpack_nosre_config = f'''\
-const path = require('path');
-
+        f.write(f'''const path = require('path');
+const webpack = require('webpack');
+const TerserPlugin = require('terser-webpack-plugin');
 module.exports = {{
-  mode: 'production',
-  entry: path.resolve(__dirname, 'tex-mml-svg-{font_id}-nosre.js'),
-  output: {{
-    filename: 'tex-mml-svg-{font_id}-nosre.js',
-    path: path.resolve(__dirname, '..', 'dist'),
-    library: 'MathJax',
-    libraryTarget: 'umd',
-    globalObject: 'this'
-  }},
-  resolve: {{
-    alias: {{
-      '@mathjax/{font_id}-font': path.resolve(__dirname, '..')
-    }}
-  }},
-  externals: {{
-    'speech-rule-engine': 'SRE'
-  }},
-  performance: {{
-    maxAssetSize: 5000000,
-    maxEntrypointSize: 5000000
-  }}
+  name: 'tex-mml-svg-{font_id}',
+  entry: path.resolve(__dirname, 'tex-mml-svg-{font_id}.js'),
+  output: {{ path: path.resolve(__dirname, '..'), filename: 'tex-mml-svg-{font_id}.js' }},
+  target: ['web', 'es5'],
+  plugins: [
+    new webpack.NormalModuleReplacementPlugin(/#default-font/, function(r) {{ r.request = r.request.replace(/#default-font/, path.resolve(__dirname, '..', 'cjs')); }}),
+    new webpack.NormalModuleReplacementPlugin(/@mathjax\\/mathjax-newcm-font\\/cjs/, function(r) {{ r.request = r.request.replace(/@mathjax\\/mathjax-newcm-font\\/cjs/, path.resolve(__dirname, '..', 'cjs')); }})
+  ],
+  resolve: {{ alias: {{ '#default-font': path.resolve(__dirname, '..', 'cjs') }}, fallback: {{}} }},
+  performance: {{ hints: false }},
+  optimization: {{ minimize: true, minimizer: [new TerserPlugin({{ extractComments: false, terserOptions: {{ output: {{ ascii_only: true }} }} }})] }},
+  mode: 'production'
 }};
-'''
+''')
+
+    # build/webpack-nosre.config.cjs (no accessibility/SRE)
     with open(os.path.join(build_dir, "webpack-nosre.config.cjs"), 'w') as f:
-        f.write(webpack_nosre_config)
+        f.write(f'''const path = require('path');
+const webpack = require('webpack');
+const TerserPlugin = require('terser-webpack-plugin');
+module.exports = {{
+  name: 'tex-mml-svg-{font_id}-nosre',
+  entry: path.resolve(__dirname, 'tex-mml-svg-{font_id}-nosre.js'),
+  output: {{ path: path.resolve(__dirname, '..'), filename: 'tex-mml-svg-{font_id}-nosre.js' }},
+  target: ['web', 'es5'],
+  plugins: [
+    new webpack.NormalModuleReplacementPlugin(/#default-font/, function(r) {{ r.request = r.request.replace(/#default-font/, path.resolve(__dirname, '..', 'cjs')); }}),
+    new webpack.NormalModuleReplacementPlugin(/@mathjax\\/mathjax-newcm-font\\/cjs/, function(r) {{ r.request = r.request.replace(/@mathjax\\/mathjax-newcm-font\\/cjs/, path.resolve(__dirname, '..', 'cjs')); }})
+  ],
+  resolve: {{ alias: {{ '#default-font': path.resolve(__dirname, '..', 'cjs') }}, fallback: {{}} }},
+  performance: {{ hints: false }},
+  optimization: {{ minimize: true, minimizer: [new TerserPlugin({{ extractComments: false, terserOptions: {{ output: {{ ascii_only: true }} }} }})] }},
+  mode: 'production'
+}};
+''')
 
-    # build/tex-mml-svg-{font_id}.js
-    entry_content = f'''\
-require('@mathjax/src/cjs/startup/startup.js');
-require('@mathjax/src/cjs/input/tex.js');
-require('@mathjax/src/cjs/input/mml.js');
-require('@mathjax/src/cjs/output/svg.js');
-require('@mathjax/src/cjs/a11y/sre.js');
-var font = require('@mathjax/{font_id}-font/js/svg.js');
-MathJax.config.output = MathJax.config.output || {{}};
-MathJax.config.output.font = new font.{font_name}();
-require('@mathjax/src/cjs/startup/ready.js');
-'''
+    # build/tex-mml-svg-{font_id}.js (full entry point with boldsymbol + a11y)
     with open(os.path.join(build_dir, f"tex-mml-svg-{font_id}.js"), 'w') as f:
-        f.write(entry_content)
+        f.write(f'''"use strict";
+var init_js_1 = require("@mathjax/src/components/cjs/startup/init.js");
+var loader_js_1 = require("@mathjax/src/cjs/components/loader.js");
+require("@mathjax/src/components/cjs/core/core.js");
+require("@mathjax/src/components/cjs/input/tex/tex.js");
+require("@mathjax/src/components/cjs/input/tex/extensions/boldsymbol/boldsymbol.js");
+require("@mathjax/src/components/cjs/input/mml/mml.js");
+var svg_js_1 = require("@mathjax/src/components/cjs/output/svg/svg.js");
+require("@mathjax/src/components/cjs/ui/menu/menu.js");
+require("@mathjax/src/components/cjs/a11y/util.js");
+require("@mathjax/src/components/cjs/a11y/semantic-enrich/semantic-enrich.js");
+require("@mathjax/src/components/cjs/a11y/complexity/complexity.js");
+require("@mathjax/src/components/cjs/a11y/explorer/explorer.js");
+require("@mathjax/src/components/cjs/a11y/assistive-mml/assistive-mml.js");
+loader_js_1.Loader.preLoaded('loader','startup','core','input/tex','[tex]/boldsymbol','input/mml','output/svg','ui/menu','a11y/util','a11y/sre','a11y/semantic-enrich','a11y/complexity','a11y/explorer','a11y/assistive-mml','a11y/speech');
+loader_js_1.Loader.saveVersion('tex-mml-svg-{font_id}');
+(0, svg_js_1.loadFont)(init_js_1.startup, true);
+''')
 
-    # build/tex-mml-svg-{font_id}-nosre.js
-    entry_nosre_content = f'''\
-require('@mathjax/src/cjs/startup/startup.js');
-require('@mathjax/src/cjs/input/tex.js');
-require('@mathjax/src/cjs/input/mml.js');
-require('@mathjax/src/cjs/output/svg.js');
-var font = require('@mathjax/{font_id}-font/js/svg.js');
-MathJax.config.output = MathJax.config.output || {{}};
-MathJax.config.output.font = new font.{font_name}();
-require('@mathjax/src/cjs/startup/ready.js');
-'''
+    # build/tex-mml-svg-{font_id}-nosre.js (no SRE, no a11y)
     with open(os.path.join(build_dir, f"tex-mml-svg-{font_id}-nosre.js"), 'w') as f:
-        f.write(entry_nosre_content)
+        f.write(f'''"use strict";
+var init_js_1 = require("@mathjax/src/components/cjs/startup/init.js");
+var loader_js_1 = require("@mathjax/src/cjs/components/loader.js");
+require("@mathjax/src/components/cjs/core/core.js");
+require("@mathjax/src/components/cjs/input/tex/tex.js");
+require("@mathjax/src/components/cjs/input/tex/extensions/boldsymbol/boldsymbol.js");
+require("@mathjax/src/components/cjs/input/mml/mml.js");
+var svg_js_1 = require("@mathjax/src/components/cjs/output/svg/svg.js");
+loader_js_1.Loader.preLoaded('loader','startup','core','input/tex','[tex]/boldsymbol','input/mml','output/svg');
+loader_js_1.Loader.saveVersion('tex-mml-svg-{font_id}-nosre');
+(0, svg_js_1.loadFont)(init_js_1.startup, true);
+''')
 
 
 # ========================================================================

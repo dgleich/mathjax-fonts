@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>MathJax Libertinus Test</title>
+<style>
+  @font-face { font-family: "Libertinus Serif"; src: url("../fonts/libertinus/LibertinusSerif-Regular.otf") format("opentype"); font-weight: 400; font-style: normal; }
+  @font-face { font-family: "Libertinus Serif"; src: url("../fonts/libertinus/LibertinusSerif-Bold.otf") format("opentype"); font-weight: 700; font-style: normal; }
+  @font-face { font-family: "Libertinus Serif"; src: url("../fonts/libertinus/LibertinusSerif-Italic.otf") format("opentype"); font-weight: 400; font-style: italic; }
+  @font-face { font-family: "Libertinus Serif"; src: url("../fonts/libertinus/LibertinusSerif-BoldItalic.otf") format("opentype"); font-weight: 700; font-style: italic; }
+  body { font-family: "Libertinus Serif", serif; max-width: 800px; margin: 2em auto; padding: 0 1.5em; line-height: 1.7; color: #1a1a1a; }
+  h1 { font-weight: 400; font-size: 1.6em; border-bottom: 1px solid #ccc; padding-bottom: 0.3em; }
+  h2 { font-size: 1.1em; color: #444; margin-top: 2em; }
+  .display { margin: 1em 0; text-align: center; }
+  .status { font-size: 0.8em; color: #999; }
+  mjx-container { display: inline-block !important; }
+</style>
+<script>
+MathJax = {
+  tex: { inlineMath: [['$', '$']], displayMath: [['$$', '$$']],
+         macros: { bm: ['\\boldsymbol{#1}', 1], R: '\\mathbb{R}', Z: '\\mathbb{Z}' } },
+  svg: { fontCache: 'global' },
+  options: { enableEnrichment: false, enableComplexity: false, enableExplorer: false, enableSpeech: false, enableBraille: false },
+  startup: { ready() { MathJax.startup.defaultReady(); document.getElementById('status').textContent = 'Rendered.'; } }
+};
+</script>
+<script src="tex-mml-svg-mathjax-libertinus.js"></script>
+</head>
+<body>
+<h1>MathJax Libertinus <span class="status" id="status">Loading...</span></h1>
+
+<h2>Accents</h2>
+<p>$\hat{a} \quad \hat{f} \quad \hat{x} \quad \tilde{a} \quad \tilde{x} \quad \bar{x} \quad \dot{x} \quad \ddot{x} \quad \vec{v}$</p>
+<p>$\widehat{abc} \quad \widetilde{abc} \quad \overline{abc}$</p>
+
+<h2>Greek</h2>
+<p>$\alpha\;\beta\;\gamma\;\delta\;\epsilon\;\zeta\;\eta\;\theta\;\iota\;\kappa\;\lambda\;\mu\;\nu\;\xi\;\pi\;\rho\;\sigma\;\tau\;\upsilon\;\phi\;\chi\;\psi\;\omega$</p>
+<p>$\Gamma\;\Delta\;\Theta\;\Lambda\;\Xi\;\Pi\;\Sigma\;\Upsilon\;\Phi\;\Psi\;\Omega$</p>
+
+<h2>Integrals and Operators</h2>
+<div class="display">$$\int_0^1 f(x)\,dx \qquad \sum_{i=1}^n a_i \qquad \prod_{k=1}^n (1-\lambda_k)$$</div>
+
+<h2>Linear Algebra</h2>
+<p>The eigenvalue problem: $\mathbf{A}\mathbf{v} = \lambda\mathbf{v}$, equivalently $\det(\mathbf{A} - \lambda I) = 0$.</p>
+<div class="display">$$\mathbf{A} = \begin{pmatrix} a_{11} & a_{12} \\ a_{21} & a_{22} \end{pmatrix}, \quad I = \begin{pmatrix} 1 & 0 \\ 0 & 1 \end{pmatrix}$$</div>
+
+<h2>Bold</h2>
+<p>$\bm{I} - \alpha\bm{P} \quad$ vs $\quad I - \alpha P \quad$ vs $\quad \mathbf{I} - \alpha\mathbf{P}$</p>
+
+<h2>Delimiters</h2>
+<div class="display">$$\left(\frac{\frac{a}{b}}{\frac{c}{d}}\right) \quad \left[\sum_{k=1}^n x_k\right] \quad \left\{\prod_{j=1}^m y_j\right\}$$</div>
+
+<h2>Display</h2>
+<div class="display">$$\hat{f}(\xi) = \int_{-\infty}^{\infty} f(x)\,e^{-2\pi ix\xi}\,dx, \qquad \tilde{f}(x) = \overline{f(-x)}$$</div>
+<div class="display">$$\nabla \times \mathbf{E} = -\frac{\partial \mathbf{B}}{\partial t}, \quad \nabla \cdot \mathbf{B} = 0$$</div>
+<div class="display">$$e^{i\theta} = \cos\theta + i\sin\theta$$</div>
+
+<h2>Mixed text and math</h2>
+<p>Let $V$ be a vector space over $\R$ with $\dim V = n$. For any $T \in \mathcal{L}(V)$,
+the characteristic polynomial $p(\lambda) = \det(T - \lambda I)$ has degree $n$ and
+$T$ satisfies $p(T) = 0$ by Cayley&ndash;Hamilton.</p>
+
+</body>
+</html>

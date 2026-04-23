@@ -1,4 +1,5 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
+exports.Font = void 0;
 var chtml_js_1 = require("../chtml.js");
-exports.default = chtml_js_1.MathJaxLibertinus;
+exports.Font = { fontName: 'mathjax-libertinus', DefaultFont: chtml_js_1.MathJaxLibertinus };
