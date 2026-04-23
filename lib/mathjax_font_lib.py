@@ -869,12 +869,33 @@ def get_glyph_total_height(font, glyph_name, em_scale=1.0):
 
 
 def build_delimiters(math_font, em_scale=1.0):
-    """Build delimiter data from MATH table."""
+    """Build delimiter data from MATH table.
+
+    Returns (delimiters_dict, pua_map) where pua_map is {glyph_name: pua_codepoint}
+    for assembly parts that have no Unicode codepoint. These need to be included
+    in the stretchy part data files (ext, lf-tp, rt-bt).
+    """
     math_table = math_font['MATH'].table
     mv = math_table.MathVariants
     upm = math_font['head'].unitsPerEm
     cmap = math_font.getBestCmap()
     gname_to_cp = get_glyph_name_to_codepoint(math_font)
+
+    # Assign private-use codepoints to assembly parts that have no Unicode mapping
+    pua_next = 0xE000
+    pua_map = {}  # glyph_name -> PUA codepoint
+
+    def get_cp_for_glyph(glyph_name):
+        """Get codepoint for a glyph, assigning PUA if needed."""
+        nonlocal pua_next
+        cp = gname_to_cp.get(glyph_name)
+        if cp is not None:
+            return cp
+        if glyph_name in pua_map:
+            return pua_map[glyph_name]
+        pua_map[glyph_name] = pua_next
+        pua_next += 1
+        return pua_map[glyph_name]
 
     delimiters = {}
 
@@ -901,8 +922,8 @@ def build_delimiters(math_font, em_scale=1.0):
                 parts = rec.GlyphAssembly.PartRecords
                 stretch_cps = []
                 for p in parts:
-                    pcp = gname_to_cp.get(p.glyph)
-                    stretch_cps.append(pcp if pcp else 0)
+                    pcp = get_cp_for_glyph(p.glyph)
+                    stretch_cps.append(pcp)
 
                 if len(parts) == 3:
                     # top, ext, bottom => [top, ext, bottom]
@@ -943,8 +964,8 @@ def build_delimiters(math_font, em_scale=1.0):
                 parts = rec.GlyphAssembly.PartRecords
                 stretch_cps = []
                 for p in parts:
-                    pcp = gname_to_cp.get(p.glyph)
-                    stretch_cps.append(pcp if pcp else 0)
+                    pcp = get_cp_for_glyph(p.glyph)
+                    stretch_cps.append(pcp)
 
                 if len(parts) == 2:
                     entry['stretch'] = [0, stretch_cps[1] if len(stretch_cps) > 1 else stretch_cps[0]]
@@ -983,7 +1004,9 @@ def build_delimiters(math_font, em_scale=1.0):
             else:
                 delimiters[cp] = alias
 
-    return delimiters
+    if pua_map:
+        print(f"    Assigned {len(pua_map)} PUA codepoints for unmapped assembly parts")
+    return delimiters, pua_map
 
 
 def write_delimiters_file(filepath, delimiters):
@@ -1123,13 +1146,18 @@ def collect_stretchy_parts(math_font):
     return part_glyphs
 
 
-def build_stretchy_part_data_svg(math_font, part_glyphs, em_scale=1.0):
-    """Build SVG data for all stretchy part glyphs that have codepoints."""
+def build_stretchy_part_data_svg(math_font, part_glyphs, em_scale=1.0, pua_map=None):
+    """Build SVG data for all stretchy part glyphs.
+
+    pua_map: dict {glyph_name: pua_codepoint} for glyphs without Unicode codepoints.
+    """
     gname_to_cp = get_glyph_name_to_codepoint(math_font)
+    if pua_map is None:
+        pua_map = {}
     data = {}
 
     for gname in part_glyphs:
-        cp = gname_to_cp.get(gname)
+        cp = gname_to_cp.get(gname) or pua_map.get(gname)
         if cp is not None:
             info = get_glyph_data_by_name_svg(math_font, gname, em_scale=em_scale)
             if info:
@@ -1138,13 +1166,15 @@ def build_stretchy_part_data_svg(math_font, part_glyphs, em_scale=1.0):
     return data
 
 
-def build_stretchy_part_data_chtml(math_font, part_glyphs, em_scale=1.0):
-    """Build CHTML data for all stretchy part glyphs that have codepoints."""
+def build_stretchy_part_data_chtml(math_font, part_glyphs, em_scale=1.0, pua_map=None):
+    """Build CHTML data for all stretchy part glyphs."""
     gname_to_cp = get_glyph_name_to_codepoint(math_font)
+    if pua_map is None:
+        pua_map = {}
     data = {}
 
     for gname in part_glyphs:
-        cp = gname_to_cp.get(gname)
+        cp = gname_to_cp.get(gname) or pua_map.get(gname)
         if cp is not None:
             info = get_glyph_data_by_name_chtml(math_font, gname, em_scale=em_scale)
             if info:
@@ -1896,11 +1926,21 @@ def build_all_variants(output_dir, text_fonts, math_font, text_ranges, math_rang
             os.path.join(output_dir, f"cjs/svg/size{sz}.js"), f"size{sz}", svg_size
         )
 
+    # ========== DELIMITERS (must come before stretchy parts to get pua_map) ==========
+    print("Building delimiters...")
+    delimiters, pua_map = build_delimiters(math_font, em_scale=em_scale)
+    write_delimiters_file(
+        os.path.join(output_dir, "cjs/svg/delimiters.js"), delimiters
+    )
+    write_delimiters_file(
+        os.path.join(output_dir, "cjs/chtml/delimiters.js"), delimiters
+    )
+
     # ========== STRETCHY PARTS ==========
     print("Building stretchy part variants...")
     part_glyphs = collect_stretchy_parts(math_font)
 
-    all_parts_svg = build_stretchy_part_data_svg(math_font, part_glyphs, em_scale=em_scale)
+    all_parts_svg = build_stretchy_part_data_svg(math_font, part_glyphs, em_scale=em_scale, pua_map=pua_map)
 
     write_svg_variant_file(
         os.path.join(output_dir, "cjs/svg/lf-tp.js"), "lfTp", all_parts_svg
@@ -1916,16 +1956,6 @@ def build_all_variants(output_dir, text_fonts, math_font, text_ranges, math_rang
     )
     write_empty_variant_file(os.path.join(output_dir, "cjs/svg/up.js"), "up")
     write_empty_variant_file(os.path.join(output_dir, "cjs/svg/dup.js"), "dup")
-
-    # ========== DELIMITERS ==========
-    print("Building delimiters...")
-    delimiters = build_delimiters(math_font, em_scale=em_scale)
-    write_delimiters_file(
-        os.path.join(output_dir, "cjs/svg/delimiters.js"), delimiters
-    )
-    write_delimiters_file(
-        os.path.join(output_dir, "cjs/chtml/delimiters.js"), delimiters
-    )
 
     # ========== CHTML VARIANTS ==========
     print("Building CHTML normal variant...")
@@ -1988,7 +2018,7 @@ def build_all_variants(output_dir, text_fonts, math_font, text_ranges, math_rang
         )
 
     # CHTML stretchy parts
-    all_parts_chtml = build_stretchy_part_data_chtml(math_font, part_glyphs, em_scale=em_scale)
+    all_parts_chtml = build_stretchy_part_data_chtml(math_font, part_glyphs, em_scale=em_scale, pua_map=pua_map)
 
     write_chtml_variant_file(
         os.path.join(output_dir, "cjs/chtml/lf-tp.js"), "lfTp", all_parts_chtml
