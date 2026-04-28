@@ -50,7 +50,7 @@ def main():
     # Extract italic corrections
     ic_map = extract_italic_corrections(math_font)
     # Libertinus Math ICs should be reasonable, but override integrals just in case
-    override_integral_ics(ic_map, normal_val=0.12)
+    override_integral_ics(ic_map, normal_val=0)
 
     # Build everything
     build_all_variants(

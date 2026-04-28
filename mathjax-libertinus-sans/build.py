@@ -46,7 +46,7 @@ def main():
     print(f"  x_height: {x_height}")
 
     ic_map = extract_italic_corrections(math_font)
-    override_integral_ics(ic_map, normal_val=0.12)
+    override_integral_ics(ic_map, normal_val=0)
 
     build_all_variants(
         output_dir=OUTPUT_DIR,

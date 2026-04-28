@@ -2005,13 +2005,11 @@ def build_all_variants(output_dir, text_fonts, math_font, text_ranges, math_rang
     print("Building SVG largeop...")
     svg_largeop = build_size_variant_svg(math_font, size_data, 1, em_scale=em_scale)
     apply_all_corrections(svg_largeop)
-    # Largeop integrals need higher IC than normal (0.33 vs 0.12, matching newCM)
+    # Largeop integrals: set IC=0 to match normal (can be tuned per font)
     INTEGRAL_CPS = list(range(0x222B, 0x2234))
     for icp in INTEGRAL_CPS:
-        if icp in svg_largeop and 'ic' in svg_largeop[icp]:
-            svg_largeop[icp]['ic'] = 0.33
-        elif icp in svg_largeop:
-            svg_largeop[icp]['ic'] = 0.33
+        if icp in svg_largeop:
+            svg_largeop[icp]['ic'] = 0
     write_svg_variant_file(
         os.path.join(output_dir, "cjs/svg/largeop.js"), "largeop", svg_largeop
     )
