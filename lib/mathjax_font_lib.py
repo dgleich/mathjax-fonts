@@ -1885,6 +1885,31 @@ _MATH_GREEK_MAPPINGS = [
     (0x1D790, 0x0391, 25, 'bold_italic'),
 ]
 
+# Variant Greek symbols: non-sequential mapping (math_alpha_cp, basic_greek_cp, font_key)
+_MATH_GREEK_VARIANT_SYMBOLS = [
+    # varepsilon, vartheta, varkappa, varphi, varrho, varpi
+    # Math italic variants
+    (0x1D716, 0x03F5, 'italic'), (0x1D717, 0x03D1, 'italic'),
+    (0x1D718, 0x03F0, 'italic'), (0x1D719, 0x03D5, 'italic'),
+    (0x1D71A, 0x03F1, 'italic'), (0x1D71B, 0x03D6, 'italic'),
+    # Math bold variants
+    (0x1D6DC, 0x03F5, 'bold'), (0x1D6DD, 0x03D1, 'bold'),
+    (0x1D6DE, 0x03F0, 'bold'), (0x1D6DF, 0x03D5, 'bold'),
+    (0x1D6E0, 0x03F1, 'bold'), (0x1D6E1, 0x03D6, 'bold'),
+    # Math bold italic variants
+    (0x1D750, 0x03F5, 'bold_italic'), (0x1D751, 0x03D1, 'bold_italic'),
+    (0x1D752, 0x03F0, 'bold_italic'), (0x1D753, 0x03D5, 'bold_italic'),
+    (0x1D754, 0x03F1, 'bold_italic'), (0x1D755, 0x03D6, 'bold_italic'),
+    # Math sans bold variants
+    (0x1D78A, 0x03F5, 'bold'), (0x1D78B, 0x03D1, 'bold'),
+    (0x1D78C, 0x03F0, 'bold'), (0x1D78D, 0x03D5, 'bold'),
+    (0x1D78E, 0x03F1, 'bold'), (0x1D78F, 0x03D6, 'bold'),
+    # Math sans bold italic variants
+    (0x1D7C4, 0x03F5, 'bold_italic'), (0x1D7C5, 0x03D1, 'bold_italic'),
+    (0x1D7C6, 0x03F0, 'bold_italic'), (0x1D7C7, 0x03D5, 'bold_italic'),
+    (0x1D7C8, 0x03F1, 'bold_italic'), (0x1D7C9, 0x03D6, 'bold_italic'),
+]
+
 def _override_math_greek_from_text(svg_normal, text_fonts, em_scale=1.0):
     """Replace math alphanumeric Greek glyphs in normal variant with text font Greek.
 
@@ -1920,6 +1945,23 @@ def _override_math_greek_from_text(svg_normal, text_fonts, em_scale=1.0):
                     info['source'] = f'text-greek-{used_key}'
                     svg_normal[math_cp] = info
                     count += 1
+    # Also override variant symbols (varepsilon, vartheta, etc.)
+    for math_cp, greek_cp, font_key in _MATH_GREEK_VARIANT_SYMBOLS:
+        font = None
+        for try_key in _fallbacks.get(font_key, [font_key]):
+            candidate = text_fonts.get(try_key)
+            if candidate and greek_cp in candidate.getBestCmap():
+                font = candidate
+                break
+        if font is None:
+            continue
+        if math_cp in svg_normal:
+            info = get_glyph_metrics_and_path(font, greek_cp, em_scale=em_scale)
+            if info:
+                info['source'] = 'text-greek-variant'
+                svg_normal[math_cp] = info
+                count += 1
+
     if count:
         print(f"  Overrode {count} math alphanumeric Greek glyphs with text font Greek")
 
@@ -1988,6 +2030,7 @@ def _override_variant_greek_from_text_chtml(variant_data, text_fonts, variant_ke
 
 
 def _override_math_greek_from_text_chtml(chtml_normal, text_fonts, em_scale=1.0):
+    """Override math alphanumeric Greek + variant symbols in CHTML normal variant."""
     """Same as SVG version but for CHTML (metrics only, no paths)."""
     _fallbacks = {
         'italic': ['italic', 'regular'],
