@@ -5,10 +5,10 @@
 ### Completed Packages
 1. **mathjax-libertinus** — Libertinus Serif + Libertinus Math (R+B+I+BI)
 2. **mathjax-libertinus-sans** — Libertinus Sans + Libertinus Math (R+B+I, BI=I fallback)
+3. **mathjax-lm-sans** — CMU Sans Serif + NewCM Sans Math (R+B+I+BI)
+4. **mathjax-noto-sans** — Noto Sans (variable, pinned wght+wdth) + Noto Sans Math (R+B+I+BI)
 
 ### Remaining Packages (planned)
-3. **mathjax-lm-sans** — CMU Sans Serif + NewCM Sans Math
-4. **mathjax-noto-sans** — Noto Sans (variable) + Noto Sans Math
 5. **mathjax-source-sans** — Source Sans 3 (variable) + Latin Modern Math
 6. **mathjax-source-code** — Source Code Pro (variable) + Latin Modern Math
 7. **mathjax-concrete-euler** — CMU Concrete (+ generated slanted) + Euler Math
@@ -59,14 +59,16 @@ Critical ones to remember:
 
 ## Open Items / Future Improvements
 
-- **Integral limit positioning**: IC controls horizontal sub/superscript offset but
-  its effect on `\int_a^b` display-mode limits is unclear. IC=0 works acceptably
-  but ideally the bottom limit would tuck slightly closer to the integral curve.
-  MathJax may use a different code path for operator limits vs inline subscripts.
-  Needs more investigation into MathJax's limit placement logic.
 - **Libertinus Sans Bold Italic**: Currently uses Italic as fallback. LaTeX package
   uses `embolden=3` (synthetic stroke thickening). Could implement via fontTools
   outline offset for slightly bolder SVG paths, but effect is very subtle (0.3%).
+- **Angle bracket scaling (langle/rangle)**: NewCM Sans Math only has 8 size
+  variants (~3em max) and no stretchy assembly for U+27E8/27E9. They don't grow
+  large enough for tall fractions. Fix: synthesize a stretchy assembly by splitting
+  the largest glyph into top/bottom caps + angled line extender. Libertinus Math
+  has 13 sizes (enough in practice) but also lacks assembly. Check each math font.
+- **Integral limit positioning**: Revisit — IC=0 works but needs more investigation.
+  The current approach may not be optimal for all math fonts.
 - **Horizontal stretchy arrows**: Arrows render as fixed-size glyphs (no stretchy
   arrowheads). The experimental-horizontal-stretch branch has PUA-based attempts
   but they broke overbraces. Needs a different approach — possibly copying newCM's
@@ -76,6 +78,10 @@ Critical ones to remember:
 
 Source fonts in `/work/mathjax-fonts/fonts/` (not in git):
 - `fonts/libertinus/` — LibertinusSerif-*.otf, LibertinusSans-*.otf, LibertinusMath-Regular.otf
+- `fonts/cmu-sans/` — cmunss.otf, cmunsx.otf, cmunsi.otf, cmunso.otf, NewCMSansMath-Regular.otf
+- `fonts/noto-sans/` — NotoSans[wdth,wght].ttf, NotoSans-Italic[wdth,wght].ttf, NotoSansMath-Regular.ttf
+- `fonts/source-sans/` — SourceSans3[wght].ttf, SourceSans3-Italic[wght].ttf
+- `fonts/lm-math/` — latinmodern-math.otf
 - See `fonts/README.md` for download instructions for all fonts
 
 Other fonts already downloaded in workspace:
