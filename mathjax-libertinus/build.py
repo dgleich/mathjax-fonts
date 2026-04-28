@@ -78,13 +78,13 @@ def main():
     # Overbrace (0x23DE): increase H (push superscript up)
     dc = re.sub(
         r'(0x23DE: \{[^}]*HDW: \[)([^,]+)',
-        lambda m: m.group(1) + str(round(float(m.group(2)) + 0.15, 3)),
+        lambda m: m.group(1) + str(round(float(m.group(2)) + 0.22, 3)),
         dc
     )
     # Underbrace (0x23DF): increase D (push subscript down)
     dc = re.sub(
         r'(0x23DF: \{[^}]*HDW: \[[^,]+, )([^,]+)',
-        lambda m: m.group(1) + str(round(float(m.group(2)) + 0.15, 3)),
+        lambda m: m.group(1) + str(round(float(m.group(2)) + 0.22, 3)),
         dc
     )
     with open(delim_path, 'w') as f:
@@ -95,12 +95,12 @@ def main():
         cc = f.read()
     cc = re.sub(
         r'(0x23DE: \{[^}]*HDW: \[)([^,]+)',
-        lambda m: m.group(1) + str(round(float(m.group(2)) + 0.15, 3)),
+        lambda m: m.group(1) + str(round(float(m.group(2)) + 0.22, 3)),
         cc
     )
     cc = re.sub(
         r'(0x23DF: \{[^}]*HDW: \[[^,]+, )([^,]+)',
-        lambda m: m.group(1) + str(round(float(m.group(2)) + 0.15, 3)),
+        lambda m: m.group(1) + str(round(float(m.group(2)) + 0.22, 3)),
         cc
     )
     with open(chtml_delim_path, 'w') as f:
