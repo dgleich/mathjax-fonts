@@ -1,0 +1,23 @@
+{
+  "name": "@mathjax/mathjax-libertinus-sans-font",
+  "version": "4.1.0",
+  "description": "MathJaxLibertinusSans font for MathJax v4",
+  "license": "OFL-1.1",
+  "keywords": [
+    "MathJax",
+    "fonts",
+    "MathJaxLibertinusSans"
+  ],
+  "files": [
+    "cjs",
+    "chtml",
+    "chtml.js",
+    "svg.js"
+  ],
+  "exports": {
+    "./js/*": {
+      "require": "./cjs/*"
+    },
+    "./*": "./*"
+  }
+}
