@@ -104,6 +104,32 @@ npx webpack --config webpack.config.cjs        # full
 npx webpack --config webpack-nosre.config.cjs   # no accessibility
 ```
 
+## Specimen Test Pages
+
+Each package should have a `test.html` generated from `lib/specimen-template.html`.
+To generate, build the webpack bundle first, then:
+
+```python
+with open('lib/specimen-template.html') as f:
+    template = f.read()
+result = template.replace('FONT_TITLE', 'Font Name + Math Font')
+result = result.replace('FONT_BUNDLE', 'tex-mml-svg-mathjax-name.js')
+result = result.replace('FONT_CSS', '@font-face { ... }')
+result = result.replace('FONT_FAMILY', '"Font Name", serif')
+with open('mathjax-name/test.html', 'w') as f:
+    f.write(result)
+```
+
+The template includes: full math specimens (linear algebra, analysis, topology,
+combinatorics, probability, abstract algebra, physics), display specimens, and
+complete glyph inventory (accents, alphabets in all 4 styles, Greek, script/
+decorative, operators, delimiters at multiple sizes).
+
+**Remember:** test.html needs a webpack bundle to work. Build it first:
+```bash
+cd mathjax-name/build && npx webpack --config webpack.config.cjs
+```
+
 ## Workspace Files (outside git repo)
 
 Key files in `/work/` (the original workspace):
