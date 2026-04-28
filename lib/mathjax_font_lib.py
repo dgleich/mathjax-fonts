@@ -1885,30 +1885,28 @@ _MATH_GREEK_MAPPINGS = [
     (0x1D790, 0x0391, 25, 'bold_italic'),
 ]
 
-# Variant Greek symbols: non-sequential mapping (math_alpha_cp, basic_greek_cp, font_key)
-_MATH_GREEK_VARIANT_SYMBOLS = [
-    # varepsilon, vartheta, varkappa, varphi, varrho, varpi
-    # Math italic variants
-    (0x1D716, 0x03F5, 'italic'), (0x1D717, 0x03D1, 'italic'),
-    (0x1D718, 0x03F0, 'italic'), (0x1D719, 0x03D5, 'italic'),
-    (0x1D71A, 0x03F1, 'italic'), (0x1D71B, 0x03D6, 'italic'),
-    # Math bold variants
-    (0x1D6DC, 0x03F5, 'bold'), (0x1D6DD, 0x03D1, 'bold'),
-    (0x1D6DE, 0x03F0, 'bold'), (0x1D6DF, 0x03D5, 'bold'),
-    (0x1D6E0, 0x03F1, 'bold'), (0x1D6E1, 0x03D6, 'bold'),
-    # Math bold italic variants
-    (0x1D750, 0x03F5, 'bold_italic'), (0x1D751, 0x03D1, 'bold_italic'),
-    (0x1D752, 0x03F0, 'bold_italic'), (0x1D753, 0x03D5, 'bold_italic'),
-    (0x1D754, 0x03F1, 'bold_italic'), (0x1D755, 0x03D6, 'bold_italic'),
-    # Math sans bold variants
-    (0x1D78A, 0x03F5, 'bold'), (0x1D78B, 0x03D1, 'bold'),
-    (0x1D78C, 0x03F0, 'bold'), (0x1D78D, 0x03D5, 'bold'),
-    (0x1D78E, 0x03F1, 'bold'), (0x1D78F, 0x03D6, 'bold'),
-    # Math sans bold italic variants
-    (0x1D7C4, 0x03F5, 'bold_italic'), (0x1D7C5, 0x03D1, 'bold_italic'),
-    (0x1D7C6, 0x03F0, 'bold_italic'), (0x1D7C7, 0x03D5, 'bold_italic'),
-    (0x1D7C8, 0x03F1, 'bold_italic'), (0x1D7C9, 0x03D6, 'bold_italic'),
-]
+# Variant Greek symbols: (math_alpha_cp, [preferred_cp, fallback_cp, ...], font_key)
+# Fallback codepoints tried in order if preferred is missing from the font.
+# varepsilon(U+03F5)->epsilon(U+03B5), varkappa(U+03F0)->kappa(U+03BA),
+# varrho(U+03F1)->rho(U+03C1), varpi(U+03D6)->pi(U+03C0)
+_MATH_GREEK_VARIANT_SYMBOLS = []
+for _style_info in [
+    # (math_base_offset, font_key)
+    (0x1D716, 'italic'),       # Math italic
+    (0x1D6DC, 'bold'),         # Math bold
+    (0x1D750, 'bold_italic'),  # Math bold italic
+    (0x1D78A, 'bold'),         # Math sans bold
+    (0x1D7C4, 'bold_italic'),  # Math sans bold italic
+]:
+    _base, _fk = _style_info
+    _MATH_GREEK_VARIANT_SYMBOLS.extend([
+        (_base + 0, [0x03F5, 0x03B5], _fk),  # varepsilon -> epsilon
+        (_base + 1, [0x03D1], _fk),            # vartheta
+        (_base + 2, [0x03F0, 0x03BA], _fk),    # varkappa -> kappa
+        (_base + 3, [0x03D5], _fk),            # varphi
+        (_base + 4, [0x03F1, 0x03C1], _fk),    # varrho -> rho
+        (_base + 5, [0x03D6, 0x03C0], _fk),    # varpi -> pi
+    ])
 
 def _override_math_greek_from_text(svg_normal, text_fonts, em_scale=1.0):
     """Replace math alphanumeric Greek glyphs in normal variant with text font Greek.
@@ -1946,21 +1944,27 @@ def _override_math_greek_from_text(svg_normal, text_fonts, em_scale=1.0):
                     svg_normal[math_cp] = info
                     count += 1
     # Also override variant symbols (varepsilon, vartheta, etc.)
-    for math_cp, greek_cp, font_key in _MATH_GREEK_VARIANT_SYMBOLS:
-        font = None
+    for math_cp, greek_cps, font_key in _MATH_GREEK_VARIANT_SYMBOLS:
+        if math_cp not in svg_normal:
+            continue
+        # Find a font+codepoint combination that works
+        found = False
         for try_key in _fallbacks.get(font_key, [font_key]):
             candidate = text_fonts.get(try_key)
-            if candidate and greek_cp in candidate.getBestCmap():
-                font = candidate
+            if candidate is None:
+                continue
+            cand_cmap = candidate.getBestCmap()
+            for gcp in greek_cps:
+                if gcp in cand_cmap:
+                    info = get_glyph_metrics_and_path(candidate, gcp, em_scale=em_scale)
+                    if info:
+                        info['source'] = 'text-greek-variant'
+                        svg_normal[math_cp] = info
+                        count += 1
+                        found = True
+                        break
+            if found:
                 break
-        if font is None:
-            continue
-        if math_cp in svg_normal:
-            info = get_glyph_metrics_and_path(font, greek_cp, em_scale=em_scale)
-            if info:
-                info['source'] = 'text-greek-variant'
-                svg_normal[math_cp] = info
-                count += 1
 
     if count:
         print(f"  Overrode {count} math alphanumeric Greek glyphs with text font Greek")
