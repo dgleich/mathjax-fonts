@@ -1975,6 +1975,12 @@ def build_all_variants(output_dir, text_fonts, math_font, text_ranges, math_rang
     svg_bold_italic.update(pua_glyph_data)
     for cp in _greek_cps:
         svg_bold_italic.pop(cp, None)
+    # Also remove basic Latin from bold-italic — forces MathJax to use
+    # bold-italic math alphanumeric (U+1D468+) from normal variant.
+    # Same issue as bold Greek: non-bold glyphs intercept the lookup.
+    _latin_cps = list(range(0x41, 0x5B)) + list(range(0x61, 0x7B))  # A-Z, a-z
+    for cp in _latin_cps:
+        svg_bold_italic.pop(cp, None)
     write_svg_variant_file(
         os.path.join(output_dir, "cjs/svg/bold-italic.js"), "boldItalic", svg_bold_italic
     )
@@ -1999,6 +2005,13 @@ def build_all_variants(output_dir, text_fonts, math_font, text_ranges, math_rang
     print("Building SVG largeop...")
     svg_largeop = build_size_variant_svg(math_font, size_data, 1, em_scale=em_scale)
     apply_all_corrections(svg_largeop)
+    # Largeop integrals need higher IC than normal (0.33 vs 0.12, matching newCM)
+    INTEGRAL_CPS = list(range(0x222B, 0x2234))
+    for icp in INTEGRAL_CPS:
+        if icp in svg_largeop and 'ic' in svg_largeop[icp]:
+            svg_largeop[icp]['ic'] = 0.33
+        elif icp in svg_largeop:
+            svg_largeop[icp]['ic'] = 0.33
     write_svg_variant_file(
         os.path.join(output_dir, "cjs/svg/largeop.js"), "largeop", svg_largeop
     )
