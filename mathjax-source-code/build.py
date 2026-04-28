@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Build MathJax font package for Source Code Pro + Latin Modern Math."""
+"""Build MathJax font package for Source Code Pro + Noto Sans Math."""
 
 import os
 import sys
@@ -20,7 +20,7 @@ FONT_ID = "mathjax-source-code"
 CSS_PREFIX = "SRCCODE"
 
 FONTS_DIR = os.path.join(os.path.dirname(__file__), '..', 'fonts', 'source-code-pro')
-LM_MATH = os.path.join(os.path.dirname(__file__), '..', 'fonts', 'lm-math', 'latinmodern-math.otf')
+NOTO_MATH = os.path.join(os.path.dirname(__file__), '..', 'fonts', 'noto-sans', 'NotoSansMath-Regular.ttf')
 
 UPRIGHT_VAR = os.path.join(FONTS_DIR, 'SourceCodePro[wght].ttf')
 ITALIC_VAR = os.path.join(FONTS_DIR, 'SourceCodePro-Italic[wght].ttf')
@@ -34,7 +34,7 @@ EXTRA_MATH = DEFAULT_EXTRA_MATH
 def main():
     print(f"Building {FONT_ID}...")
     print(f"  Text: Source Code Pro (variable, pinned wght)")
-    print(f"  Math: Latin Modern Math")
+    print(f"  Math: Noto Sans Math")
 
     print("  Instantiating variable fonts...")
     text_fonts = {
@@ -43,7 +43,7 @@ def main():
         'italic':      instantiate_variable_font(ITALIC_VAR, weight=400),
         'bold_italic': instantiate_variable_font(ITALIC_VAR, weight=700),
     }
-    math_font = load_font(LM_MATH)
+    math_font = load_font(NOTO_MATH)
 
     tmpdir = tempfile.mkdtemp(prefix='srccode-static-')
     text_font_paths = {}
