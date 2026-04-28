@@ -68,6 +68,45 @@ def main():
         text_font_paths=TEXT_FONTS,
     )
 
+    # Post-build: adjust overbrace/underbrace label offset
+    # The HDW height/depth controls how far the label sits from the brace.
+    # Libertinus Math's values put labels too close. Increase by ~0.15em.
+    import json, re
+    delim_path = os.path.join(OUTPUT_DIR, "cjs/svg/delimiters.js")
+    with open(delim_path) as f:
+        dc = f.read()
+    # Overbrace (0x23DE): increase H (push superscript up)
+    dc = re.sub(
+        r'(0x23DE: \{[^}]*HDW: \[)([^,]+)',
+        lambda m: m.group(1) + str(round(float(m.group(2)) + 0.15, 3)),
+        dc
+    )
+    # Underbrace (0x23DF): increase D (push subscript down)
+    dc = re.sub(
+        r'(0x23DF: \{[^}]*HDW: \[[^,]+, )([^,]+)',
+        lambda m: m.group(1) + str(round(float(m.group(2)) + 0.15, 3)),
+        dc
+    )
+    with open(delim_path, 'w') as f:
+        f.write(dc)
+    # Same for CHTML
+    chtml_delim_path = os.path.join(OUTPUT_DIR, "cjs/chtml/delimiters.js")
+    with open(chtml_delim_path) as f:
+        cc = f.read()
+    cc = re.sub(
+        r'(0x23DE: \{[^}]*HDW: \[)([^,]+)',
+        lambda m: m.group(1) + str(round(float(m.group(2)) + 0.15, 3)),
+        cc
+    )
+    cc = re.sub(
+        r'(0x23DF: \{[^}]*HDW: \[[^,]+, )([^,]+)',
+        lambda m: m.group(1) + str(round(float(m.group(2)) + 0.15, 3)),
+        cc
+    )
+    with open(chtml_delim_path, 'w') as f:
+        f.write(cc)
+    print("  Adjusted overbrace/underbrace label spacing (+0.15em)")
+
     # Generate boilerplate (webpack configs, default.js, sre/)
     write_boilerplate(OUTPUT_DIR, FONT_ID, FONT_NAME)
 

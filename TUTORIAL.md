@@ -538,7 +538,18 @@ a non-bold glyph (sourced from the same math font), MathJax finds that first and
 renders non-bold. Remove Greek (U+0391–03C9, U+03D1–03D6, U+03F0–03F6) from
 bold and bold-italic variants to force the math alphanumeric fallback.
 
-### 16. Delimiter codepoints must exist in your font data
+### 16. Adjust overbrace/underbrace label spacing via HDW
+The HDW values in delimiter entries control how far the label
+(`^{text}` for overbrace, `_{text}` for underbrace) sits from the brace.
+Some math fonts produce HDW values that place labels too close.
+
+- **Overbrace** (U+23DE): Increase HDW[0] (height) to push superscript up
+- **Underbrace** (U+23DF): Increase HDW[1] (depth) to push subscript down
+
+Compare with newCM's values and adjust by ~0.1–0.15em if labels are too tight.
+This is a per-font tweak done in the build script after generating delimiter data.
+
+### 17. Delimiter codepoints must exist in your font data
 The stretchy delimiter `stretch` array references codepoints for assembly parts
 (e.g., 0x239B for left paren top). These glyphs must appear in your `-lf-tp`,
 `-rt-bt`, `-ext`, and `-mid` variant data files.
