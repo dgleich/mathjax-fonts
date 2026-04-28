@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Build MathJax font package for Source Sans 3 + Latin Modern Math."""
+"""Build MathJax font package for Source Sans 3 + Noto Sans Math."""
 
 import os
 import sys
@@ -20,7 +20,7 @@ FONT_ID = "mathjax-source-sans"
 CSS_PREFIX = "SRCSANS"
 
 FONTS_DIR = os.path.join(os.path.dirname(__file__), '..', 'fonts', 'source-sans')
-LM_MATH = os.path.join(os.path.dirname(__file__), '..', 'fonts', 'lm-math', 'latinmodern-math.otf')
+NOTO_MATH = os.path.join(os.path.dirname(__file__), '..', 'fonts', 'noto-sans', 'NotoSansMath-Regular.ttf')
 
 UPRIGHT_VAR = os.path.join(FONTS_DIR, 'SourceSans3[wght].ttf')
 ITALIC_VAR = os.path.join(FONTS_DIR, 'SourceSans3-Italic[wght].ttf')
@@ -34,7 +34,7 @@ EXTRA_MATH = DEFAULT_EXTRA_MATH
 def main():
     print(f"Building {FONT_ID}...")
     print(f"  Text: Source Sans 3 (variable, pinned wght)")
-    print(f"  Math: Latin Modern Math")
+    print(f"  Math: Noto Sans Math")
 
     print("  Instantiating variable fonts...")
     text_fonts = {
@@ -43,7 +43,7 @@ def main():
         'italic':      instantiate_variable_font(ITALIC_VAR, weight=400),
         'bold_italic': instantiate_variable_font(ITALIC_VAR, weight=700),
     }
-    math_font = load_font(LM_MATH)
+    math_font = load_font(NOTO_MATH)
 
     # Save static instances to temp files for WOFF2 generation
     tmpdir = tempfile.mkdtemp(prefix='srcsans-static-')
