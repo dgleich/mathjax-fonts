@@ -1003,12 +1003,23 @@ def build_delimiters(math_font, em_scale=1.0):
                 # Build stretch array and stretchv
                 # MathJax stretchv: 0=skip, 1=extension, 2=full, 3=left end, 4=right end
                 if len(parts) == 2:
-                    # [end_or_ext, ext_or_end]
-                    sv = []
-                    for is_ext in stretch_flags:
-                        sv.append(1 if is_ext else 0)
-                    entry['stretch'] = stretch_cps
-                    entry['stretchv'] = sv
+                    # 2-part: one extender + one fixed end piece
+                    # Determine which end the fixed piece is on:
+                    # - If fixed piece is first (e.g. left arrowhead): [left, 0, 0] + ext in slot 1
+                    # - If fixed piece is second (e.g. right arrowhead): [0, 0, right] + ext in slot 1
+                    if stretch_flags[0] and not stretch_flags[1]:
+                        # [extender, right_end] -> MathJax [0, ext, right]
+                        entry['stretch'] = [0, stretch_cps[0], stretch_cps[1]]
+                        entry['stretchv'] = [0, 1, 4]
+                    elif not stretch_flags[0] and stretch_flags[1]:
+                        # [left_end, extender] -> MathJax [left, ext, 0]
+                        entry['stretch'] = [stretch_cps[0], stretch_cps[1], 0]
+                        entry['stretchv'] = [3, 1, 0]
+                    else:
+                        # Both same flag — just pass through
+                        entry['stretch'] = stretch_cps
+                        sv = [1 if is_ext else 0 for is_ext in stretch_flags]
+                        entry['stretchv'] = sv
                 elif len(parts) == 3:
                     # [left, ext, right]
                     entry['stretch'] = stretch_cps

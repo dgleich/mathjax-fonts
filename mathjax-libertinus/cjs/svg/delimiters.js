@@ -94,8 +94,8 @@ exports.delimiters = {
     0x305: {
         dir: Direction_js_1.H,
         sizes: [0.377, 0.546, 0.791],
-        stretch: [0xE001, 0xE001],
-        stretchv: [0, 1],
+        stretch: [0xE001, 0xE001, 0],
+        stretchv: [3, 1, 0],
         HDW: [0.777, -0.733, 0],
         hd: [0.777, -0.733]
     },
@@ -114,8 +114,8 @@ exports.delimiters = {
     0x332: {
         dir: Direction_js_1.H,
         sizes: [0.381, 0.546, 0.791],
-        stretch: [0xE002, 0xE002],
-        stretchv: [0, 1],
+        stretch: [0xE002, 0xE002, 0],
+        stretchv: [3, 1, 0],
         HDW: [-0.087, 0.131, 0],
         hd: [-0.087, 0.131]
     },
@@ -159,32 +159,32 @@ exports.delimiters = {
     0x20D0: {
         dir: Direction_js_1.H,
         sizes: [0.421],
-        stretch: [0x20D0, 0xE004],
-        stretchv: [0, 1],
+        stretch: [0x20D0, 0xE004, 0],
+        stretchv: [3, 1, 0],
         HDW: [0.774, -0.644, 0.42],
         hd: [0.774, -0.644]
     },
     0x20D1: {
         dir: Direction_js_1.H,
         sizes: [0.421],
-        stretch: [0xE004, 0x20D1],
-        stretchv: [1, 0],
+        stretch: [0, 0xE004, 0x20D1],
+        stretchv: [0, 1, 4],
         HDW: [0.774, -0.644, 0.42],
         hd: [0.774, -0.644]
     },
     0x20D6: {
         dir: Direction_js_1.H,
         sizes: [0.421],
-        stretch: [0x20D6, 0xE004],
-        stretchv: [0, 1],
+        stretch: [0x20D6, 0xE004, 0],
+        stretchv: [3, 1, 0],
         HDW: [0.774, -0.554, 0.42],
         hd: [0.774, -0.554]
     },
     0x20D7: {
         dir: Direction_js_1.H,
         sizes: [0.421],
-        stretch: [0xE004, 0x20D7],
-        stretchv: [1, 0],
+        stretch: [0, 0xE004, 0x20D7],
+        stretchv: [0, 1, 4],
         HDW: [0.774, -0.554, 0.42],
         hd: [0.774, -0.554]
     },
@@ -199,16 +199,16 @@ exports.delimiters = {
     0x20EE: {
         dir: Direction_js_1.H,
         sizes: [0.421],
-        stretch: [0x20EE, 0xE003],
-        stretchv: [0, 1],
+        stretch: [0x20EE, 0xE003, 0],
+        stretchv: [3, 1, 0],
         HDW: [-0.172, 0.392, 0.42],
         hd: [-0.172, 0.392]
     },
     0x20EF: {
         dir: Direction_js_1.H,
         sizes: [0.421],
-        stretch: [0xE003, 0x20EF],
-        stretchv: [1, 0],
+        stretch: [0, 0xE003, 0x20EF],
+        stretchv: [0, 1, 4],
         HDW: [-0.172, 0.392, 0.42],
         hd: [-0.172, 0.392]
     },
