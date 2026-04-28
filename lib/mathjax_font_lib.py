@@ -1924,6 +1924,69 @@ def _override_math_greek_from_text(svg_normal, text_fonts, em_scale=1.0):
         print(f"  Overrode {count} math alphanumeric Greek glyphs with text font Greek")
 
 
+def _override_variant_greek_from_text(variant_data, text_fonts, variant_key, em_scale=1.0):
+    """Override basic Greek (U+0391-03C9 etc.) in a variant with text font Greek.
+
+    Used for italic/bold-italic variants where the text font might not have Greek,
+    falling back to regular/bold.
+    """
+    _fallbacks = {
+        'italic': ['italic', 'regular'],
+        'bold': ['bold', 'regular'],
+        'bold_italic': ['bold_italic', 'bold', 'regular'],
+        'regular': ['regular'],
+    }
+    greek_ranges = [(0x391, 0x3A9), (0x3B1, 0x3C9), (0x3D1, 0x3D6), (0x3F0, 0x3F6)]
+    font = None
+    used_key = None
+    for try_key in _fallbacks.get(variant_key, [variant_key]):
+        candidate = text_fonts.get(try_key)
+        if candidate and 0x03B1 in candidate.getBestCmap():
+            font = candidate
+            used_key = try_key
+            break
+    if font is None:
+        return
+    cmap = font.getBestCmap()
+    count = 0
+    for start, end in greek_ranges:
+        for cp in range(start, end + 1):
+            if cp in cmap and cp in variant_data:
+                info = get_glyph_metrics_and_path(font, cp, em_scale=em_scale)
+                if info:
+                    info['source'] = f'text-greek-{used_key}'
+                    variant_data[cp] = info
+                    count += 1
+    if count:
+        print(f"    Overrode {count} variant Greek glyphs (using {used_key})")
+
+
+def _override_variant_greek_from_text_chtml(variant_data, text_fonts, variant_key, em_scale=1.0):
+    """CHTML version of variant Greek override."""
+    _fallbacks = {
+        'italic': ['italic', 'regular'],
+        'bold': ['bold', 'regular'],
+        'bold_italic': ['bold_italic', 'bold', 'regular'],
+        'regular': ['regular'],
+    }
+    greek_ranges = [(0x391, 0x3A9), (0x3B1, 0x3C9), (0x3D1, 0x3D6), (0x3F0, 0x3F6)]
+    font = None
+    for try_key in _fallbacks.get(variant_key, [variant_key]):
+        candidate = text_fonts.get(try_key)
+        if candidate and 0x03B1 in candidate.getBestCmap():
+            font = candidate
+            break
+    if font is None:
+        return
+    cmap = font.getBestCmap()
+    for start, end in greek_ranges:
+        for cp in range(start, end + 1):
+            if cp in cmap and cp in variant_data:
+                info = get_glyph_metrics_only(font, cp, em_scale=em_scale)
+                if info:
+                    variant_data[cp] = info
+
+
 def _override_math_greek_from_text_chtml(chtml_normal, text_fonts, em_scale=1.0):
     """Same as SVG version but for CHTML (metrics only, no paths)."""
     _fallbacks = {
@@ -2099,6 +2162,8 @@ def build_all_variants(output_dir, text_fonts, math_font, text_ranges, math_rang
     )
     apply_all_corrections(svg_italic, 'italic')
     svg_italic.update(pua_glyph_data)
+    if greek_from_text:
+        _override_variant_greek_from_text(svg_italic, text_fonts, 'italic', em_scale)
     write_svg_variant_file(
         os.path.join(output_dir, "cjs/svg/italic.js"), "italic", svg_italic
     )
@@ -2111,6 +2176,8 @@ def build_all_variants(output_dir, text_fonts, math_font, text_ranges, math_rang
     )
     apply_all_corrections(svg_bold_italic, 'bold_italic')
     svg_bold_italic.update(pua_glyph_data)
+    if greek_from_text:
+        _override_variant_greek_from_text(svg_bold_italic, text_fonts, 'bold_italic', em_scale)
     for cp in _greek_cps:
         svg_bold_italic.pop(cp, None)
     # Also remove basic Latin from bold-italic — forces MathJax to use
@@ -2216,6 +2283,8 @@ def build_all_variants(output_dir, text_fonts, math_font, text_ranges, math_rang
         text_fonts['italic'], math_font, text_ranges, math_ranges, extra_math,
         middle_layer_data=get_middle_layer('italic'), em_scale=em_scale
     )
+    if greek_from_text:
+        _override_variant_greek_from_text_chtml(chtml_italic, text_fonts, 'italic', em_scale)
     write_chtml_variant_file(
         os.path.join(output_dir, "cjs/chtml/italic.js"), "italic", chtml_italic
     )
@@ -2225,6 +2294,8 @@ def build_all_variants(output_dir, text_fonts, math_font, text_ranges, math_rang
         text_fonts['bold_italic'], math_font, text_ranges, math_ranges, extra_math,
         middle_layer_data=get_middle_layer('bold_italic'), em_scale=em_scale
     )
+    if greek_from_text:
+        _override_variant_greek_from_text_chtml(chtml_bold_italic, text_fonts, 'bold_italic', em_scale)
     write_chtml_variant_file(
         os.path.join(output_dir, "cjs/chtml/bold-italic.js"), "boldItalic", chtml_bold_italic
     )
