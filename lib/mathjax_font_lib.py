@@ -41,6 +41,15 @@ DEFAULT_TEXT_RANGES = [
     (0x2D8, 0x2DC),   # breve, dot above, ring, ogonek, small tilde
 ]
 
+# Use this when the text font has its own Greek glyphs (most OTF fonts do).
+# Greek extracted from text font takes priority over math font Greek.
+TEXT_RANGES_WITH_GREEK = DEFAULT_TEXT_RANGES + [
+    (0x391, 0x3A9),   # Greek capitals
+    (0x3B1, 0x3C9),   # Greek lowercase
+    (0x3D1, 0x3D6),   # Greek symbols (thetasym, phi, etc.)
+    (0x3F0, 0x3F6),   # Greek symbols (kappa, rho, etc.)
+]
+
 DEFAULT_MATH_RANGES = [
     (0x391, 0x3A9), (0x3B1, 0x3C9), (0x3D1, 0x3D6), (0x3F0, 0x3F6),  # Greek
     (0x2100, 0x214F),  # Letterlike Symbols (bb C,H,N,P,Q,R,Z, hbar, ell, etc.)
@@ -1848,6 +1857,72 @@ loader_js_1.Loader.saveVersion('tex-mml-svg-{font_id}-nosre');
 
 
 # ========================================================================
+# Math alphanumeric Greek override
+# ========================================================================
+
+# Mapping from math alphanumeric Greek codepoints to basic Greek codepoints.
+# Each entry: (math_alpha_start, basic_greek_start, count, text_font_key)
+_MATH_GREEK_MAPPINGS = [
+    # Math italic Greek lowercase: U+1D6FC-1D714 <- italic U+03B1-03C9
+    (0x1D6FC, 0x03B1, 25, 'italic'),
+    # Math italic Greek capitals: U+1D6E2-1D6FA <- italic U+0391-03A9
+    (0x1D6E2, 0x0391, 25, 'italic'),
+    # Math bold Greek lowercase: U+1D6C2-1D6DA <- bold U+03B1-03C9
+    (0x1D6C2, 0x03B1, 25, 'bold'),
+    # Math bold Greek capitals: U+1D6A8-1D6C0 <- bold U+0391-03A9
+    (0x1D6A8, 0x0391, 25, 'bold'),
+    # Math bold italic Greek lowercase: U+1D736-1D74E <- bold_italic U+03B1-03C9
+    (0x1D736, 0x03B1, 25, 'bold_italic'),
+    # Math bold italic Greek capitals: U+1D71C-1D734 <- bold_italic U+0391-03A9
+    (0x1D71C, 0x0391, 25, 'bold_italic'),
+    # Math sans-serif bold Greek lowercase: U+1D770-1D788 <- bold U+03B1-03C9
+    (0x1D770, 0x03B1, 25, 'bold'),
+    # Math sans-serif bold Greek capitals: U+1D756-1D76E <- bold U+0391-03A9
+    (0x1D756, 0x0391, 25, 'bold'),
+    # Math sans-serif bold italic Greek lowercase: U+1D7AA-1D7C2 <- bold_italic U+03B1-03C9
+    (0x1D7AA, 0x03B1, 25, 'bold_italic'),
+    # Math sans-serif bold italic Greek capitals: U+1D790-1D7A8 <- bold_italic U+0391-03A9
+    (0x1D790, 0x0391, 25, 'bold_italic'),
+]
+
+def _override_math_greek_from_text(svg_normal, text_fonts, em_scale=1.0):
+    """Replace math alphanumeric Greek glyphs in normal variant with text font Greek."""
+    count = 0
+    for math_start, greek_start, n, font_key in _MATH_GREEK_MAPPINGS:
+        font = text_fonts.get(font_key)
+        if font is None:
+            continue
+        cmap = font.getBestCmap()
+        for i in range(n):
+            math_cp = math_start + i
+            greek_cp = greek_start + i
+            if greek_cp in cmap and math_cp in svg_normal:
+                info = get_glyph_metrics_and_path(font, greek_cp, em_scale=em_scale)
+                if info:
+                    info['source'] = f'text-greek-{font_key}'
+                    svg_normal[math_cp] = info
+                    count += 1
+    if count:
+        print(f"  Overrode {count} math alphanumeric Greek glyphs with text font Greek")
+
+
+def _override_math_greek_from_text_chtml(chtml_normal, text_fonts, em_scale=1.0):
+    """Same as SVG version but for CHTML (metrics only, no paths)."""
+    for math_start, greek_start, n, font_key in _MATH_GREEK_MAPPINGS:
+        font = text_fonts.get(font_key)
+        if font is None:
+            continue
+        cmap = font.getBestCmap()
+        for i in range(n):
+            math_cp = math_start + i
+            greek_cp = greek_start + i
+            if greek_cp in cmap and math_cp in chtml_normal:
+                info = get_glyph_metrics_only(font, greek_cp, em_scale=em_scale)
+                if info:
+                    chtml_normal[math_cp] = info
+
+
+# ========================================================================
 # High-level build_all_variants helper
 # ========================================================================
 
@@ -1855,7 +1930,8 @@ def build_all_variants(output_dir, text_fonts, math_font, text_ranges, math_rang
                        extra_math=None, middle_layer_data=None, ic_map=None,
                        em_scale=1.0, font_name="MathJaxFont", font_id="mathjax-font",
                        css_prefix="MJX", x_height=0.500, text_source='text',
-                       text_font_paths=None, woff2_slug=None):
+                       text_font_paths=None, woff2_slug=None,
+                       greek_from_text=False):
     """Build all SVG + CHTML variant files, size variants, delimiters, stretchy parts.
 
     text_fonts: dict with keys 'regular', 'bold', 'italic', 'bold_italic' -> TTFont objects
@@ -1953,6 +2029,11 @@ def build_all_variants(output_dir, text_fonts, math_font, text_ranges, math_rang
     )
     apply_all_corrections(svg_normal, 'regular')
     svg_normal.update(pua_glyph_data)  # inject PUA assembly glyphs
+
+    # Override math alphanumeric Greek with text font Greek if requested
+    if greek_from_text:
+        _override_math_greek_from_text(svg_normal, text_fonts, em_scale)
+
     # Report source breakdown
     sources = {}
     for cp, info in svg_normal.items():
@@ -2086,6 +2167,8 @@ def build_all_variants(output_dir, text_fonts, math_font, text_ranges, math_rang
         text_fonts['regular'], math_font, text_ranges, math_ranges, extra_math,
         middle_layer_data=get_middle_layer('normal'), em_scale=em_scale
     )
+    if greek_from_text:
+        _override_math_greek_from_text_chtml(chtml_normal, text_fonts, em_scale)
     write_chtml_variant_file(
         os.path.join(output_dir, "cjs/chtml/normal.js"), "normal", chtml_normal
     )

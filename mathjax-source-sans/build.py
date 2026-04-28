@@ -10,7 +10,7 @@ sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..', 'lib'))
 from mathjax_font_lib import (
     load_font, get_x_height, extract_italic_corrections, override_integral_ics,
     build_all_variants, write_boilerplate, instantiate_variable_font,
-    DEFAULT_TEXT_RANGES, DEFAULT_MATH_RANGES, DEFAULT_EXTRA_MATH,
+    TEXT_RANGES_WITH_GREEK, DEFAULT_MATH_RANGES, DEFAULT_EXTRA_MATH,
 )
 import re
 
@@ -26,7 +26,7 @@ UPRIGHT_VAR = os.path.join(FONTS_DIR, 'SourceSans3[wght].ttf')
 ITALIC_VAR = os.path.join(FONTS_DIR, 'SourceSans3-Italic[wght].ttf')
 
 # Source Sans 3 has Greek built in — no middle layer needed
-TEXT_RANGES = DEFAULT_TEXT_RANGES
+TEXT_RANGES = TEXT_RANGES_WITH_GREEK
 MATH_RANGES = DEFAULT_MATH_RANGES
 EXTRA_MATH = DEFAULT_EXTRA_MATH
 
@@ -72,6 +72,7 @@ def main():
         css_prefix=CSS_PREFIX,
         x_height=x_height,
         text_font_paths=text_font_paths,
+        greek_from_text=True,
     )
 
     # Post-build: adjust overbrace/underbrace label spacing
