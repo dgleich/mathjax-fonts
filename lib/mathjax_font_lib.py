@@ -971,9 +971,23 @@ def build_delimiters(math_font, em_scale=1.0):
                     # top, ext, mid, ext, bottom => [top, ext, bottom, mid]
                     entry['stretch'] = [stretch_cps[4], stretch_cps[3], stretch_cps[0], stretch_cps[2]]
                 elif len(parts) == 2:
-                    # Just ext + one piece => [0, ext]
-                    entry['stretch'] = [0, stretch_cps[0]]
-                    entry['stretchv'] = [0, 1]
+                    # 2-part vertical assembly
+                    if parts[0].PartFlags & 1:
+                        # First part is extender
+                        if parts[1].PartFlags & 1:
+                            # Both are extenders (e.g., | bar) — just use one as ext
+                            entry['stretch'] = [0, stretch_cps[0], 0]
+                        else:
+                            # [ext, bottom] -> [0, ext, bottom]
+                            entry['stretch'] = [0, stretch_cps[0], stretch_cps[1]]
+                    else:
+                        # First part is fixed
+                        if parts[1].PartFlags & 1:
+                            # [top, ext] -> [top, ext, 0]
+                            entry['stretch'] = [stretch_cps[0], stretch_cps[1], 0]
+                        else:
+                            # Both fixed — unusual, treat first as ext
+                            entry['stretch'] = [0, stretch_cps[0], 0]
 
                 # HDW
                 metrics = get_glyph_height_depth_width(math_font, glyph_name, em_scale=em_scale)
