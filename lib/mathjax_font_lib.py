@@ -1040,6 +1040,28 @@ def build_delimiters(math_font, em_scale=1.0):
             else:
                 delimiters[cp] = alias
 
+    # Add self-stretching entries for horizontal bar glyphs.
+    # MathJax uses U+2015 (HORIZONTAL BAR) for \overline — NOT U+0305.
+    # These glyphs stretch by tiling themselves: stretch [0, self_cp].
+    self_stretch_cps = [
+        0x2015,  # HORIZONTAL BAR (used by \overline)
+        0x2500,  # BOX DRAWINGS LIGHT HORIZONTAL
+        0x2013,  # EN DASH
+        0x2014,  # EM DASH
+    ]
+    cmap = math_font.getBestCmap()
+    for scp in self_stretch_cps:
+        if scp not in delimiters and scp in cmap:
+            glyph_name = cmap[scp]
+            hdw = get_glyph_height_depth_width(math_font, glyph_name, em_scale=em_scale)
+            if hdw:
+                delimiters[scp] = {
+                    'dir': 'H',
+                    'stretch': [0, scp],
+                    'HDW': list(hdw),
+                    'hd': [hdw[0], hdw[1]],
+                }
+
     if pua_map:
         print(f"    Assigned {len(pua_map)} PUA codepoints for unmapped assembly parts")
     return delimiters, pua_map
@@ -1921,6 +1943,12 @@ def build_all_variants(output_dir, text_fonts, math_font, text_ranges, math_rang
     )
     apply_all_corrections(svg_bold, 'bold')
     svg_bold.update(pua_glyph_data)
+    # Remove regular Greek from bold — forces MathJax to use bold math alphanumeric
+    # codepoints (U+1D6A8+) from normal variant for \boldsymbol
+    _greek_cps = (list(range(0x391, 0x3CA)) + list(range(0x3D1, 0x3D7))
+                  + list(range(0x3F0, 0x3F7)))
+    for cp in _greek_cps:
+        svg_bold.pop(cp, None)
     write_svg_variant_file(
         os.path.join(output_dir, "cjs/svg/bold.js"), "bold", svg_bold
     )
@@ -1945,6 +1973,8 @@ def build_all_variants(output_dir, text_fonts, math_font, text_ranges, math_rang
     )
     apply_all_corrections(svg_bold_italic, 'bold_italic')
     svg_bold_italic.update(pua_glyph_data)
+    for cp in _greek_cps:
+        svg_bold_italic.pop(cp, None)
     write_svg_variant_file(
         os.path.join(output_dir, "cjs/svg/bold-italic.js"), "boldItalic", svg_bold_italic
     )

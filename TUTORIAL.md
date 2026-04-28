@@ -491,7 +491,54 @@ This is especially important for italic variants, where the glyph's visual
 center is shifted right by the italic slant. Without per-variant text skews,
 `\hat{f}` and `\tilde{a}` will be visibly off-center in italic math.
 
-### 12. Delimiter codepoints must exist in your font data
+### 12. `\overline` uses U+2015, not U+0305 — add self-stretching delimiters
+MathJax renders `\overline{content}` using **U+2015 (HORIZONTAL BAR)**, not
+U+0305 (combining overline) or U+00AF (macron). If U+2015 is missing from your
+delimiter data, `\overline` will render as a fixed-width bar that never grows.
+
+The fix: add self-referencing stretch entries for horizontal rules/bars. These
+glyphs stretch by tiling themselves:
+
+```python
+SELF_STRETCH = [0x2015, 0x2500, 0x2013, 0x2014, 0x23AF, 0x2212, 0x3D]
+for cp in SELF_STRETCH:
+    if cp in cmap and cp not in delimiters:
+        delimiters[cp] = {'dir': 'H', 'stretch': [0, cp], 'HDW': [...], 'hd': [...]}
+```
+
+**How to debug:** Inspect the SVG output — look for `data-c="XXXX"` on the bar's
+`<path>` element to see which codepoint MathJax is actually using. Don't assume
+it matches the LaTeX command name.
+
+### 13. `stretchv` values are variant indices into `defaultStretchVariants`
+The `stretchv` array in delimiter entries contains **indices** into the
+`defaultStretchVariants` array, NOT abstract piece-type codes. The order must
+match newCM's convention:
+
+```
+defaultStretchVariants: ['normal', '-ext', '-size3', '-lf-tp', '-rt-bt']
+                          0        1       2         3         4
+```
+
+So `stretchv: [3, 1, 4]` means: left piece from `-lf-tp`, extension from `-ext`,
+right piece from `-rt-bt`. Getting the order wrong (e.g., putting `-lf-tp` at
+index 2 instead of 3) causes MathJax to look up pieces in the wrong variant files.
+
+### 14. Assembly part glyphs need base-name codepoint fallback
+Font-internal assembly glyphs like `uni0305.size1` or `arrowright.left` have no
+Unicode codepoint. When mapping them to codepoints for the stretch/size data,
+try stripping the suffix (`.size1`, `.left`, `.ex`, etc.) to find the base
+glyph's codepoint. This applies to BOTH the delimiter builder AND the stretchy
+part builder (lf-tp, rt-bt, ext files).
+
+### 15. Remove regular Greek from bold/bold-italic variants
+MathJax's `\boldsymbol{\alpha}` remaps α (U+03B1) to bold alpha (U+1D6C2) and
+looks it up in the **normal** variant. If your bold variant also has U+03B1 with
+a non-bold glyph (sourced from the same math font), MathJax finds that first and
+renders non-bold. Remove Greek (U+0391–03C9, U+03D1–03D6, U+03F0–03F6) from
+bold and bold-italic variants to force the math alphanumeric fallback.
+
+### 16. Delimiter codepoints must exist in your font data
 The stretchy delimiter `stretch` array references codepoints for assembly parts
 (e.g., 0x239B for left paren top). These glyphs must appear in your `-lf-tp`,
 `-rt-bt`, `-ext`, and `-mid` variant data files.
