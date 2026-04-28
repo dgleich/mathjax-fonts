@@ -113,6 +113,23 @@ def load_font(path):
     return TTFont(path)
 
 
+def instantiate_variable_font(path, weight=400, width=None):
+    """Pin a variable font to specific axis values and return a static TTFont.
+
+    Args:
+        path: Path to variable font (.ttf with fvar table)
+        weight: wght axis value (e.g. 400 for Regular, 700 for Bold)
+        width: wdth axis value (e.g. 100 for normal width), or None to skip
+    """
+    from fontTools.varLib.instancer import instantiateVariableFont
+    font = TTFont(path)
+    axes = {'wght': weight}
+    if width is not None:
+        axes['wdth'] = width
+    instantiateVariableFont(font, axes, inplace=True)
+    return font
+
+
 def get_x_height(font):
     """Auto-calculate x_height from OS/2 table."""
     return round3(font['OS/2'].sxHeight / font['head'].unitsPerEm)

@@ -1,0 +1,23 @@
+{
+  "name": "@mathjax/mathjax-noto-sans-font",
+  "version": "4.1.0",
+  "description": "MathJaxNotoSans font for MathJax v4",
+  "license": "OFL-1.1",
+  "keywords": [
+    "MathJax",
+    "fonts",
+    "MathJaxNotoSans"
+  ],
+  "files": [
+    "cjs",
+    "chtml",
+    "chtml.js",
+    "svg.js"
+  ],
+  "exports": {
+    "./js/*": {
+      "require": "./cjs/*"
+    },
+    "./*": "./*"
+  }
+}
