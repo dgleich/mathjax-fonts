@@ -53,8 +53,24 @@ Critical ones to remember:
 - **Accent skew (sk:)**: compute from text font visual centers, not MATH table
 - **Invisible operators**: U+2061-2064 must be zero-width
 - **Modifier accents**: U+02C6-02DC must be in text font ranges
+- **Bold-italic Latin**: also remove A-Z/a-z from bold-italic variant (same issue as Greek)
 - **Overbrace/underbrace**: HDW values may need +0.35em adjustment
-- **Integral IC**: Latin Modern Math values too large, override to 0.12
+- **Integral IC**: Set to 0 for Libertinus (LM Math raw values too large). Largeop IC override in library.
+
+## Open Items / Future Improvements
+
+- **Integral limit positioning**: IC controls horizontal sub/superscript offset but
+  its effect on `\int_a^b` display-mode limits is unclear. IC=0 works acceptably
+  but ideally the bottom limit would tuck slightly closer to the integral curve.
+  MathJax may use a different code path for operator limits vs inline subscripts.
+  Needs more investigation into MathJax's limit placement logic.
+- **Libertinus Sans Bold Italic**: Currently uses Italic as fallback. LaTeX package
+  uses `embolden=3` (synthetic stroke thickening). Could implement via fontTools
+  outline offset for slightly bolder SVG paths, but effect is very subtle (0.3%).
+- **Horizontal stretchy arrows**: Arrows render as fixed-size glyphs (no stretchy
+  arrowheads). The experimental-horizontal-stretch branch has PUA-based attempts
+  but they broke overbraces. Needs a different approach — possibly copying newCM's
+  horizontal delimiter entries directly for arrow codepoints.
 
 ## Font Files Location
 

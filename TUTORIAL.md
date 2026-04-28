@@ -439,22 +439,23 @@ Apply the `ic:` field in your glyph entry format:
 bold-italic, smallop, largeop, and size3–size15. Missing IC on size
 variants means display-mode integrals won't tuck their limits.
 
-### 10. Override integral italic corrections from Latin Modern Math
-Latin Modern Math's raw IC values for integrals are much larger than what
-MathJax expects (0.332 vs newCM's 0.12 for normal size). If you use LM Math
-as your math font source, override the integral ICs to match newCM:
+### 10. Override integral italic corrections — tuning required
+Math fonts often have IC values for integrals that don't work well in MathJax.
+Latin Modern Math's raw values (0.332) are too large. Start with IC=0 and
+tune from there.
 
 ```python
 INTEGRAL_CPS = range(0x222B, 0x2234)  # ∫ through ∰
 for cp in INTEGRAL_CPS:
     if cp in ic_map:
-        ic_map[cp] = 0.12  # normal size (newCM uses 0.12)
-# For largeop variants, use 0.33 (newCM's largeop value)
+        ic_map[cp] = 0  # start here, tune per font
 ```
 
-If limits still seem offset, you can tune these values. We found 0.22/0.42
-worked better for some fonts (PT Sans). The right value depends on the
-integral glyph's actual width and shape.
+**Note:** IC affects inline subscript placement (e.g., `f_i`) but its effect
+on display-mode operator limits (`\int_a^b`) is unclear — MathJax may use a
+different code path for those. Negative IC values are clamped to 0. The
+relationship between IC, glyph width, and limit placement needs more
+investigation. For Libertinus, IC=0 matches newCM's appearance.
 
 ### 11. Compute accent skews (sk:) from the text font, not the math font
 MathJax uses the `sk:` property to center accents (`\hat`, `\tilde`, `\bar`)
@@ -531,12 +532,18 @@ try stripping the suffix (`.size1`, `.left`, `.ex`, etc.) to find the base
 glyph's codepoint. This applies to BOTH the delimiter builder AND the stretchy
 part builder (lf-tp, rt-bt, ext files).
 
-### 15. Remove regular Greek from bold/bold-italic variants
-MathJax's `\boldsymbol{\alpha}` remaps α (U+03B1) to bold alpha (U+1D6C2) and
-looks it up in the **normal** variant. If your bold variant also has U+03B1 with
-a non-bold glyph (sourced from the same math font), MathJax finds that first and
-renders non-bold. Remove Greek (U+0391–03C9, U+03D1–03D6, U+03F0–03F6) from
-bold and bold-italic variants to force the math alphanumeric fallback.
+### 15. Remove regular Greek and Latin from bold/bold-italic variants
+MathJax's `\boldsymbol` remaps characters to the math alphanumeric bold range
+(e.g., α → U+1D6C2, x → U+1D482) and looks them up in the **normal** variant.
+If your bold or bold-italic variant has those base codepoints with non-bold
+glyphs, MathJax finds them first and renders non-bold.
+
+Remove from **bold** variant:
+- Greek: U+0391–03C9, U+03D1–03D6, U+03F0–03F6
+
+Remove from **bold-italic** variant:
+- Greek: same as above
+- Latin: U+0041–005A (A-Z), U+0061–007A (a-z)
 
 ### 16. Adjust overbrace/underbrace label spacing via HDW
 The HDW values in delimiter entries control how far the label
