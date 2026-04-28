@@ -1886,10 +1886,28 @@ _MATH_GREEK_MAPPINGS = [
 ]
 
 def _override_math_greek_from_text(svg_normal, text_fonts, em_scale=1.0):
-    """Replace math alphanumeric Greek glyphs in normal variant with text font Greek."""
+    """Replace math alphanumeric Greek glyphs in normal variant with text font Greek.
+
+    Falls back through font styles: italic->regular, bold_italic->bold->regular
+    if the preferred style doesn't have Greek.
+    """
+    _fallbacks = {
+        'italic': ['italic', 'regular'],
+        'bold': ['bold', 'regular'],
+        'bold_italic': ['bold_italic', 'bold', 'regular'],
+        'regular': ['regular'],
+    }
     count = 0
     for math_start, greek_start, n, font_key in _MATH_GREEK_MAPPINGS:
-        font = text_fonts.get(font_key)
+        # Try preferred font, then fallbacks
+        font = None
+        used_key = None
+        for try_key in _fallbacks.get(font_key, [font_key]):
+            candidate = text_fonts.get(try_key)
+            if candidate and greek_start in candidate.getBestCmap():
+                font = candidate
+                used_key = try_key
+                break
         if font is None:
             continue
         cmap = font.getBestCmap()
@@ -1899,7 +1917,7 @@ def _override_math_greek_from_text(svg_normal, text_fonts, em_scale=1.0):
             if greek_cp in cmap and math_cp in svg_normal:
                 info = get_glyph_metrics_and_path(font, greek_cp, em_scale=em_scale)
                 if info:
-                    info['source'] = f'text-greek-{font_key}'
+                    info['source'] = f'text-greek-{used_key}'
                     svg_normal[math_cp] = info
                     count += 1
     if count:
@@ -1908,8 +1926,19 @@ def _override_math_greek_from_text(svg_normal, text_fonts, em_scale=1.0):
 
 def _override_math_greek_from_text_chtml(chtml_normal, text_fonts, em_scale=1.0):
     """Same as SVG version but for CHTML (metrics only, no paths)."""
+    _fallbacks = {
+        'italic': ['italic', 'regular'],
+        'bold': ['bold', 'regular'],
+        'bold_italic': ['bold_italic', 'bold', 'regular'],
+        'regular': ['regular'],
+    }
     for math_start, greek_start, n, font_key in _MATH_GREEK_MAPPINGS:
-        font = text_fonts.get(font_key)
+        font = None
+        for try_key in _fallbacks.get(font_key, [font_key]):
+            candidate = text_fonts.get(try_key)
+            if candidate and greek_start in candidate.getBestCmap():
+                font = candidate
+                break
         if font is None:
             continue
         cmap = font.getBestCmap()
