@@ -1874,9 +1874,10 @@ loader_js_1.Loader.saveVersion('tex-mml-svg-{font_id}-nosre');
 # Math alphanumeric Greek override
 # ========================================================================
 
-# Mapping from math alphanumeric Greek codepoints to basic Greek codepoints.
-# Each entry: (math_alpha_start, basic_greek_start, count, text_font_key)
-_MATH_GREEK_MAPPINGS = [
+# Mapping from math alphanumeric codepoints to basic codepoints.
+# Each entry: (math_alpha_start, basic_start, count, text_font_key)
+_MATH_ALPHA_MAPPINGS = [
+    # === GREEK ===
     # Math italic Greek lowercase: U+1D6FC-1D714 <- italic U+03B1-03C9
     (0x1D6FC, 0x03B1, 25, 'italic'),
     # Math italic Greek capitals: U+1D6E2-1D6FA <- italic U+0391-03A9
@@ -1897,6 +1898,35 @@ _MATH_GREEK_MAPPINGS = [
     (0x1D7AA, 0x03B1, 25, 'bold_italic'),
     # Math sans-serif bold italic Greek capitals: U+1D790-1D7A8 <- bold_italic U+0391-03A9
     (0x1D790, 0x0391, 25, 'bold_italic'),
+    # === LATIN ===
+    # Math italic A-Z: U+1D434-1D44D <- italic A-Z
+    (0x1D434, 0x41, 26, 'italic'),
+    # Math italic a-z: U+1D44E-1D467 <- italic a-z
+    (0x1D44E, 0x61, 26, 'italic'),
+    # Math bold A-Z: U+1D400-1D419 <- bold A-Z
+    (0x1D400, 0x41, 26, 'bold'),
+    # Math bold a-z: U+1D41A-1D433 <- bold a-z
+    (0x1D41A, 0x61, 26, 'bold'),
+    # Math bold italic A-Z: U+1D468-1D481 <- bold_italic A-Z
+    (0x1D468, 0x41, 26, 'bold_italic'),
+    # Math bold italic a-z: U+1D482-1D49B <- bold_italic a-z
+    (0x1D482, 0x61, 26, 'bold_italic'),
+    # Math sans-serif A-Z: U+1D5A0-1D5B9 <- regular A-Z
+    (0x1D5A0, 0x41, 26, 'regular'),
+    # Math sans-serif a-z: U+1D5BA-1D5D3 <- regular a-z
+    (0x1D5BA, 0x61, 26, 'regular'),
+    # Math sans-serif bold A-Z: U+1D5D4-1D5ED <- bold A-Z
+    (0x1D5D4, 0x41, 26, 'bold'),
+    # Math sans-serif bold a-z: U+1D5EE-1D607 <- bold a-z
+    (0x1D5EE, 0x61, 26, 'bold'),
+    # Math sans-serif italic A-Z: U+1D608-1D621 <- italic A-Z
+    (0x1D608, 0x41, 26, 'italic'),
+    # Math sans-serif italic a-z: U+1D622-1D63B <- italic a-z
+    (0x1D622, 0x61, 26, 'italic'),
+    # Math sans-serif bold italic A-Z: U+1D63C-1D655 <- bold_italic A-Z
+    (0x1D63C, 0x41, 26, 'bold_italic'),
+    # Math sans-serif bold italic a-z: U+1D656-1D66F <- bold_italic a-z
+    (0x1D656, 0x61, 26, 'bold_italic'),
 ]
 
 # Variant Greek symbols: (math_alpha_cp, [preferred_cp, fallback_cp, ...], font_key)
@@ -1935,13 +1965,13 @@ def _override_math_greek_from_text(svg_normal, text_fonts, em_scale=1.0):
         'regular': ['regular'],
     }
     count = 0
-    for math_start, greek_start, n, font_key in _MATH_GREEK_MAPPINGS:
+    for math_start, basic_start, n, font_key in _MATH_ALPHA_MAPPINGS:
         # Try preferred font, then fallbacks
         font = None
         used_key = None
         for try_key in _fallbacks.get(font_key, [font_key]):
             candidate = text_fonts.get(try_key)
-            if candidate and greek_start in candidate.getBestCmap():
+            if candidate and basic_start in candidate.getBestCmap():
                 font = candidate
                 used_key = try_key
                 break
@@ -1950,9 +1980,9 @@ def _override_math_greek_from_text(svg_normal, text_fonts, em_scale=1.0):
         cmap = font.getBestCmap()
         for i in range(n):
             math_cp = math_start + i
-            greek_cp = greek_start + i
-            if greek_cp in cmap and math_cp in svg_normal:
-                info = get_glyph_metrics_and_path(font, greek_cp, em_scale=em_scale)
+            basic_cp = basic_start + i
+            if basic_cp in cmap and math_cp in svg_normal:
+                info = get_glyph_metrics_and_path(font, basic_cp, em_scale=em_scale)
                 if info:
                     info['source'] = f'text-greek-{used_key}'
                     svg_normal[math_cp] = info
@@ -1981,7 +2011,7 @@ def _override_math_greek_from_text(svg_normal, text_fonts, em_scale=1.0):
                 break
 
     if count:
-        print(f"  Overrode {count} math alphanumeric Greek glyphs with text font Greek")
+        print(f"  Overrode {count} math alphanumeric glyphs with text font")
 
 
 def _override_variant_greek_from_text(variant_data, text_fonts, variant_key, em_scale=1.0):
@@ -2056,11 +2086,11 @@ def _override_math_greek_from_text_chtml(chtml_normal, text_fonts, em_scale=1.0)
         'bold_italic': ['bold_italic', 'bold', 'regular'],
         'regular': ['regular'],
     }
-    for math_start, greek_start, n, font_key in _MATH_GREEK_MAPPINGS:
+    for math_start, basic_start, n, font_key in _MATH_ALPHA_MAPPINGS:
         font = None
         for try_key in _fallbacks.get(font_key, [font_key]):
             candidate = text_fonts.get(try_key)
-            if candidate and greek_start in candidate.getBestCmap():
+            if candidate and basic_start in candidate.getBestCmap():
                 font = candidate
                 break
         if font is None:
@@ -2068,9 +2098,9 @@ def _override_math_greek_from_text_chtml(chtml_normal, text_fonts, em_scale=1.0)
         cmap = font.getBestCmap()
         for i in range(n):
             math_cp = math_start + i
-            greek_cp = greek_start + i
-            if greek_cp in cmap and math_cp in chtml_normal:
-                info = get_glyph_metrics_only(font, greek_cp, em_scale=em_scale)
+            basic_cp = basic_start + i
+            if basic_cp in cmap and math_cp in chtml_normal:
+                info = get_glyph_metrics_only(font, basic_cp, em_scale=em_scale)
                 if info:
                     chtml_normal[math_cp] = info
 
