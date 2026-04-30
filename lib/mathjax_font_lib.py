@@ -2077,6 +2077,20 @@ def _override_variant_greek_from_text_chtml(variant_data, text_fonts, variant_ke
                     variant_data[cp] = info
 
 
+def _remove_math_alpha_from_variant(variant_data):
+    """Remove math alphanumeric Greek+Latin codepoints from a non-normal variant.
+
+    These codepoints in bold/italic/bold-italic variants would shadow the
+    overridden values in the normal variant. MathJax checks non-normal variants
+    first, so removing them forces fallthrough to normal.
+    """
+    for math_start, basic_start, n, font_key in _MATH_ALPHA_MAPPINGS:
+        for i in range(n):
+            variant_data.pop(math_start + i, None)
+    for math_cp, greek_cps, font_key in _MATH_GREEK_VARIANT_SYMBOLS:
+        variant_data.pop(math_cp, None)
+
+
 def _override_math_greek_from_text_chtml(chtml_normal, text_fonts, em_scale=1.0):
     """Override math alphanumeric Greek + variant symbols in CHTML normal variant."""
     """Same as SVG version but for CHTML (metrics only, no paths)."""
@@ -2241,6 +2255,14 @@ def build_all_variants(output_dir, text_fonts, math_font, text_ranges, math_rang
                   + list(range(0x3F0, 0x3F7)))
     for cp in _greek_cps:
         svg_bold.pop(cp, None)
+    # When greek_from_text is on, also remove math alphanumeric Greek+Latin from
+    # bold variant — they duplicate what's in normal and would use math font metrics
+    if greek_from_text:
+        for math_start, basic_start, n, font_key in _MATH_ALPHA_MAPPINGS:
+            for i in range(n):
+                svg_bold.pop(math_start + i, None)
+        for math_cp, greek_cps, font_key in _MATH_GREEK_VARIANT_SYMBOLS:
+            svg_bold.pop(math_cp, None)
     write_svg_variant_file(
         os.path.join(output_dir, "cjs/svg/bold.js"), "bold", svg_bold
     )
@@ -2255,6 +2277,11 @@ def build_all_variants(output_dir, text_fonts, math_font, text_ranges, math_rang
     svg_italic.update(pua_glyph_data)
     if greek_from_text:
         _override_variant_greek_from_text(svg_italic, text_fonts, 'italic', em_scale)
+        for math_start, basic_start, n, font_key in _MATH_ALPHA_MAPPINGS:
+            for i in range(n):
+                svg_italic.pop(math_start + i, None)
+        for math_cp, greek_cps, font_key in _MATH_GREEK_VARIANT_SYMBOLS:
+            svg_italic.pop(math_cp, None)
     write_svg_variant_file(
         os.path.join(output_dir, "cjs/svg/italic.js"), "italic", svg_italic
     )
@@ -2273,10 +2300,15 @@ def build_all_variants(output_dir, text_fonts, math_font, text_ranges, math_rang
         svg_bold_italic.pop(cp, None)
     # Also remove basic Latin from bold-italic — forces MathJax to use
     # bold-italic math alphanumeric (U+1D468+) from normal variant.
-    # Same issue as bold Greek: non-bold glyphs intercept the lookup.
     _latin_cps = list(range(0x41, 0x5B)) + list(range(0x61, 0x7B))  # A-Z, a-z
     for cp in _latin_cps:
         svg_bold_italic.pop(cp, None)
+    if greek_from_text:
+        for math_start, basic_start, n, font_key in _MATH_ALPHA_MAPPINGS:
+            for i in range(n):
+                svg_bold_italic.pop(math_start + i, None)
+        for math_cp, greek_cps, font_key in _MATH_GREEK_VARIANT_SYMBOLS:
+            svg_bold_italic.pop(math_cp, None)
     write_svg_variant_file(
         os.path.join(output_dir, "cjs/svg/bold-italic.js"), "boldItalic", svg_bold_italic
     )
@@ -2365,6 +2397,8 @@ def build_all_variants(output_dir, text_fonts, math_font, text_ranges, math_rang
         text_fonts['bold'], math_font, text_ranges, math_ranges, extra_math,
         middle_layer_data=get_middle_layer('bold'), em_scale=em_scale
     )
+    if greek_from_text:
+        _remove_math_alpha_from_variant(chtml_bold)
     write_chtml_variant_file(
         os.path.join(output_dir, "cjs/chtml/bold.js"), "bold", chtml_bold
     )
@@ -2376,6 +2410,7 @@ def build_all_variants(output_dir, text_fonts, math_font, text_ranges, math_rang
     )
     if greek_from_text:
         _override_variant_greek_from_text_chtml(chtml_italic, text_fonts, 'italic', em_scale)
+        _remove_math_alpha_from_variant(chtml_italic)
     write_chtml_variant_file(
         os.path.join(output_dir, "cjs/chtml/italic.js"), "italic", chtml_italic
     )
@@ -2387,6 +2422,7 @@ def build_all_variants(output_dir, text_fonts, math_font, text_ranges, math_rang
     )
     if greek_from_text:
         _override_variant_greek_from_text_chtml(chtml_bold_italic, text_fonts, 'bold_italic', em_scale)
+        _remove_math_alpha_from_variant(chtml_bold_italic)
     write_chtml_variant_file(
         os.path.join(output_dir, "cjs/chtml/bold-italic.js"), "boldItalic", chtml_bold_italic
     )
