@@ -561,6 +561,62 @@ The stretchy delimiter `stretch` array references codepoints for assembly parts
 (e.g., 0x239B for left paren top). These glyphs must appear in your `-lf-tp`,
 `-rt-bt`, `-ext`, and `-mid` variant data files.
 
+### 18. Math alphanumeric Greek/Latin from text font (`greek_from_text`)
+
+When your text font has its own Greek (and possibly a different style than the
+math font — e.g., Source Sans vs Noto Sans Math, or Source Code Pro monospace),
+you need to override the math alphanumeric codepoints (U+1D400–1D7FF) with
+glyphs from the text font. Otherwise `\alpha`, `\mathbf{A}`, `\boldsymbol{\Sigma}`
+etc. use the math font's glyphs, which may have different cap height, x-height,
+or style.
+
+The `greek_from_text=True` parameter in `build_all_variants()` handles this:
+
+1. **Normal variant override**: Replaces math italic/bold/bold-italic Greek
+   (U+1D6A8–1D74E) and Latin (U+1D400–1D66F) in the normal variant with
+   glyphs from the corresponding text font style (italic, bold, bold-italic).
+   Falls back through styles if needed (e.g., italic→regular when the italic
+   font lacks Greek, as with Source Code Pro).
+
+2. **Variant symbol fallbacks**: For variant Greek symbols (varepsilon U+03F5,
+   vartheta U+03D1, etc.) that may be missing from the text font, falls back
+   to the closest basic Greek glyph (e.g., varepsilon→epsilon).
+
+3. **Remove duplicates from non-normal variants**: This is critical — the
+   bold, italic, and bold-italic variants also contain math alphanumeric
+   codepoints pulled from the math font. MathJax checks these variants
+   *before* the normal variant, so the math font's metrics shadow the
+   overridden text font metrics. The fix is to remove all math alphanumeric
+   codepoints from non-normal variants, forcing MathJax to fall through to
+   the normal variant where the correct text font glyphs live.
+
+   Without this step, the webpack bundle contains multiple copies of each
+   glyph (one correct from normal, several wrong from bold/italic/bi),
+   and MathJax uses the first (wrong) one.
+
+4. **Basic Greek in italic/bold-italic variants**: The basic Greek range
+   (U+0391–03C9) in the italic variant is what MathJax uses for `\alpha`
+   in math mode. If the text font's italic doesn't have Greek, override
+   these with the regular font's Greek.
+
+Also use `TEXT_RANGES_WITH_GREEK` for the text_ranges parameter to pull
+basic Greek from the text font layer instead of the math font layer.
+
+### 19. Two-part stretchy assemblies (arrows and vert bars)
+
+Some math fonts use 2-part assemblies for arrows (extender + arrowhead) and
+vertical bars (one piece repeated). The library must handle these correctly:
+
+**Horizontal 2-part** (e.g., right arrow = extender + right tip):
+- Detect which part is the fixed end piece and place it in the correct
+  MathJax slot: `[0, ext, right]` for right arrow, `[left, ext, 0]` for left.
+- Without this fix, arrowheads get clipped.
+
+**Vertical 2-part** (e.g., `|` = same glyph as both FIXED and EXT):
+- When both parts are extenders (same glyph), output `[0, ext, 0]`.
+- When one is fixed: `[top, ext, 0]` or `[0, ext, bottom]`.
+- Without this fix, `\left|` and `\left\|` produce math output errors.
+
 ## File Inventory
 
 A complete MathJax font package contains:
