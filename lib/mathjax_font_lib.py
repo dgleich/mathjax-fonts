@@ -1833,6 +1833,40 @@ module.exports = {{
 }};
 ''')
 
+    # Patch for lcGreek: make \mathrm{\alpha} use upright Greek.
+    # We directly patch the source file before webpack bundles it, because
+    # the CharacterMap captures the function reference at module load time.
+    _parse_methods_path = os.path.join(
+        os.path.dirname(build_dir),  # package root
+        '..', 'node_modules', '@mathjax', 'src', 'cjs', 'input', 'tex', 'ParseMethods.js'
+    )
+    # Try common locations
+    for _try_path in [
+        _parse_methods_path,
+        '/work/node_modules/@mathjax/src/cjs/input/tex/ParseMethods.js',
+    ]:
+        if os.path.exists(_try_path):
+            _parse_methods_path = _try_path
+            break
+
+    _pm_patched = False
+    if os.path.exists(_parse_methods_path):
+        with open(_parse_methods_path) as f:
+            _pm_src = f.read()
+        _old = "mathvariant: parser.configuration.mathStyle(mchar.char) || MATHVARIANT.ITALIC,"
+        _new = "mathvariant: parser.stack.env['font'] || parser.configuration.mathStyle(mchar.char) || MATHVARIANT.ITALIC,"
+        if _old in _pm_src and _new not in _pm_src:
+            _pm_src = _pm_src.replace(_old, _new)
+            with open(_parse_methods_path, 'w') as f:
+                f.write(_pm_src)
+            _pm_patched = True
+            print(f"  Patched lcGreek in {_parse_methods_path}")
+        elif _new in _pm_src:
+            print(f"  lcGreek already patched in {_parse_methods_path}")
+            _pm_patched = True
+
+    lcgreek_patch = ""  # no longer needed in entry point
+
     # build/tex-mml-svg-{font_id}.js (full entry point with boldsymbol + a11y)
     with open(os.path.join(build_dir, f"tex-mml-svg-{font_id}.js"), 'w') as f:
         f.write(f'''"use strict";
