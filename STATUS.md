@@ -103,10 +103,13 @@ Critical ones to remember:
   is being used correctly and whether concrete-euler should use a different
   `mathStyle` configuration.
 
-- **Calligraphic/script glyphs**: All math fonts (Noto Sans Math, LM Math,
-  Libertinus Math, Euler, NewCM Sans) provide the same 18/26 script letters
-  (rest from letterlike symbols). Noto Sans Math's calligraphic looks out of
-  place with some text fonts but no better alternative found. Deferred.
+- **Calligraphic/script glyphs**: Noto Sans Math's calligraphic (\mathcal)
+  looks out of place with Source Sans, Source Code, and other fonts that use
+  Noto Sans Math. **TODO**: Override calligraphic glyphs (U+1D49C-1D4B5 +
+  letterlike symbols) with NewCM Sans Math's calligraphic for fonts using
+  Noto Sans Math. NewCM Sans Math has better-looking script letters that
+  match a sans-serif context. Would need a post-build override similar to
+  `greek_from_text` but for the script range in the normal variant.
 
 ## Font Files Location
 
