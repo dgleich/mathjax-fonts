@@ -899,29 +899,25 @@ exports.delimiters = {
     0x2308: {
         dir: Direction_js_1.V,
         sizes: [1.001, 1.101, 1.201, 1.452, 1.801, 2.101, 2.401, 3.001],
-        stretch: [0, 0x23A2],
-        stretchv: [0, 1],
+        stretch: [0, 0x23A2, 0x23A1],
         HDW: [0.75, 0.25, 0.444]
     },
     0x2309: {
         dir: Direction_js_1.V,
         sizes: [1.001, 1.101, 1.201, 1.452, 1.801, 2.101, 2.401, 3.001],
-        stretch: [0, 0x23A5],
-        stretchv: [0, 1],
+        stretch: [0, 0x23A5, 0x23A4],
         HDW: [0.75, 0.25, 0.444]
     },
     0x230A: {
         dir: Direction_js_1.V,
         sizes: [1.001, 1.101, 1.201, 1.452, 1.801, 2.101, 2.401, 3.001],
-        stretch: [0, 0x23A3],
-        stretchv: [0, 1],
+        stretch: [0x23A3, 0x23A2, 0],
         HDW: [0.75, 0.25, 0.444]
     },
     0x230B: {
         dir: Direction_js_1.V,
         sizes: [1.001, 1.101, 1.201, 1.452, 1.801, 2.101, 2.401, 3.001],
-        stretch: [0, 0x23A6],
-        stretchv: [0, 1],
+        stretch: [0x23A6, 0x23A5, 0],
         HDW: [0.75, 0.25, 0.444]
     },
     0x2329: {
