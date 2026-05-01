@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="utf-8">
-<title>Math Font Specimen — Source Code Pro + Latin Modern Math</title>
+<title>Math Font Specimen — Source Code Pro + Noto Sans Math</title>
 <style>
   @font-face {
   font-family: "Source Code Pro";
@@ -24,7 +24,7 @@
   src: url("chtml/woff2/mjx-source-code-bi.woff2") format("woff2");
   font-weight: bold; font-style: italic;
 }
-  :root { --font-body: "Source Code Pro", monospace; --font-label: "Source Code Pro + Latin Modern Math"; }
+  :root { --font-body: "Source Code Pro", monospace; --font-label: "Source Code Pro + Noto Sans Math"; }
   body {
     font-family: var(--font-body);
     max-width: 850px;
@@ -124,10 +124,11 @@ MathJax = {
 
 <body>
 
-<h1>Math Font Specimen — Source Code Pro + Latin Modern Math <span style="font-size:0.5em;color:#999;" id="status">Loading...</span></h1>
+<h1>Math Font Specimen — Source Code Pro + Noto Sans Math <span style="font-size:0.5em;color:#999;" id="status">Loading...</span></h1>
 
 <nav>
   <a href="#alphabet">Alphabet</a>
+  <a href="#typmatrix">Typography Matrix</a>
   <a href="#linalg">Linear Algebra</a>
   <a href="#analysis">Analysis &amp; PDEs</a>
   <a href="#topology">Topology</a>
@@ -176,6 +177,74 @@ MathJax = {
 <p>$\forall\; \exists\; \nexists\; \neg\; \land\; \lor\; \Rightarrow\; \Leftrightarrow\; \vdash\; \models\; \top\; \bot$</p>
 <p>$\infty\; \partial\; \nabla\; \triangle\; \square\; \hbar\; \ell\; \wp\; \Re\; \Im\; \aleph$</p>
 </div>
+</div>
+
+<!-- ==================== TYPOGRAPHY MATRIX ==================== -->
+<div id="typmatrix">
+<h2>Typography Matrix — Style Variants</h2>
+
+<p style="font-size:0.85em;color:#555;">Tests all four style combinations (upright, italic, bold upright, bold italic) for Latin and Greek.
+Each row should use the text font's own glyphs, not the math font's.</p>
+
+<div class="specimen-block">
+<span class="field-label">Uppercase Latin</span>
+<table style="border-collapse:collapse;width:100%;font-size:0.95em;margin:0.5em 0;">
+<tr style="background:#f5f5f5;"><td style="padding:4px 8px;width:140px;font-size:0.8em;color:#666;">Upright (mathrm)</td><td style="padding:4px 8px;">$\mathrm{A\,B\,C\,D\,E\,F\,G\,H\,I\,J\,K\,L\,M\,N\,O\,P\,Q\,R\,S\,T\,U\,V\,W\,X\,Y\,Z}$</td></tr>
+<tr><td style="padding:4px 8px;font-size:0.8em;color:#666;">Italic (default)</td><td style="padding:4px 8px;">$A\,B\,C\,D\,E\,F\,G\,H\,I\,J\,K\,L\,M\,N\,O\,P\,Q\,R\,S\,T\,U\,V\,W\,X\,Y\,Z$</td></tr>
+<tr style="background:#f5f5f5;"><td style="padding:4px 8px;font-size:0.8em;color:#666;">Bold upright (mathbf)</td><td style="padding:4px 8px;">$\mathbf{A\,B\,C\,D\,E\,F\,G\,H\,I\,J\,K\,L\,M\,N\,O\,P\,Q\,R\,S\,T\,U\,V\,W\,X\,Y\,Z}$</td></tr>
+<tr><td style="padding:4px 8px;font-size:0.8em;color:#666;">Bold italic (boldsymbol)</td><td style="padding:4px 8px;">$\boldsymbol{A\,B\,C\,D\,E\,F\,G\,H\,I\,J\,K\,L\,M\,N\,O\,P\,Q\,R\,S\,T\,U\,V\,W\,X\,Y\,Z}$</td></tr>
+</table>
+</div>
+
+<div class="specimen-block">
+<span class="field-label">Lowercase Latin</span>
+<table style="border-collapse:collapse;width:100%;font-size:0.95em;margin:0.5em 0;">
+<tr style="background:#f5f5f5;"><td style="padding:4px 8px;width:140px;font-size:0.8em;color:#666;">Upright (mathrm)</td><td style="padding:4px 8px;">$\mathrm{a\,b\,c\,d\,e\,f\,g\,h\,i\,j\,k\,l\,m\,n\,o\,p\,q\,r\,s\,t\,u\,v\,w\,x\,y\,z}$</td></tr>
+<tr><td style="padding:4px 8px;font-size:0.8em;color:#666;">Italic (default)</td><td style="padding:4px 8px;">$a\,b\,c\,d\,e\,f\,g\,h\,i\,j\,k\,l\,m\,n\,o\,p\,q\,r\,s\,t\,u\,v\,w\,x\,y\,z$</td></tr>
+<tr style="background:#f5f5f5;"><td style="padding:4px 8px;font-size:0.8em;color:#666;">Bold upright (mathbf)</td><td style="padding:4px 8px;">$\mathbf{a\,b\,c\,d\,e\,f\,g\,h\,i\,j\,k\,l\,m\,n\,o\,p\,q\,r\,s\,t\,u\,v\,w\,x\,y\,z}$</td></tr>
+<tr><td style="padding:4px 8px;font-size:0.8em;color:#666;">Bold italic (boldsymbol)</td><td style="padding:4px 8px;">$\boldsymbol{a\,b\,c\,d\,e\,f\,g\,h\,i\,j\,k\,l\,m\,n\,o\,p\,q\,r\,s\,t\,u\,v\,w\,x\,y\,z}$</td></tr>
+</table>
+</div>
+
+<div class="specimen-block">
+<span class="field-label">Uppercase Greek</span>
+<table style="border-collapse:collapse;width:100%;font-size:0.95em;margin:0.5em 0;">
+<tr style="background:#f5f5f5;"><td style="padding:4px 8px;width:140px;font-size:0.8em;color:#666;">Upright (default)</td><td style="padding:4px 8px;">$\Gamma\;\Delta\;\Theta\;\Lambda\;\Xi\;\Pi\;\Sigma\;\Upsilon\;\Phi\;\Psi\;\Omega$</td></tr>
+<tr><td style="padding:4px 8px;font-size:0.8em;color:#666;">Italic (varGamma etc.)</td><td style="padding:4px 8px;">$\varGamma\;\varDelta\;\varTheta\;\varLambda\;\varXi\;\varPi\;\varSigma\;\varUpsilon\;\varPhi\;\varPsi\;\varOmega$</td></tr>
+<tr style="background:#f5f5f5;"><td style="padding:4px 8px;font-size:0.8em;color:#666;">Bold upright (boldsymbol)</td><td style="padding:4px 8px;">$\boldsymbol{\Gamma}\;\boldsymbol{\Delta}\;\boldsymbol{\Theta}\;\boldsymbol{\Lambda}\;\boldsymbol{\Xi}\;\boldsymbol{\Pi}\;\boldsymbol{\Sigma}\;\boldsymbol{\Upsilon}\;\boldsymbol{\Phi}\;\boldsymbol{\Psi}\;\boldsymbol{\Omega}$</td></tr>
+<tr><td style="padding:4px 8px;font-size:0.8em;color:#666;">Bold italic</td><td style="padding:4px 8px;">$\boldsymbol{\varGamma}\;\boldsymbol{\varDelta}\;\boldsymbol{\varTheta}\;\boldsymbol{\varLambda}\;\boldsymbol{\varXi}\;\boldsymbol{\varPi}\;\boldsymbol{\varSigma}\;\boldsymbol{\varUpsilon}\;\boldsymbol{\varPhi}\;\boldsymbol{\varPsi}\;\boldsymbol{\varOmega}$</td></tr>
+</table>
+</div>
+
+<div class="specimen-block">
+<span class="field-label">Lowercase Greek</span>
+<table style="border-collapse:collapse;width:100%;font-size:0.95em;margin:0.5em 0;">
+<tr style="background:#f5f5f5;"><td style="padding:4px 8px;width:140px;font-size:0.8em;color:#666;">Upright (mathrm)</td><td style="padding:4px 8px;">$\mathrm{\alpha\;\beta\;\gamma\;\delta\;\epsilon\;\zeta\;\eta\;\theta\;\iota\;\kappa\;\lambda\;\mu\;\nu\;\xi\;\pi\;\rho\;\sigma\;\tau\;\upsilon\;\phi\;\chi\;\psi\;\omega}$</td></tr>
+<tr><td style="padding:4px 8px;font-size:0.8em;color:#666;">Italic (default)</td><td style="padding:4px 8px;">$\alpha\;\beta\;\gamma\;\delta\;\epsilon\;\zeta\;\eta\;\theta\;\iota\;\kappa\;\lambda\;\mu\;\nu\;\xi\;\pi\;\rho\;\sigma\;\tau\;\upsilon\;\phi\;\chi\;\psi\;\omega$</td></tr>
+<tr style="background:#f5f5f5;"><td style="padding:4px 8px;font-size:0.8em;color:#666;">Bold upright</td><td style="padding:4px 8px;">$\boldsymbol{\mathrm{\alpha\;\beta\;\gamma\;\delta\;\epsilon\;\zeta\;\eta\;\theta\;\iota\;\kappa\;\lambda\;\mu\;\nu\;\xi\;\pi\;\rho\;\sigma\;\tau\;\upsilon\;\phi\;\chi\;\psi\;\omega}}$</td></tr>
+<tr><td style="padding:4px 8px;font-size:0.8em;color:#666;">Bold italic (boldsymbol)</td><td style="padding:4px 8px;">$\boldsymbol{\alpha\;\beta\;\gamma\;\delta\;\epsilon\;\zeta\;\eta\;\theta\;\iota\;\kappa\;\lambda\;\mu\;\nu\;\xi\;\pi\;\rho\;\sigma\;\tau\;\upsilon\;\phi\;\chi\;\psi\;\omega}$</td></tr>
+</table>
+</div>
+
+<div class="specimen-block">
+<span class="field-label">Greek variant forms</span>
+<table style="border-collapse:collapse;width:100%;font-size:0.95em;margin:0.5em 0;">
+<tr style="background:#f5f5f5;"><td style="padding:4px 8px;width:140px;font-size:0.8em;color:#666;">Italic (default)</td><td style="padding:4px 8px;">$\varepsilon\;\vartheta\;\varkappa\;\varpi\;\varrho\;\varsigma\;\varphi$</td></tr>
+<tr><td style="padding:4px 8px;font-size:0.8em;color:#666;">Bold italic</td><td style="padding:4px 8px;">$\boldsymbol{\varepsilon}\;\boldsymbol{\vartheta}\;\boldsymbol{\varkappa}\;\boldsymbol{\varpi}\;\boldsymbol{\varrho}\;\boldsymbol{\varsigma}\;\boldsymbol{\varphi}$</td></tr>
+</table>
+</div>
+
+<div class="specimen-block">
+<span class="field-label">Mixed Latin + Greek (height consistency check)</span>
+<table style="border-collapse:collapse;width:100%;font-size:0.95em;margin:0.5em 0;">
+<tr style="background:#f5f5f5;"><td style="padding:4px 8px;width:140px;font-size:0.8em;color:#666;">Regular</td><td style="padding:4px 8px;">$U \Sigma V^T \quad \alpha x + \beta y = \gamma z \quad \Gamma(n) = (n-1)!$</td></tr>
+<tr><td style="padding:4px 8px;font-size:0.8em;color:#666;">Bold</td><td style="padding:4px 8px;">$\mathbf{U} \boldsymbol{\Sigma} \mathbf{V}^T \quad \boldsymbol{\alpha} \mathbf{x} + \boldsymbol{\beta} \mathbf{y} = \boldsymbol{\gamma} \mathbf{z} \quad \boldsymbol{\Gamma}(\mathbf{n}) = (\mathbf{n}-1)!$</td></tr>
+<tr style="background:#f5f5f5;"><td style="padding:4px 8px;font-size:0.8em;color:#666;">Mixed bold/regular caps</td><td style="padding:4px 8px;">$\mathbf{A}\Sigma\mathbf{B}\Gamma \quad \boldsymbol{\Sigma} = U \Lambda U^T \quad P(\mathbf{X}) = \boldsymbol{\Theta}\,\Phi(X) \quad \mathbf{M}\Delta\mathbf{N}\Omega$</td></tr>
+<tr><td style="padding:4px 8px;font-size:0.8em;color:#666;">Mixed (expressions)</td><td style="padding:4px 8px;">$\boldsymbol{\mu} = \frac{1}{n}\sum_{i=1}^n \mathbf{x}_i \quad \boldsymbol{\Sigma} = \mathbb{E}[(\mathbf{x}-\boldsymbol{\mu})(\mathbf{x}-\boldsymbol{\mu})^T] \quad \rho(\mathbf{A}) = \max|\lambda_i|$</td></tr>
+<tr style="background:#f5f5f5;"><td style="padding:4px 8px;font-size:0.8em;color:#666;">Mixed (physics)</td><td style="padding:4px 8px;">$\boldsymbol{F} = m\mathbf{a} \quad \boldsymbol{\omega} \times \mathbf{r} = \mathbf{v} \quad \boldsymbol{\nabla} \cdot \mathbf{E} = \frac{\rho}{\varepsilon_0} \quad \Psi(\mathbf{r},t) = \phi(\mathbf{r})e^{-i\omega t}$</td></tr>
+</table>
+</div>
+
 </div>
 
 <!-- ==================== LINEAR ALGEBRA ==================== -->

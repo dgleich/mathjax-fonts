@@ -2,29 +2,10 @@
 <html lang="en">
 <head>
 <meta charset="utf-8">
-<title>Math Font Specimen — Libertinus Serif + Libertinus Math</title>
+<title>Math Font Specimen — Default MathJax (newCM)</title>
 <style>
-  @font-face {
-  font-family: "Libertinus Serif";
-  src: url("chtml/woff2/mjx-libertinus-n.woff2") format("woff2");
-  font-weight: normal; font-style: normal;
-}
-@font-face {
-  font-family: "Libertinus Serif";
-  src: url("chtml/woff2/mjx-libertinus-b.woff2") format("woff2");
-  font-weight: bold; font-style: normal;
-}
-@font-face {
-  font-family: "Libertinus Serif";
-  src: url("chtml/woff2/mjx-libertinus-i.woff2") format("woff2");
-  font-weight: normal; font-style: italic;
-}
-@font-face {
-  font-family: "Libertinus Serif";
-  src: url("chtml/woff2/mjx-libertinus-bi.woff2") format("woff2");
-  font-weight: bold; font-style: italic;
-}
-  :root { --font-body: "Libertinus Serif", serif; --font-label: "Libertinus Serif + Libertinus Math"; }
+  /* default MathJax — no custom CSS */
+  :root { --font-body: serif; --font-label: "Default MathJax (newCM)"; }
   body {
     font-family: var(--font-body);
     max-width: 850px;
@@ -119,12 +100,12 @@ MathJax = {
   }
 };
 </script>
-<script id="MathJax-script" async src="tex-mml-svg-mathjax-libertinus.js"></script>
+<script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@4/tex-mml-svg.js"></script>
 </head>
 
 <body>
 
-<h1>Math Font Specimen — Libertinus Serif + Libertinus Math <span style="font-size:0.5em;color:#999;" id="status">Loading...</span></h1>
+<h1>Math Font Specimen — Default MathJax (newCM) <span style="font-size:0.5em;color:#999;" id="status">Loading...</span></h1>
 
 <nav>
   <a href="#alphabet">Alphabet</a>
