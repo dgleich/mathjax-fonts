@@ -2111,6 +2111,48 @@ def _override_variant_greek_from_text_chtml(variant_data, text_fonts, variant_ke
                     variant_data[cp] = info
 
 
+def _replace_with_math_italic_greek(variant_data, math_font, em_scale=1.0):
+    """Replace basic Greek (U+03B1 etc.) in a variant with math-italic Greek from the math font.
+
+    The variant builder puts the math font's upright basic Greek into every variant.
+    For the italic variant, we want the math font's math-italic forms instead
+    (U+1D6FC for alpha, etc.), which are distinct italic glyphs.
+    """
+    math_cmap = math_font.getBestCmap()
+    # Lowercase: U+03B1-03C9 -> U+1D6FC-1D714
+    count = 0
+    for i in range(25):
+        basic_cp = 0x03B1 + i
+        italic_cp = 0x1D6FC + i
+        if basic_cp in variant_data and italic_cp in math_cmap:
+            info = get_glyph_metrics_and_path(math_font, italic_cp, em_scale=em_scale)
+            if info:
+                info['source'] = 'math-italic'
+                variant_data[basic_cp] = info
+                count += 1
+    # Uppercase: U+0391-03A9 -> U+1D6E2-1D6FA
+    for i in range(25):
+        basic_cp = 0x0391 + i
+        italic_cp = 0x1D6E2 + i
+        if basic_cp in variant_data and italic_cp in math_cmap:
+            info = get_glyph_metrics_and_path(math_font, italic_cp, em_scale=em_scale)
+            if info:
+                info['source'] = 'math-italic'
+                variant_data[basic_cp] = info
+                count += 1
+    # Variant symbols: U+03D1->U+1D717, U+03D5->U+1D719, etc.
+    for basic_cp, italic_cp in [(0x03D1, 0x1D717), (0x03D5, 0x1D719), (0x03D6, 0x1D71B),
+                                 (0x03F0, 0x1D718), (0x03F1, 0x1D71A), (0x03F5, 0x1D716)]:
+        if basic_cp in variant_data and italic_cp in math_cmap:
+            info = get_glyph_metrics_and_path(math_font, italic_cp, em_scale=em_scale)
+            if info:
+                info['source'] = 'math-italic'
+                variant_data[basic_cp] = info
+                count += 1
+    if count:
+        print(f"    Replaced {count} basic Greek with math-italic forms")
+
+
 def _remove_math_alpha_from_variant(variant_data):
     """Remove math alphanumeric Greek+Latin codepoints from a non-normal variant.
 
@@ -2309,6 +2351,10 @@ def build_all_variants(output_dir, text_fonts, math_font, text_ranges, math_rang
     )
     apply_all_corrections(svg_italic, 'italic')
     svg_italic.update(pua_glyph_data)
+    # Replace basic Greek in italic variant with math font's math-italic Greek.
+    # The variant builder puts upright math font Greek (U+03B1) into the italic
+    # variant, but \alpha should render the italic form (U+1D6FC from math font).
+    _replace_with_math_italic_greek(svg_italic, math_font, em_scale)
     if greek_from_text:
         _override_variant_greek_from_text(svg_italic, text_fonts, 'italic', em_scale)
         for math_start, basic_start, n, font_key in _MATH_ALPHA_MAPPINGS:
