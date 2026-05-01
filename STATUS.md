@@ -74,6 +74,40 @@ Critical ones to remember:
   but they broke overbraces. Needs a different approach — possibly copying newCM's
   horizontal delimiter entries directly for arrow codepoints.
 
+- **Lowercase Greek upright (\mathrm{\alpha}) not supported by MathJax**:
+  MathJax's TeX parser hardcodes lowercase Greek to always use MATHVARIANT.ITALIC
+  in the `lcGreek` handler (ParseMethods.js). Unlike `ucGreek`, it does NOT check
+  `parser.stack.env['font']`, so `\mathrm{\alpha}` renders the same as `\alpha`.
+  This matches standard TeX behavior (lowercase Greek is always italic in math).
+
+  **Consequence**: Our text font's upright lowercase Greek (in the normal variant
+  at U+03B1) is never used by any standard LaTeX command. The italic variant's
+  Greek is always what renders for `\alpha`.
+
+  **Options to fix**:
+  1. Patch `lcGreek` in our webpack bundle to also check `env['font']` — would
+     make `\mathrm{\alpha}` use the normal variant (upright Greek). Small patch.
+  2. Use MathJax's `mathStyle: 'upright'` option to make ALL Greek upright.
+  3. Use MathJax's `mathStyle: 'ISO'` to make ALL Greek italic (including capitals).
+  4. Accept it — matches standard TeX. Most users won't notice.
+
+  **Current inconsistency across our fonts**: Libertinus, Libertinus Sans, LM Sans,
+  and Noto Sans show upright Greek capitals + italic lowercase (matching standard
+  TeX/newCM). Source Sans and Source Code Pro also follow this pattern after the
+  `greek_from_text` fix. The upright lowercase Greek data exists in the normal
+  variant but is unused.
+
+- **Concrete + Euler needs revisiting**: The typography matrix shows issues that
+  need investigation. Euler Math has a distinctive upright style for all math
+  (Knuth's design intent was upright math). Need to check if Euler's Greek
+  is being used correctly and whether concrete-euler should use a different
+  `mathStyle` configuration.
+
+- **Calligraphic/script glyphs**: All math fonts (Noto Sans Math, LM Math,
+  Libertinus Math, Euler, NewCM Sans) provide the same 18/26 script letters
+  (rest from letterlike symbols). Noto Sans Math's calligraphic looks out of
+  place with some text fonts but no better alternative found. Deferred.
+
 ## Font Files Location
 
 Source fonts in `/work/mathjax-fonts/fonts/` (not in git):
