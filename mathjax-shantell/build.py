@@ -131,6 +131,75 @@ def main():
         greek_from_text=True,
     )
 
+    # Post-build: flip pm (U+00B1) to make mp (U+2213)
+    normal_path = os.path.join(OUTPUT_DIR, "cjs/svg/normal.js")
+    with open(normal_path) as f:
+        nc = f.read()
+    pm_m = re.search(r"0xB1:\s*\[([^,]+),\s*([^,]+),\s*([^,]+),\s*\{[^}]*p:\s*'([^']+)'\s*\}", nc)
+    if pm_m:
+        h, d, w = float(pm_m.group(1)), float(pm_m.group(2)), float(pm_m.group(3))
+        pm_path = pm_m.group(4)
+        # Vertical flip: new_y = (H + D) * 1000 - old_y
+        flip_sum = int((h + d) * 1000)
+        def _flip_y(path_str):
+            # SVG path: coords alternate x,y. We need to flip only y coords.
+            # Use the full path parser approach: negate y and shift
+            # Simpler: apply SVG transform in the path by reconstructing
+            # Actually, for MathJax compressed paths, just negate y won't work easily.
+            # Instead, wrap the entry with the flipped metrics and reversed path commands.
+            # Easiest: use fontTools to get the flipped glyph directly.
+            pass
+        # Simpler approach: read the mp glyph from pm by using a vertical flip transform
+        # MathJax SVG paths use commands like M, L, Q, C, H, V, Z
+        # H (horizontal) stays same, V (vertical) flips, other coords flip y only
+        import re as _re
+        tokens = _re.findall(r'[A-Za-z]|-?\d+(?:\.\d+)?', pm_path)
+        result = []
+        i = 0
+        while i < len(tokens):
+            t = tokens[i]
+            if t in 'MLCSQT':
+                result.append(t)
+                i += 1
+                # These take pairs of (x, y)
+                pairs = {'M': 1, 'L': 1, 'S': 2, 'Q': 2, 'C': 3, 'T': 1}
+                for _ in range(pairs.get(t, 1)):
+                    if i + 1 < len(tokens):
+                        result.append(tokens[i])  # x stays
+                        result.append(str(flip_sum - int(float(tokens[i+1]))))  # flip y
+                        i += 2
+            elif t == 'H':
+                result.append('H')
+                i += 1
+                if i < len(tokens):
+                    result.append(tokens[i])  # x stays
+                    i += 1
+            elif t == 'V':
+                result.append('V')
+                i += 1
+                if i < len(tokens):
+                    result.append(str(flip_sum - int(float(tokens[i]))))  # flip y
+                    i += 1
+            elif t == 'Z':
+                result.append('Z')
+                i += 1
+            else:
+                # bare number — part of implicit command, treat as coordinate pair
+                if i + 1 < len(tokens) and not tokens[i+1].isalpha():
+                    result.append(tokens[i])  # x
+                    result.append(str(flip_sum - int(float(tokens[i+1]))))  # flip y
+                    i += 2
+                else:
+                    result.append(tokens[i])
+                    i += 1
+        mp_path = ' '.join(result)
+        mp_entry = f"0x2213: [{h}, {d}, {w}, {{ p: '{mp_path}' }}]"
+        # Replace existing mp entry
+        nc = re.sub(r'0x2213:\s*\[[^\]]+\]', mp_entry, nc)
+        with open(normal_path, 'w') as f:
+            f.write(nc)
+        print("  Replaced mp (U+2213) with flipped pm glyph")
+
     # Post-build: adjust overbrace/underbrace label spacing
     for delim_path in [
         os.path.join(OUTPUT_DIR, "cjs/svg/delimiters.js"),
