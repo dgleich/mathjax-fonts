@@ -122,19 +122,21 @@ def load_font(path):
     return TTFont(path)
 
 
-def instantiate_variable_font(path, weight=400, width=None):
+def instantiate_variable_font(path, weight=400, width=None, **extra_axes):
     """Pin a variable font to specific axis values and return a static TTFont.
 
     Args:
         path: Path to variable font (.ttf with fvar table)
         weight: wght axis value (e.g. 400 for Regular, 700 for Bold)
         width: wdth axis value (e.g. 100 for normal width), or None to skip
+        **extra_axes: Additional axes to pin (e.g. BNCE=0, INFM=0)
     """
     from fontTools.varLib.instancer import instantiateVariableFont
     font = TTFont(path)
     axes = {'wght': weight}
     if width is not None:
         axes['wdth'] = width
+    axes.update(extra_axes)
     instantiateVariableFont(font, axes, inplace=True)
     return font
 

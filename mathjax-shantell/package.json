@@ -1,0 +1,23 @@
+{
+  "name": "@mathjax/mathjax-shantell-font",
+  "version": "4.1.0",
+  "description": "MathJaxShantell font for MathJax v4",
+  "license": "OFL-1.1",
+  "keywords": [
+    "MathJax",
+    "fonts",
+    "MathJaxShantell"
+  ],
+  "files": [
+    "cjs",
+    "chtml",
+    "chtml.js",
+    "svg.js"
+  ],
+  "exports": {
+    "./js/*": {
+      "require": "./cjs/*"
+    },
+    "./*": "./*"
+  }
+}
