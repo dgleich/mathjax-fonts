@@ -2002,27 +2002,27 @@ def _override_math_greek_from_text(svg_normal, text_fonts, em_scale=1.0):
     }
     count = 0
     for math_start, basic_start, n, font_key in _MATH_ALPHA_MAPPINGS:
-        # Try preferred font, then fallbacks
-        font = None
-        used_key = None
-        for try_key in _fallbacks.get(font_key, [font_key]):
-            candidate = text_fonts.get(try_key)
-            if candidate and basic_start in candidate.getBestCmap():
-                font = candidate
-                used_key = try_key
-                break
-        if font is None:
-            continue
-        cmap = font.getBestCmap()
         for i in range(n):
             math_cp = math_start + i
             basic_cp = basic_start + i
-            if basic_cp in cmap and math_cp in svg_normal:
-                info = get_glyph_metrics_and_path(font, basic_cp, em_scale=em_scale)
-                if info:
-                    info['source'] = f'text-greek-{used_key}'
-                    svg_normal[math_cp] = info
-                    count += 1
+            if math_cp not in svg_normal:
+                continue
+            # Try preferred font, then fallbacks, per glyph
+            font = None
+            used_key = None
+            for try_key in _fallbacks.get(font_key, [font_key]):
+                candidate = text_fonts.get(try_key)
+                if candidate and basic_cp in candidate.getBestCmap():
+                    font = candidate
+                    used_key = try_key
+                    break
+            if font is None:
+                continue
+            info = get_glyph_metrics_and_path(font, basic_cp, em_scale=em_scale)
+            if info:
+                info['source'] = f'text-greek-{used_key}'
+                svg_normal[math_cp] = info
+                count += 1
     # Also override variant symbols (varepsilon, vartheta, etc.)
     for math_cp, greek_cps, font_key in _MATH_GREEK_VARIANT_SYMBOLS:
         if math_cp not in svg_normal:
@@ -2179,22 +2179,22 @@ def _override_math_greek_from_text_chtml(chtml_normal, text_fonts, em_scale=1.0)
         'regular': ['regular'],
     }
     for math_start, basic_start, n, font_key in _MATH_ALPHA_MAPPINGS:
-        font = None
-        for try_key in _fallbacks.get(font_key, [font_key]):
-            candidate = text_fonts.get(try_key)
-            if candidate and basic_start in candidate.getBestCmap():
-                font = candidate
-                break
-        if font is None:
-            continue
-        cmap = font.getBestCmap()
         for i in range(n):
             math_cp = math_start + i
             basic_cp = basic_start + i
-            if basic_cp in cmap and math_cp in chtml_normal:
-                info = get_glyph_metrics_only(font, basic_cp, em_scale=em_scale)
-                if info:
-                    chtml_normal[math_cp] = info
+            if math_cp not in chtml_normal:
+                continue
+            font = None
+            for try_key in _fallbacks.get(font_key, [font_key]):
+                candidate = text_fonts.get(try_key)
+                if candidate and basic_cp in candidate.getBestCmap():
+                    font = candidate
+                    break
+            if font is None:
+                continue
+            info = get_glyph_metrics_only(font, basic_cp, em_scale=em_scale)
+            if info:
+                chtml_normal[math_cp] = info
 
 
 # ========================================================================
