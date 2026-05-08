@@ -97,6 +97,11 @@ Critical ones to remember:
   `greek_from_text` fix. The upright lowercase Greek data exists in the normal
   variant but is unused.
 
+- **TODO: Test italic vs upright Greek across all fonts**: The lcGreek patch and
+  `_replace_with_math_italic_greek` fix were applied to all 7 packages. Need to
+  verify the typography matrix shows distinct upright (`\mathrm{\alpha}`) vs italic
+  (`\alpha`) lowercase Greek for each font.
+
 - **Concrete + Euler needs revisiting**: The typography matrix shows issues that
   need investigation. Euler Math has a distinctive upright style for all math
   (Knuth's design intent was upright math). Need to check if Euler's Greek
