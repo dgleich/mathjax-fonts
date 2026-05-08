@@ -37,8 +37,28 @@ GREEK_RANGES = [
     (0x3F0, 0x3F6),   # Greek symbols (kappa, rho, etc.)
 ]
 
-# Shantell Sans has NO Greek — use Source Code Pro as middle layer
-TEXT_RANGES = DEFAULT_TEXT_RANGES
+# Shantell Sans has NO Greek — use Source Code Pro as middle layer.
+# But Shantell DOES have handwriting-style math symbols — pull those from text font.
+TEXT_RANGES = DEFAULT_TEXT_RANGES + [
+    (0x00B1, 0x00B1),   # ±
+    (0x00D7, 0x00D7),   # ×
+    (0x00F7, 0x00F7),   # ÷
+    (0x03A9, 0x03A9),   # Ω
+    (0x03C0, 0x03C0),   # π
+    (0x2190, 0x2199),   # arrows ← ↑ → ↓ ↔ ↕ ↖ ↗ ↘ ↙
+    (0x2202, 0x2202),   # ∂
+    (0x2205, 0x2206),   # ∅ ∆
+    (0x220F, 0x2212),   # ∏ ∑ − ∕
+    (0x2219, 0x2219),   # ∙
+    (0x221A, 0x221A),   # √
+    (0x221E, 0x221E),   # ∞
+    (0x222B, 0x222B),   # ∫
+    (0x2248, 0x2248),   # ≈
+    (0x2260, 0x2260),   # ≠
+    (0x2264, 0x2265),   # ≤ ≥
+    (0x25A0, 0x25C6),   # geometric shapes
+    (0x25CB, 0x25CF),   # ○ ● etc.
+]
 MATH_RANGES = DEFAULT_MATH_RANGES
 EXTRA_MATH = DEFAULT_EXTRA_MATH
 
@@ -143,7 +163,7 @@ def main():
         # new_x = W*1000 - old_x, new_y = (H+D)*1000 - old_y
         flip_x = int(w * 1000)
         flip_y = int((h + d) * 1000)
-        y_shift = -int((h - d) * 1000 * 0.10)  # shift down 10%
+        y_shift = 0  # no vertical shift
         import re as _re
         tokens = _re.findall(r'[A-Za-z]|-?\d+(?:\.\d+)?', pm_path)
         result = []
