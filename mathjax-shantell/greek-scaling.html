@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html><head><meta charset="utf-8">
+<title>Shantell Sans — Greek Scaling Evaluation</title>
+<script id="MathJax-script" async src="tex-mml-svg-mathjax-shantell.js"></script>
+<style>
+@font-face {
+  font-family: "Shantell Sans";
+  src: url("chtml/woff2/mjx-shantell-n.woff2") format("woff2");
+  font-weight: normal; font-style: normal;
+}
+@font-face {
+  font-family: "Shantell Sans";
+  src: url("chtml/woff2/mjx-shantell-b.woff2") format("woff2");
+  font-weight: bold; font-style: normal;
+}
+@font-face {
+  font-family: "Shantell Sans";
+  src: url("chtml/woff2/mjx-shantell-i.woff2") format("woff2");
+  font-weight: normal; font-style: italic;
+}
+@font-face {
+  font-family: "Shantell Sans";
+  src: url("chtml/woff2/mjx-shantell-bi.woff2") format("woff2");
+  font-weight: bold; font-style: italic;
+}
+body { font-family: "Shantell Sans", cursive; max-width: 1100px; margin: 2em auto; font-size: 16px; }
+h1 { font-size: 1.4em; }
+h2 { font-size: 1.1em; color: #444; margin-top: 1.5em; }
+.demo { font-size: 1.5em; padding: 0.8em; margin: 0.5em 0; background: #fafafa; border: 1px solid #ddd; border-radius: 6px; line-height: 1.8; }
+.demo-big { font-size: 1.8em; }
+</style></head><body>
+<h1>Shantell Sans — Greek/Latin Lowercase Scaling Check</h1>
+
+<h2>Inline expressions (lowercase heavy)</h2>
+<div class="demo">
+Let \(\alpha\) be a learning rate and \(\beta\) a momentum parameter.
+We update \(\theta\) via \(\theta \leftarrow \theta - \alpha \nabla f(\theta) + \beta \Delta\theta\).
+</div>
+
+<div class="demo">
+Given \(\lambda_1 \geq \lambda_2 \geq \cdots \geq \lambda_n\), the condition number is
+\(\kappa = \lambda_1 / \lambda_n\). If \(\kappa\) is large, the problem is ill-conditioned.
+</div>
+
+<div class="demo">
+The density \(\rho(x)\) satisfies \(\int_\Omega \rho(x)\,dx = 1\) with variance
+\(\sigma^2 = \int (x - \mu)^2 \rho(x)\,dx\) where \(\mu\) is the mean.
+</div>
+
+<h2>Upright Greek (mathrm) mixed with Latin</h2>
+<div class="demo">
+Define \(\mathrm{\alpha} = 0.01\), \(\mathrm{\beta} = 0.9\), and \(\mathrm{\gamma} = 0.99\).
+Then \(x_k = \mathrm{\alpha} x_{k-1} + \mathrm{\beta} y_{k-1}\).
+</div>
+
+<h2>Mixed uppercase and lowercase</h2>
+<div class="demo">
+\(\Gamma(\alpha + 1) = \alpha \Gamma(\alpha)\) &emsp;
+\(\Sigma = U \Lambda U^T\) &emsp;
+\(\Phi(\sigma) = \frac{1}{\sqrt{2\pi}} e^{-\sigma^2/2}\)
+</div>
+
+<h2>Bold and non-bold mixed</h2>
+<div class="demo">
+\(\boldsymbol{\alpha} x + \alpha \mathbf{x}\) &emsp;
+\(\boldsymbol{\beta} y + \beta \mathbf{y}\) &emsp;
+\(\boldsymbol{\gamma} z + \gamma \mathbf{z}\) &emsp;
+\(\boldsymbol{\theta} w + \theta \mathbf{w}\)
+</div>
+
+<div class="demo">
+\(\boldsymbol{\mu} = \frac{1}{n}\sum_{i=1}^n \mathbf{x}_i\) &emsp;
+\(\boldsymbol{\Sigma} = \frac{1}{n}\sum_{i=1}^n (\mathbf{x}_i - \boldsymbol{\mu})(\mathbf{x}_i - \boldsymbol{\mu})^T\) &emsp;
+\(\boldsymbol{\lambda} \cdot \mathbf{v} = \lambda v\)
+</div>
+
+<h2>Display mode</h2>
+<div class="demo">
+$$\nabla_\theta \mathcal{L}(\theta) = -\frac{1}{n}\sum_{i=1}^{n} \left[\frac{y_i}{\sigma(\theta^T x_i)} - \frac{1 - y_i}{1 - \sigma(\theta^T x_i)}\right] \sigma'(\theta^T x_i)\, x_i$$
+</div>
+
+<div class="demo">
+$$p(\theta \mid \mathcal{D}) = \frac{p(\mathcal{D} \mid \theta)\, p(\theta)}{\int p(\mathcal{D} \mid \theta')\, p(\theta')\, d\theta'} \propto \prod_{i=1}^n p(x_i \mid \theta)\, p(\theta)$$
+</div>
+
+<h2>Beta variations next to Latin (large)</h2>
+<div class="demo demo-big">
+\(b\beta p\beta a\beta f\beta\) &emsp; italic: \(b\beta p\beta a\beta f\beta\)
+</div>
+<div class="demo demo-big">
+upright: \(\mathrm{b}\mathrm{\beta}\mathrm{p}\mathrm{\beta}\mathrm{a}\mathrm{\beta}\mathrm{f}\mathrm{\beta}\)
+</div>
+<div class="demo demo-big">
+bold: \(\mathbf{b}\boldsymbol{\beta}\mathbf{p}\boldsymbol{\beta}\mathbf{a}\boldsymbol{\beta}\mathbf{f}\boldsymbol{\beta}\)
+</div>
+<div class="demo demo-big">
+bold italic: \(\boldsymbol{b\beta p\beta a\beta f\beta}\)
+</div>
+<div class="demo demo-big">
+\(\beta\boldsymbol{\beta}\) &emsp;
+\(\alpha\boldsymbol{\alpha}\) &emsp;
+\(\gamma\boldsymbol{\gamma}\) &emsp;
+\(\theta\boldsymbol{\theta}\) &emsp;
+\(\sigma\boldsymbol{\sigma}\) &emsp;
+\(\Sigma\boldsymbol{\Sigma}\) &emsp;
+\(\Gamma\boldsymbol{\Gamma}\)
+</div>
+
+<h2>Side-by-side height check (large)</h2>
+<div class="demo demo-big">
+\(axb\alpha c\beta d\gamma e\theta f\sigma\) &emsp; \(\mathbf{a}\boldsymbol{\alpha}\mathbf{b}\boldsymbol{\beta}\mathbf{c}\boldsymbol{\gamma}\)
+</div>
+<div class="demo demo-big">
+\(A\Sigma B\Gamma C\Omega D\Theta\) &emsp; \(\mathbf{A}\boldsymbol{\Sigma}\mathbf{B}\boldsymbol{\Gamma}\mathbf{C}\boldsymbol{\Omega}\)
+</div>
+
+</body></html>

@@ -54,8 +54,8 @@ def main():
     text_fonts = {
         'regular':     instantiate_variable_font(UPRIGHT_VAR, weight=400, BNCE=0, INFM=0, SPAC=0),
         'bold':        instantiate_variable_font(UPRIGHT_VAR, weight=700, BNCE=0, INFM=0, SPAC=0),
-        'italic':      instantiate_variable_font(ITALIC_VAR, weight=400, BNCE=0, INFM=0, SPAC=0),
-        'bold_italic': instantiate_variable_font(ITALIC_VAR, weight=700, BNCE=0, INFM=0, SPAC=0),
+        'italic':      instantiate_variable_font(ITALIC_VAR, weight=300, BNCE=0, INFM=0, SPAC=0),
+        'bold_italic': instantiate_variable_font(ITALIC_VAR, weight=500, BNCE=0, INFM=0, SPAC=0),
     }
     math_font = load_font(NOTO_MATH)
 
@@ -76,7 +76,39 @@ def main():
     middle_layer = build_middle_layer_from_otf(scp_path, GREEK_RANGES)
     print(f"    {len(middle_layer)} Greek glyphs from Source Code Pro")
 
+    # Scale uppercase Greek to match Shantell's cap height
+    # SCP cap height ~0.656, Shantell cap height ~0.710
     x_height = get_x_height(text_fonts['regular'])
+    shantell_cap = 0.680
+    scp_cap = 0.656
+    uc_scale = shantell_cap / scp_cap
+    lc_scale = 0.97  # slight reduction for lowercase Greek
+    print(f"  Scaling uppercase Greek by {uc_scale:.3f}x, lowercase by {lc_scale:.3f}x")
+
+    import re as _re
+    def _scale_glyphs(data, codepoints, scale):
+        for cp in codepoints:
+            if cp in data:
+                info = data[cp]
+                info['height'] = round(info['height'] * scale, 3)
+                info['depth'] = round(info['depth'] * scale, 3)
+                info['width'] = round(info['width'] * scale, 3)
+                path = info.get('path', '')
+                if path:
+                    info['path'] = _re.sub(
+                        r'-?\d+(?:\.\d+)?',
+                        lambda m: str(round(float(m.group()) * scale)),
+                        path
+                    )
+
+    # Scale uppercase Greek
+    _scale_glyphs(middle_layer,
+                  [cp for cp in range(0x0391, 0x03AA) if cp != 0x03A2],
+                  uc_scale)
+    # Scale lowercase Greek
+    _scale_glyphs(middle_layer,
+                  list(range(0x03B1, 0x03CA)) + list(range(0x03D1, 0x03D7)) + list(range(0x03F0, 0x03F7)),
+                  lc_scale)
     print(f"  x_height: {x_height}")
 
     ic_map = extract_italic_corrections(math_font)
