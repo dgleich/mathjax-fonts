@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Build MathJax font package for Shantell Sans + Source Code Pro Greek + LM Math."""
+"""Build MathJax font package for Shantell Sans + SCP Greek + Noto Sans Math."""
 
 import os
 import sys
@@ -22,7 +22,7 @@ CSS_PREFIX = "SHANTELL"
 
 FONTS_DIR = os.path.join(os.path.dirname(__file__), '..', 'fonts', 'shantell-sans')
 SCP_DIR = os.path.join(os.path.dirname(__file__), '..', 'fonts', 'source-code-pro')
-LM_MATH = os.path.join(os.path.dirname(__file__), '..', 'fonts', 'lm-math', 'latinmodern-math.otf')
+NOTO_MATH = os.path.join(os.path.dirname(__file__), '..', 'fonts', 'noto-sans', 'NotoSansMath-Regular.ttf')
 
 UPRIGHT_VAR = os.path.join(FONTS_DIR, 'ShantellSans[BNCE,INFM,SPAC,wght].ttf')
 ITALIC_VAR = os.path.join(FONTS_DIR, 'ShantellSans-Italic[BNCE,INFM,SPAC,wght].ttf')
@@ -47,7 +47,7 @@ def main():
     print(f"Building {FONT_ID}...")
     print(f"  Text: Shantell Sans (variable, pinned wght+BNCE+INFM+SPAC)")
     print(f"  Greek: Source Code Pro (middle layer)")
-    print(f"  Math: Latin Modern Math")
+    print(f"  Math: Noto Sans Math")
 
     # Instantiate Shantell Sans: pin all custom axes to defaults, vary weight
     print("  Instantiating variable fonts...")
@@ -57,7 +57,7 @@ def main():
         'italic':      instantiate_variable_font(ITALIC_VAR, weight=400, BNCE=0, INFM=0, SPAC=0),
         'bold_italic': instantiate_variable_font(ITALIC_VAR, weight=700, BNCE=0, INFM=0, SPAC=0),
     }
-    math_font = load_font(LM_MATH)
+    math_font = load_font(NOTO_MATH)
 
     # Save static instances to temp files for WOFF2 generation
     tmpdir = tempfile.mkdtemp(prefix='shantell-static-')
@@ -96,6 +96,7 @@ def main():
         css_prefix=CSS_PREFIX,
         x_height=x_height,
         text_font_paths=text_font_paths,
+        greek_from_text=True,
     )
 
     # Post-build: adjust overbrace/underbrace label spacing
