@@ -139,6 +139,67 @@ def main():
                 override_count += 1
     print(f"    Overrode {override_count} Greek with Shantell Latin/Cyrillic glyphs")
 
+    # Fix Sigma (∑): scale down and shift up to remove descent
+    # Target: match Gamma cap height (~0.707), minimal descent (~0.01)
+    if 0x03A3 in middle_layer:
+        sigma = middle_layer[0x03A3]
+        # Current: H=0.718, D=0.27, total span = 0.988
+        # Target: H=0.707, D=0.01, total span = 0.717
+        target_h = 0.707
+        target_d = 0.01
+        old_h, old_d = sigma['height'], sigma['depth']
+        old_span = old_h - old_d  # old_d is positive for descent below baseline
+        target_span = target_h + target_d
+        scale = target_span / (old_h + old_d)
+        # Shift: move everything up so descent becomes ~0.01
+        # In font coords (1000 UPM): old bottom = -old_d*1000, new bottom = -target_d*1000
+        y_shift = int((-target_d - (-old_d)) * 1000 * scale)  # shift after scaling
+        import re as _re
+        path = sigma.get('path', '')
+        if path:
+            tokens = _re.findall(r'[A-Za-z]|-?\d+(?:\.\d+)?', path)
+            result = []
+            i = 0
+            while i < len(tokens):
+                t = tokens[i]
+                if t in 'MLCSQT':
+                    result.append(t)
+                    i += 1
+                    pairs = {'M': 1, 'L': 1, 'S': 2, 'Q': 2, 'C': 3, 'T': 1}
+                    for _ in range(pairs.get(t, 1)):
+                        if i + 1 < len(tokens):
+                            result.append(str(round(float(tokens[i]) * scale)))
+                            result.append(str(round(float(tokens[i+1]) * scale + y_shift)))
+                            i += 2
+                elif t == 'H':
+                    result.append('H')
+                    i += 1
+                    if i < len(tokens):
+                        result.append(str(round(float(tokens[i]) * scale)))
+                        i += 1
+                elif t == 'V':
+                    result.append('V')
+                    i += 1
+                    if i < len(tokens):
+                        result.append(str(round(float(tokens[i]) * scale + y_shift)))
+                        i += 1
+                elif t == 'Z':
+                    result.append('Z')
+                    i += 1
+                else:
+                    if i + 1 < len(tokens) and not tokens[i+1].isalpha():
+                        result.append(str(round(float(tokens[i]) * scale)))
+                        result.append(str(round(float(tokens[i+1]) * scale + y_shift)))
+                        i += 2
+                    else:
+                        result.append(tokens[i])
+                        i += 1
+            sigma['path'] = ' '.join(result)
+        sigma['height'] = round(target_h, 3)
+        sigma['depth'] = round(target_d, 3)
+        sigma['width'] = round(sigma['width'] * scale, 3)
+        print(f"    Fixed Sigma: H={target_h} D={target_d} (scaled {scale:.3f}x, shifted)")
+
     # Scale uppercase Greek to match Shantell's cap height
     # SCP cap height ~0.656, Shantell cap height ~0.710
     x_height = get_x_height(text_fonts['regular'])
