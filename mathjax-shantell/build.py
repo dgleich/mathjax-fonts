@@ -96,6 +96,49 @@ def main():
     middle_layer = build_middle_layer_from_otf(scp_path, GREEK_RANGES)
     print(f"    {len(middle_layer)} Greek glyphs from Source Code Pro")
 
+    # Override uppercase Greek with Shantell Latin/Cyrillic glyphs where possible
+    from mathjax_font_lib import get_glyph_metrics_and_path
+    shantell_greek_map = {
+        # Greek CP -> Shantell source CP
+        0x0391: 0x0041,  # Alpha <- A
+        0x0392: 0x0042,  # Beta <- B
+        0x0393: 0x0413,  # Gamma <- Cyrillic Г
+        0x0394: 0x2206,  # Delta <- Shantell ∆
+        0x0395: 0x0045,  # Epsilon <- E
+        0x0396: 0x005A,  # Zeta <- Z
+        0x0397: 0x0048,  # Eta <- H
+        0x0398: 0x04E8,  # Theta <- Cyrillic Ө
+        0x0399: 0x0049,  # Iota <- I
+        0x039A: 0x004B,  # Kappa <- K
+        0x039B: 0x041B,  # Lambda <- Cyrillic Л
+        0x039C: 0x004D,  # Mu <- M
+        0x039D: 0x004E,  # Nu <- N
+        # 0x039E: Xi — no match, keep SCP
+        0x039F: 0x004F,  # Omicron <- O
+        0x03A0: 0x041F,  # Pi <- Cyrillic П
+        0x03A1: 0x0050,  # Rho <- P
+        0x03A3: 0x2211,  # Sigma <- Shantell ∑
+        0x03A4: 0x0054,  # Tau <- T
+        0x03A5: 0x0423,  # Upsilon <- Cyrillic У
+        0x03A6: 0x0424,  # Phi <- Cyrillic Ф
+        0x03A7: 0x0058,  # Chi <- X
+        # 0x03A8: Psi — no match, keep SCP
+        # 0x03A9: Omega — already in font via text_ranges
+        # Lowercase
+        0x03BC: 0x00B5,  # mu <- Shantell µ
+    }
+    shantell_reg = text_fonts['regular']
+    shantell_cmap = shantell_reg.getBestCmap()
+    override_count = 0
+    for greek_cp, source_cp in shantell_greek_map.items():
+        if source_cp in shantell_cmap:
+            info = get_glyph_metrics_and_path(shantell_reg, source_cp)
+            if info:
+                info['source'] = 'shantell-mapped'
+                middle_layer[greek_cp] = info
+                override_count += 1
+    print(f"    Overrode {override_count} Greek with Shantell Latin/Cyrillic glyphs")
+
     # Scale uppercase Greek to match Shantell's cap height
     # SCP cap height ~0.656, Shantell cap height ~0.710
     x_height = get_x_height(text_fonts['regular'])
@@ -121,10 +164,11 @@ def main():
                         path
                     )
 
-    # Scale uppercase Greek
-    _scale_glyphs(middle_layer,
-                  [cp for cp in range(0x0391, 0x03AA) if cp != 0x03A2],
-                  uc_scale)
+    # Scale uppercase Greek — only SCP glyphs (not Shantell-mapped ones)
+    scp_uc = [cp for cp in range(0x0391, 0x03AA)
+              if cp != 0x03A2 and cp in middle_layer
+              and middle_layer[cp].get('source') != 'shantell-mapped']
+    _scale_glyphs(middle_layer, scp_uc, uc_scale)
     # Scale lowercase Greek
     _scale_glyphs(middle_layer,
                   list(range(0x03B1, 0x03CA)) + list(range(0x03D1, 0x03D7)) + list(range(0x03F0, 0x03F7)),
