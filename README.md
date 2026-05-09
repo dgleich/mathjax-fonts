@@ -65,14 +65,50 @@ or Tauri app to render LaTeX math in a specific font style.
 | `mathjax-lato` | Lato | TBD | Planned |
 | `mathjax-ptsans` | PT Sans | TBD | Planned |
 
-## Usage
+## Using these fonts on your site
 
-Each package produces a single webpack bundle (`tex-mml-svg-{package}.js`)
-that replaces MathJax's default font. Include it in your HTML:
+Each font package is a **single JavaScript file** (~5 MB) that includes MathJax 4,
+the TeX input processor, the SVG renderer, and all the font data. No MathJax CDN needed.
+
+### 1. Download the bundle
+
+Grab the `.js` file for your chosen font from this repo:
+
+```
+mathjax-source-sans/tex-mml-svg-mathjax-source-sans.js
+```
+
+### 2. Replace the MathJax script tag
 
 ```html
+<!-- Instead of the CDN: -->
+<!-- <script src="https://cdn.jsdelivr.net/npm/mathjax@4/tex-mml-svg.js"></script> -->
+
+<!-- Use your bundle: -->
 <script id="MathJax-script" async src="tex-mml-svg-mathjax-source-sans.js"></script>
 ```
+
+That's it. All LaTeX math on the page renders in the chosen font.
+
+### 3. Or load directly from GitHub Pages (for testing)
+
+```html
+<script id="MathJax-script" async
+  src="https://dgleich.github.io/mathjax-fonts/mathjax-source-sans/tex-mml-svg-mathjax-source-sans.js"></script>
+```
+
+### Available bundles
+
+| Font | Bundle |
+|------|--------|
+| Libertinus Serif | `tex-mml-svg-mathjax-libertinus.js` |
+| Libertinus Sans | `tex-mml-svg-mathjax-libertinus-sans.js` |
+| CMU Sans Serif | `tex-mml-svg-mathjax-lm-sans.js` |
+| Noto Sans | `tex-mml-svg-mathjax-noto-sans.js` |
+| Source Sans 3 | `tex-mml-svg-mathjax-source-sans.js` |
+| Source Code Pro | `tex-mml-svg-mathjax-source-code.js` |
+| CMU Concrete + Euler | `tex-mml-svg-mathjax-concrete-euler.js` |
+| Shantell Sans | `tex-mml-svg-mathjax-shantell.js` |
 
 Or import in a bundled app:
 
