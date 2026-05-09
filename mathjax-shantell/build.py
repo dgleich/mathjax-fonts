@@ -359,9 +359,11 @@ def main():
     italic_font = text_fonts['italic']
     italic_cmap = italic_font.getBestCmap()
     it_patch = 0
-    for greek_cp, source_cp in shantell_greek_map.items():
-        if greek_cp < 0x0391 or greek_cp > 0x03A9:  # uppercase only
-            continue
+    # Include pi and Omega which come via TEXT_RANGES but get overwritten
+    _italic_patch_map = dict(shantell_greek_map)
+    _italic_patch_map[0x03C0] = 0x03C0  # pi <- pi (already in Shantell)
+    _italic_patch_map[0x03A9] = 0x03A9  # Omega <- Omega (already in Shantell)
+    for greek_cp, source_cp in _italic_patch_map.items():
         if source_cp not in italic_cmap:
             continue
         use_font = _sigma_fonts.get('italic', italic_font) if greek_cp == 0x03A3 else italic_font
