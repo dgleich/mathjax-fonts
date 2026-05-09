@@ -49,6 +49,51 @@ and glyph inventory.</p>
   <a href="specimen-default-mathjax.html">Default MathJax (newCM)</a> — reference specimen for comparison
 </div>
 
+<h2 style="margin-top:2em;">Using these fonts on your own site</h2>
+
+<p>Each font package is a single JavaScript file that replaces MathJax's default font.
+No MathJax CDN needed — the bundle includes everything.</p>
+
+<h3>1. Download the bundle</h3>
+<p>From the <a href="https://github.com/dgleich/mathjax-fonts">GitHub repo</a>,
+download the bundle for your chosen font. Each lives at:</p>
+<pre style="background:#f5f5f5;padding:0.8em;border-radius:4px;overflow-x:auto;font-size:0.9em;">mathjax-{name}/tex-mml-svg-mathjax-{name}.js</pre>
+<p>For example, for Source Sans:</p>
+<pre style="background:#f5f5f5;padding:0.8em;border-radius:4px;overflow-x:auto;font-size:0.9em;">mathjax-source-sans/tex-mml-svg-mathjax-source-sans.js</pre>
+<p>That single <code>.js</code> file (~5 MB) is all you need. It contains MathJax 4, the TeX input
+processor, the SVG renderer, and all the font data.</p>
+
+<h3>2. Add it to your page</h3>
+<p>Replace the usual MathJax CDN script tag with your bundle:</p>
+<pre style="background:#f5f5f5;padding:0.8em;border-radius:4px;overflow-x:auto;font-size:0.9em;">&lt;!-- Instead of this: --&gt;
+&lt;!-- &lt;script src="https://cdn.jsdelivr.net/npm/mathjax@4/tex-mml-svg.js"&gt;&lt;/script&gt; --&gt;
+
+&lt;!-- Use this: --&gt;
+&lt;script id="MathJax-script" async
+  src="tex-mml-svg-mathjax-source-sans.js"&gt;&lt;/script&gt;</pre>
+
+<p>That's it. LaTeX math in your page will render in the chosen font:</p>
+<pre style="background:#f5f5f5;padding:0.8em;border-radius:4px;overflow-x:auto;font-size:0.9em;">&lt;p&gt;The Euler identity: \(e^{i\pi} + 1 = 0\)&lt;/p&gt;</pre>
+
+<h3>3. Or use from this site directly</h3>
+<p>You can also load the bundle directly from GitHub Pages (not recommended for production,
+but handy for testing):</p>
+<pre style="background:#f5f5f5;padding:0.8em;border-radius:4px;overflow-x:auto;font-size:0.9em;">&lt;script id="MathJax-script" async
+  src="https://dgleich.github.io/mathjax-fonts/mathjax-source-sans/tex-mml-svg-mathjax-source-sans.js"&gt;&lt;/script&gt;</pre>
+
+<h3>Available bundles</h3>
+<table style="border-collapse:collapse;width:100%;margin:1em 0;font-size:0.9em;">
+<tr style="background:#f5f5f5;"><th style="border:1px solid #ddd;padding:6px 10px;text-align:left;">Font</th><th style="border:1px solid #ddd;padding:6px 10px;text-align:left;">Bundle filename</th></tr>
+<tr><td style="border:1px solid #ddd;padding:6px 10px;">Libertinus Serif</td><td style="border:1px solid #ddd;padding:6px 10px;"><code>tex-mml-svg-mathjax-libertinus.js</code></td></tr>
+<tr><td style="border:1px solid #ddd;padding:6px 10px;">Libertinus Sans</td><td style="border:1px solid #ddd;padding:6px 10px;"><code>tex-mml-svg-mathjax-libertinus-sans.js</code></td></tr>
+<tr><td style="border:1px solid #ddd;padding:6px 10px;">CMU Sans Serif</td><td style="border:1px solid #ddd;padding:6px 10px;"><code>tex-mml-svg-mathjax-lm-sans.js</code></td></tr>
+<tr><td style="border:1px solid #ddd;padding:6px 10px;">Noto Sans</td><td style="border:1px solid #ddd;padding:6px 10px;"><code>tex-mml-svg-mathjax-noto-sans.js</code></td></tr>
+<tr><td style="border:1px solid #ddd;padding:6px 10px;">Source Sans 3</td><td style="border:1px solid #ddd;padding:6px 10px;"><code>tex-mml-svg-mathjax-source-sans.js</code></td></tr>
+<tr><td style="border:1px solid #ddd;padding:6px 10px;">Source Code Pro</td><td style="border:1px solid #ddd;padding:6px 10px;"><code>tex-mml-svg-mathjax-source-code.js</code></td></tr>
+<tr><td style="border:1px solid #ddd;padding:6px 10px;">CMU Concrete + Euler</td><td style="border:1px solid #ddd;padding:6px 10px;"><code>tex-mml-svg-mathjax-concrete-euler.js</code></td></tr>
+<tr><td style="border:1px solid #ddd;padding:6px 10px;">Shantell Sans</td><td style="border:1px solid #ddd;padding:6px 10px;"><code>tex-mml-svg-mathjax-shantell.js</code></td></tr>
+</table>
+
 <footer>
   <a href="https://github.com/dgleich/mathjax-fonts">GitHub repository</a>
 </footer>
