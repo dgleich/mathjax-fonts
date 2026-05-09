@@ -256,6 +256,85 @@ def main():
         greek_from_text=True,
     )
 
+    # Post-build: override math alphanumeric uppercase Greek in normal variant
+    # with Shantell Latin/Cyrillic glyphs from bold/italic/bold-italic styles
+    _math_alpha_uc_greek = [
+        # (math_alpha_base, greek_base, count, text_font_key)
+        (0x1D6E2, 0x0391, 25, 'italic'),       # Math italic Greek caps
+        (0x1D6A8, 0x0391, 25, 'bold'),          # Math bold Greek caps
+        (0x1D71C, 0x0391, 25, 'bold_italic'),   # Math bold italic Greek caps
+        (0x1D756, 0x0391, 25, 'bold'),          # Math sans bold Greek caps
+        (0x1D790, 0x0391, 25, 'bold_italic'),   # Math sans bold italic Greek caps
+    ]
+    normal_path = os.path.join(OUTPUT_DIR, "cjs/svg/normal.js")
+    with open(normal_path) as f:
+        nc = f.read()
+    patch_count = 0
+    for math_base, greek_base, n, style_key in _math_alpha_uc_greek:
+        font = text_fonts[style_key]
+        font_cmap = font.getBestCmap()
+        for i in range(n):
+            math_cp = math_base + i
+            greek_cp = greek_base + i
+            if greek_cp == 0x03A2:  # reserved
+                continue
+            # Find the source glyph in Shantell via our mapping
+            source_cp = shantell_greek_map.get(greek_cp)
+            if source_cp is None or source_cp not in font_cmap:
+                continue
+            info = get_glyph_metrics_and_path(font, source_cp)
+            if info is None:
+                continue
+            h, d, w = info['height'], info['depth'], info['width']
+            path = info.get('path', '')
+            # Apply Sigma descent fix if needed (same as upright fix)
+            if greek_cp == 0x03A3 and d > 0.1:
+                sig_target_h, sig_target_d = 0.707, 0.01
+                sig_scale = (sig_target_h + sig_target_d) / (h + d)
+                sig_y_shift = int((-sig_target_d - (-d)) * 1000 * sig_scale)
+                tokens = re.findall(r'[A-Za-z]|-?\d+(?:\.\d+)?', path)
+                result = []
+                ti = 0
+                while ti < len(tokens):
+                    tok = tokens[ti]
+                    if tok in 'MLCSQT':
+                        result.append(tok); ti += 1
+                        pairs = {'M':1,'L':1,'S':2,'Q':2,'C':3,'T':1}
+                        for _ in range(pairs.get(tok, 1)):
+                            if ti + 1 < len(tokens):
+                                result.append(str(round(float(tokens[ti]) * sig_scale)))
+                                result.append(str(round(float(tokens[ti+1]) * sig_scale + sig_y_shift)))
+                                ti += 2
+                    elif tok == 'H':
+                        result.append('H'); ti += 1
+                        if ti < len(tokens):
+                            result.append(str(round(float(tokens[ti]) * sig_scale))); ti += 1
+                    elif tok == 'V':
+                        result.append('V'); ti += 1
+                        if ti < len(tokens):
+                            result.append(str(round(float(tokens[ti]) * sig_scale + sig_y_shift))); ti += 1
+                    elif tok == 'Z':
+                        result.append('Z'); ti += 1
+                    else:
+                        if ti + 1 < len(tokens) and not tokens[ti+1].isalpha():
+                            result.append(str(round(float(tokens[ti]) * sig_scale)))
+                            result.append(str(round(float(tokens[ti+1]) * sig_scale + sig_y_shift)))
+                            ti += 2
+                        else:
+                            result.append(tokens[ti]); ti += 1
+                path = ' '.join(result)
+                h, d, w = sig_target_h, sig_target_d, round(w * sig_scale, 3)
+            # Build the replacement entry
+            old_pattern = rf'0x{math_cp:X}:\s*\[[^\]]+\]'
+            new_entry = f"0x{math_cp:X}: [{h}, {d}, {w}, {{ p: '{path}' }}]"
+            nc_new = re.sub(old_pattern, new_entry, nc)
+            if nc_new != nc:
+                nc = nc_new
+                patch_count += 1
+    with open(normal_path, 'w') as f:
+        f.write(nc)
+    print(f"  Patched {patch_count} math alphanumeric uppercase Greek with Shantell glyphs")
+
     # Post-build: flip pm (U+00B1) to make mp (U+2213)
     normal_path = os.path.join(OUTPUT_DIR, "cjs/svg/normal.js")
     with open(normal_path) as f:
