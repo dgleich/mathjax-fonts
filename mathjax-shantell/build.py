@@ -137,7 +137,14 @@ def main():
                 info['source'] = 'shantell-mapped'
                 middle_layer[greek_cp] = info
                 override_count += 1
-    print(f"    Overrode {override_count} Greek with Shantell Latin/Cyrillic glyphs")
+    # For Sigma, use a heavier weight (500) to compensate for scaling making it thin
+    shantell_sigma_heavy = instantiate_variable_font(UPRIGHT_VAR, weight=500, BNCE=0, INFM=0, SPAC=0)
+    sigma_info = get_glyph_metrics_and_path(shantell_sigma_heavy, 0x2211)
+    if sigma_info:
+        sigma_info['source'] = 'shantell-mapped'
+        middle_layer[0x03A3] = sigma_info
+        override_count += 1
+    print(f"    Overrode {override_count} Greek with Shantell Latin/Cyrillic glyphs (Sigma at wght=500)")
 
     # Fix Sigma (∑): scale down and shift up to remove descent
     # Target: match Gamma cap height (~0.707), minimal descent (~0.01)
@@ -269,6 +276,12 @@ def main():
     normal_path = os.path.join(OUTPUT_DIR, "cjs/svg/normal.js")
     with open(normal_path) as f:
         nc = f.read()
+    # Extra instances for heavier Sigma weights
+    _sigma_fonts = {
+        'italic': instantiate_variable_font(ITALIC_VAR, weight=350, BNCE=0, INFM=0, SPAC=0),
+        'bold': instantiate_variable_font(UPRIGHT_VAR, weight=800, BNCE=0, INFM=0, SPAC=0),
+        'bold_italic': instantiate_variable_font(ITALIC_VAR, weight=600, BNCE=0, INFM=0, SPAC=0),
+    }
     patch_count = 0
     for math_base, greek_base, n, style_key in _math_alpha_uc_greek:
         font = text_fonts[style_key]
@@ -282,7 +295,11 @@ def main():
             source_cp = shantell_greek_map.get(greek_cp)
             if source_cp is None or source_cp not in font_cmap:
                 continue
-            info = get_glyph_metrics_and_path(font, source_cp)
+            # Use heavier weight for Sigma to compensate for scaling
+            use_font = _sigma_fonts.get(style_key, font) if greek_cp == 0x03A3 else font
+            if source_cp not in use_font.getBestCmap():
+                use_font = font
+            info = get_glyph_metrics_and_path(use_font, source_cp)
             if info is None:
                 continue
             h, d, w = info['height'], info['depth'], info['width']
@@ -334,6 +351,70 @@ def main():
     with open(normal_path, 'w') as f:
         f.write(nc)
     print(f"  Patched {patch_count} math alphanumeric uppercase Greek with Shantell glyphs")
+
+    # Post-build: override italic variant's basic uppercase Greek with Shantell italic
+    italic_js_path = os.path.join(OUTPUT_DIR, "cjs/svg/italic.js")
+    with open(italic_js_path) as f:
+        itc = f.read()
+    italic_font = text_fonts['italic']
+    italic_cmap = italic_font.getBestCmap()
+    it_patch = 0
+    for greek_cp, source_cp in shantell_greek_map.items():
+        if greek_cp < 0x0391 or greek_cp > 0x03A9:  # uppercase only
+            continue
+        if source_cp not in italic_cmap:
+            continue
+        use_font = _sigma_fonts.get('italic', italic_font) if greek_cp == 0x03A3 else italic_font
+        if source_cp not in use_font.getBestCmap():
+            use_font = italic_font
+        info = get_glyph_metrics_and_path(use_font, source_cp)
+        if info is None:
+            continue
+        h, d, w = info['height'], info['depth'], info['width']
+        path = info.get('path', '')
+        # Apply Sigma fix
+        if greek_cp == 0x03A3 and d > 0.1:
+            sig_target_h, sig_target_d = 0.707, 0.01
+            sig_s = (sig_target_h + sig_target_d) / (h + d)
+            sig_ys = int((-sig_target_d - (-d)) * 1000 * sig_s)
+            toks = re.findall(r'[A-Za-z]|-?\d+(?:\.\d+)?', path)
+            res = []
+            ti = 0
+            while ti < len(toks):
+                tok = toks[ti]
+                if tok in 'MLCSQT':
+                    res.append(tok); ti += 1
+                    for _ in range({'M':1,'L':1,'S':2,'Q':2,'C':3,'T':1}.get(tok, 1)):
+                        if ti + 1 < len(toks):
+                            res.append(str(round(float(toks[ti]) * sig_s)))
+                            res.append(str(round(float(toks[ti+1]) * sig_s + sig_ys)))
+                            ti += 2
+                elif tok == 'H':
+                    res.append('H'); ti += 1
+                    if ti < len(toks): res.append(str(round(float(toks[ti]) * sig_s))); ti += 1
+                elif tok == 'V':
+                    res.append('V'); ti += 1
+                    if ti < len(toks): res.append(str(round(float(toks[ti]) * sig_s + sig_ys))); ti += 1
+                elif tok == 'Z':
+                    res.append('Z'); ti += 1
+                else:
+                    if ti + 1 < len(toks) and not toks[ti+1].isalpha():
+                        res.append(str(round(float(toks[ti]) * sig_s)))
+                        res.append(str(round(float(toks[ti+1]) * sig_s + sig_ys)))
+                        ti += 2
+                    else:
+                        res.append(toks[ti]); ti += 1
+            path = ' '.join(res)
+            h, d, w = sig_target_h, sig_target_d, round(w * sig_s, 3)
+        old_pat = rf'0x{greek_cp:X}:\s*\[[^\]]+\]'
+        new_ent = f"0x{greek_cp:X}: [{h}, {d}, {w}, {{ p: '{path}' }}]"
+        itc_new = re.sub(old_pat, new_ent, itc)
+        if itc_new != itc:
+            itc = itc_new
+            it_patch += 1
+    with open(italic_js_path, 'w') as f:
+        f.write(itc)
+    print(f"  Patched {it_patch} italic variant uppercase Greek with Shantell italic glyphs")
 
     # Post-build: flip pm (U+00B1) to make mp (U+2213)
     normal_path = os.path.join(OUTPUT_DIR, "cjs/svg/normal.js")
