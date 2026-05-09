@@ -1,6 +1,44 @@
 # MathJax Custom Font Packages
 
 <human>
+
+I've long wanted more fonts in MathJax. Computer/Latin Modern are beautiful when
+printed on a high dpi laser printer, but really leave something to be desired on
+screen -- even a retina screen.
+
+MathJax 4 added the ability to work with custom fonts. But they have no tooling to do this.
+There are only a few fonts. I know why after this project. It's a pain.
+
+I worked with Claude for a few weeks in my spare time to prep this bundle.
+
+I find font selection a deeply personal thing and picked a few that
+carry a range of expression.
+
+There's Libertinus and Libertinus Sans for a classic look.
+
+Concrete and Euler because of Knuth and it hasn't been done. I love the Denealian look of
+Concrete Italics.
+
+I have a dear colleague who gave talks in
+Comic Sans, which is surprisingly lovely for math, and hence, I've used
+the free (and superior!) alternative Shantell Sans for that purpose.
+
+I _love_ PT Sans. The soft curves just look stately on a screen, and the italic adds a
+nice pop.
+
+Lato is another favorite of mine and Noto looks amazing. Just two classic sans serif pairings.
+
+Surprisingly, no one has done the standard Latin Modern that we are all used to with Beamer.
+So now we can do that too!
+
+We have a range here. They aren't perfect. Typographers are probably
+aghast -- this needs more refinement -- kerning problems, slight mismatches abound.
+But if they saw the horror that is regularly done with mixtures
+of math and other fonts, I hope they will forgive me. I think these combos often look nice.
+
+The rest of this was written by Claude to document ... probably to other LLMs at this point ...
+what is in this repo and how to use it.
+
 </human>
 
 ## Overview
