@@ -1,20 +1,10 @@
 # Source font files (download separately, see fonts/README.md)
-fonts/*.ttf
-fonts/*.otf
-fonts/*.pfb
 fonts/**/*.ttf
 fonts/**/*.otf
 fonts/**/*.pfb
 
 # Node modules
 node_modules/
-
-# Webpack bundles (generated, large)
-*/tex-mml-svg-*.js
-
-# WOFF2 fonts (generated)
-*/chtml/woff2/
-*.woff2
 
 # Python
 __pycache__/
@@ -23,3 +13,13 @@ __pycache__/
 
 # OS
 .DS_Store
+
+# Temporary debug/specimen files
+*/greek-*.html
+*/sigma-*.html
+*/mp-check.html
+*/glyph-*.html
+*/mathrm-test.html
+**/ShantellSans-w*.woff2
+**/SourceSans3-*.woff2
+**/NotoSansMath-Regular.woff2
