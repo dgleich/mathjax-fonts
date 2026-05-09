@@ -576,6 +576,53 @@ def override_integral_ics(ic_map, normal_val=0.12):
             ic_map[cp] = normal_val
 
 
+def adjust_integral_widths(output_dir, smallop_w=0.52, smallop_ic=0.22,
+                            largeop_w=0.63, largeop_ic=0.37):
+    """Adjust integral glyph widths and ICs in smallop/largeop for better subscript tucking.
+
+    The integral is slanted like / but its declared width extends to the rightmost point,
+    pushing subscripts too far right. Reducing the declared width tucks subscripts under
+    the curve. IC controls superscript horizontal offset (push right to clear the top).
+
+    Args:
+        smallop_w: Width for inline integral (default 0.52, original ~0.836)
+        smallop_ic: IC for inline integral superscript (default 0.22)
+        largeop_w: Width for display integral (default 0.63, original ~1.052)
+        largeop_ic: IC for display integral superscript (default 0.37)
+    """
+    import re as _re
+    for path, w_val, ic_val in [
+        (os.path.join(output_dir, "cjs/svg/smallop.js"), smallop_w, smallop_ic),
+        (os.path.join(output_dir, "cjs/svg/largeop.js"), largeop_w, largeop_ic),
+    ]:
+        if not os.path.exists(path):
+            continue
+        with open(path) as f:
+            c = f.read()
+        # Patch all integral codepoints (U+222B-2233)
+        for cp in range(0x222B, 0x2234):
+            old = _re.search(rf'0x{cp:X}:\s*\[([^\]]+)\]', c)
+            if not old:
+                continue
+            entry = old.group(1)
+            # Replace width (3rd field)
+            parts = entry.split(',', 3)
+            if len(parts) >= 3:
+                parts[2] = f' {w_val}'
+                entry = ','.join(parts)
+            # Set IC
+            if 'ic:' in entry:
+                entry = _re.sub(r'ic:\s*-?[\d.]+', f'ic: {ic_val}', entry)
+            elif '{ sk:' in entry:
+                entry = entry.replace('{ sk:', f'{{ ic: {ic_val}, sk:')
+            elif '{ p:' in entry:
+                entry = entry.replace('{ p:', f'{{ ic: {ic_val}, p:')
+            c = c.replace(old.group(0), f'0x{cp:X}: [{entry}]')
+        with open(path, 'w') as f:
+            f.write(c)
+    print(f"  Adjusted integral widths: smallop W={smallop_w} IC={smallop_ic}, largeop W={largeop_w} IC={largeop_ic}")
+
+
 def apply_italic_corrections(data, ic_map):
     """Merge italic corrections into variant data. Returns count applied."""
     applied = 0
