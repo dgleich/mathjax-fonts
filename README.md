@@ -1,6 +1,6 @@
 # MathJax Custom Font Packages
 
-<human>
+`<human>`
 
 I've long wanted more fonts in MathJax. Computer/Latin Modern are beautiful when
 printed on a high dpi laser printer, but really leave something to be desired on
@@ -39,7 +39,7 @@ of math and other fonts, I hope they will forgive me. I think these combos often
 The rest of this was written by Claude to document ... probably to other LLMs at this point ...
 what is in this repo and how to use it.
 
-</human>
+`</human>`
 
 ## Overview
 
