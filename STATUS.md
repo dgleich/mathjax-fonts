@@ -67,8 +67,11 @@ Critical ones to remember:
   large enough for tall fractions. Fix: synthesize a stretchy assembly by splitting
   the largest glyph into top/bottom caps + angled line extender. Libertinus Math
   has 13 sizes (enough in practice) but also lacks assembly. Check each math font.
-- **Integral limit positioning**: Revisit — IC=0 works but needs more investigation.
-  The current approach may not be optimal for all math fonts.
+- **Integral subscript positioning**: RESOLVED. IC alone doesn't work for sized
+  operators (cancels itself). Fixed by reducing declared glyph width in smallop/
+  largeop (W=0.52/0.63) and using IC (0.22/0.37) for superscript offset only.
+  `adjust_integral_widths()` added to library. Currently applied to Shantell;
+  needs adding to other font build scripts.
 - **Horizontal stretchy arrows**: Arrows render as fixed-size glyphs (no stretchy
   arrowheads). The experimental-horizontal-stretch branch has PUA-based attempts
   but they broke overbraces. Needs a different approach — possibly copying newCM's

@@ -617,6 +617,34 @@ vertical bars (one piece repeated). The library must handle these correctly:
 - When one is fixed: `[top, ext, 0]` or `[0, ext, bottom]`.
 - Without this fix, `\left|` and `\left\|` produce math output errors.
 
+### 20. Integral subscript tucking (width + IC, not just IC)
+
+Integral subscripts (`\int_a^b`) sit too far right by default because the
+integral glyph's declared advance width extends to the rightmost point of the
+slanted curve. The subscript is placed at `base_width + offset`, so the wider
+the declared width, the further right the subscript.
+
+**Why IC alone doesn't work**: For sized operators (integrals use smallop/largeop
+size variants), MathJax's `baseRemoveIc=true` causes `getBaseWidth()` to subtract
+IC, but `appendScripts()` adds `adjustedIc` back. The net effect is approximately
+`sub_x = bbox.w + 0.05*IC + 0.083` — IC barely moves the subscript.
+
+**The real lever is the declared glyph width**. Reducing it tucks the subscript
+left. IC then separately controls the superscript offset (push right to clear
+the top of the integral's curve).
+
+Use `adjust_integral_widths()` as a post-build step:
+
+```python
+adjust_integral_widths(OUTPUT_DIR,
+    smallop_w=0.52, smallop_ic=0.22,   # inline integrals
+    largeop_w=0.63, largeop_ic=0.37)   # display integrals
+```
+
+These values were tuned visually across ~40 variants. They work well for
+Shantell Sans (Noto Sans Math integrals) and should be a reasonable starting
+point for other fonts, though per-font tuning may be needed.
+
 ## File Inventory
 
 A complete MathJax font package contains:
