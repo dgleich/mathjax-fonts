@@ -8,7 +8,7 @@ import tempfile
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..', 'lib'))
 from mathjax_font_lib import (
     load_font, get_x_height, extract_italic_corrections, override_integral_ics,
-    build_all_variants, write_boilerplate, instantiate_variable_font,
+    build_all_variants, write_boilerplate, adjust_integral_widths, instantiate_variable_font,
     DEFAULT_TEXT_RANGES, DEFAULT_MATH_RANGES, DEFAULT_EXTRA_MATH,
 )
 import re
@@ -94,6 +94,9 @@ def main():
         with open(delim_path, 'w') as f:
             f.write(dc)
     print("  Adjusted overbrace/underbrace label spacing (+0.35em)")
+    
+    # Adjust integral widths for better subscript tucking
+    adjust_integral_widths(OUTPUT_DIR)
 
     # Clean up temp files
     import shutil
