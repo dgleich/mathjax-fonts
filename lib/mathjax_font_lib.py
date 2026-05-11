@@ -576,24 +576,27 @@ def override_integral_ics(ic_map, normal_val=0.12):
             ic_map[cp] = normal_val
 
 
-def adjust_integral_widths(output_dir, smallop_w=0.52, smallop_ic=0.22,
-                            largeop_w=0.63, largeop_ic=0.37):
+def adjust_integral_widths(output_dir, smallop_w_ratio=0.88, smallop_ic=0.22,
+                            largeop_w_ratio=0.64, largeop_ic=0.37):
     """Adjust integral glyph widths and ICs in smallop/largeop for better subscript tucking.
 
     The integral is slanted like / but its declared width extends to the rightmost point,
     pushing subscripts too far right. Reducing the declared width tucks subscripts under
     the curve. IC controls superscript horizontal offset (push right to clear the top).
 
+    Width is scaled by a RATIO (not a fixed value) so double/triple integrals keep
+    their proportionally wider widths.
+
     Args:
-        smallop_w: Width for inline integral (default 0.52, original ~0.836)
+        smallop_w_ratio: Width scale factor for inline integrals (default 0.88)
         smallop_ic: IC for inline integral superscript (default 0.22)
-        largeop_w: Width for display integral (default 0.63, original ~1.052)
+        largeop_w_ratio: Width scale factor for display integrals (default 0.64)
         largeop_ic: IC for display integral superscript (default 0.37)
     """
     import re as _re
-    for path, w_val, ic_val in [
-        (os.path.join(output_dir, "cjs/svg/smallop.js"), smallop_w, smallop_ic),
-        (os.path.join(output_dir, "cjs/svg/largeop.js"), largeop_w, largeop_ic),
+    for path, w_ratio, ic_val in [
+        (os.path.join(output_dir, "cjs/svg/smallop.js"), smallop_w_ratio, smallop_ic),
+        (os.path.join(output_dir, "cjs/svg/largeop.js"), largeop_w_ratio, largeop_ic),
     ]:
         if not os.path.exists(path):
             continue
@@ -605,10 +608,12 @@ def adjust_integral_widths(output_dir, smallop_w=0.52, smallop_ic=0.22,
             if not old:
                 continue
             entry = old.group(1)
-            # Replace width (3rd field)
+            # Scale width (3rd field) by ratio
             parts = entry.split(',', 3)
             if len(parts) >= 3:
-                parts[2] = f' {w_val}'
+                orig_w = float(parts[2].split('{')[0].strip())
+                new_w = round(orig_w * w_ratio, 3)
+                parts[2] = f' {new_w}'
                 entry = ','.join(parts)
             # Set IC
             if 'ic:' in entry:
@@ -620,7 +625,7 @@ def adjust_integral_widths(output_dir, smallop_w=0.52, smallop_ic=0.22,
             c = c.replace(old.group(0), f'0x{cp:X}: [{entry}]')
         with open(path, 'w') as f:
             f.write(c)
-    print(f"  Adjusted integral widths: smallop W={smallop_w} IC={smallop_ic}, largeop W={largeop_w} IC={largeop_ic}")
+    print(f"  Adjusted integral widths: smallop ratio={smallop_w_ratio} IC={smallop_ic}, largeop ratio={largeop_w_ratio} IC={largeop_ic}")
 
 
 def apply_italic_corrections(data, ic_map):

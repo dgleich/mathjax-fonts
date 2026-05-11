@@ -70,6 +70,7 @@ def main():
         css_prefix=CSS_PREFIX,
         x_height=x_height,
         text_font_paths=TEXT_FONTS,
+        greek_from_text=True,
     )
 
     import re as _re
