@@ -2335,16 +2335,36 @@ def build_all_variants(output_dir, text_fonts, math_font, text_ranges, math_rang
     print("Building delimiters...")
     delimiters, pua_map = build_delimiters(math_font, em_scale=em_scale)
 
-    # Build PUA glyph data to inject into variant files
-    # MathJax looks up stretch piece codepoints in the normal variant, not just lf-tp/ext
+    # Build glyph data for all stretch assembly codepoints.
+    # MathJax looks up stretch piece codepoints in the normal variant.
+    # This includes PUA-assigned glyphs AND pre-existing PUA codepoints in the math font.
     pua_glyph_data = {}
     if pua_map:
-        gs = math_font.getGlyphSet()
         for glyph_name, pua_cp in pua_map.items():
             info = get_glyph_data_by_name_svg(math_font, glyph_name, em_scale=em_scale)
             if info:
                 info['source'] = 'pua-assembly'
                 pua_glyph_data[pua_cp] = info
+    # Also collect all codepoints referenced in delimiter stretch arrays
+    # that aren't in standard math/text ranges (e.g., font's own PUA at U+E000+)
+    stretch_cps = set()
+    for entry in delimiters.values():
+        if isinstance(entry, dict) and 'stretch' in entry:
+            for cp in entry['stretch']:
+                if cp and cp >= 0xE000:  # PUA range
+                    stretch_cps.add(cp)
+    math_cmap = math_font.getBestCmap()
+    rev_cmap = {v: k for k, v in math_cmap.items()}
+    for cp in stretch_cps:
+        if cp not in pua_glyph_data:
+            # Find glyph name for this codepoint
+            glyph_name = math_cmap.get(cp)
+            if glyph_name:
+                info = get_glyph_data_by_name_svg(math_font, glyph_name, em_scale=em_scale)
+                if info:
+                    info['source'] = 'pua-assembly'
+                    pua_glyph_data[cp] = info
+    if pua_glyph_data:
         print(f"    PUA assembly glyphs to inject: {len(pua_glyph_data)}")
 
     # ========== SVG VARIANTS ==========
