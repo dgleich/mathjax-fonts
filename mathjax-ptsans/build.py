@@ -72,47 +72,11 @@ def main():
         text_font_paths=TEXT_FONTS,
     )
 
-    # Post-build: scale down uppercase Greek caps to match PT Sans cap height
-    # Lete Greek caps ~0.716, PT Sans caps ~0.700, scale = 0.700/0.716 ≈ 0.978
     import re as _re
-    for js_path in [os.path.join(OUTPUT_DIR, "cjs/svg/normal.js"),
-                     os.path.join(OUTPUT_DIR, "cjs/svg/italic.js")]:
-        with open(js_path) as f:
-            c = f.read()
-        scale = 0.700 / 0.716
-        for cp in list(range(0x0391, 0x03AA)) + list(range(0x1D6A8, 0x1D6C1)) + \
-                  list(range(0x1D6E2, 0x1D6FB)) + list(range(0x1D71C, 0x1D735)) + \
-                  list(range(0x1D756, 0x1D76F)) + list(range(0x1D790, 0x1D7A9)):
-            if cp == 0x03A2:
-                continue
-            m = _re.search(rf'0x{cp:X}:\s*\[([^\]]+)\]', c)
-            if not m:
-                continue
-            entry = m.group(1)
-            parts = entry.split(',', 3)
-            if len(parts) >= 3:
-                h = float(parts[0])
-                d = float(parts[1])
-                w = float(parts[2].split('{')[0].strip())
-                new_h = round(h * scale, 3)
-                new_d = round(d * scale, 3)
-                new_w = round(w * scale, 3)
-                # Scale path coords
-                path_m = _re.search(r"p:\s*'([^']+)'", entry)
-                if path_m:
-                    path = path_m.group(1)
-                    new_path = _re.sub(r'-?\d+(?:\.\d+)?',
-                                        lambda m2: str(round(float(m2.group()) * scale)),
-                                        path)
-                    new_entry = entry.replace(parts[0], str(new_h), 1)
-                    new_entry = new_entry.replace(parts[1], f' {new_d}', 1)
-                    old_w = parts[2].split('{')[0].strip()
-                    new_entry = new_entry.replace(old_w, str(new_w), 1)
-                    new_entry = new_entry.replace(path, new_path)
-                    c = c.replace(m.group(0), f'0x{cp:X}: [{new_entry}]')
-        with open(js_path, 'w') as f:
-            f.write(c)
-    print(f"  Scaled uppercase Greek caps by {scale:.3f}x to match PT Sans")
+    scale = 0.700 / 0.716
+    uc_greek_cps = set(range(0x0391, 0x03AA)) - {0x03A2}
+    for base in [0x1D6A8, 0x1D6E2, 0x1D71C, 0x1D756, 0x1D790]:
+        uc_greek_cps.update(range(base, base + 25))
 
     # Post-build: adjust overbrace/underbrace label spacing
     for delim_path in [
@@ -138,8 +102,49 @@ def main():
     # Adjust integral widths for better subscript tucking
     adjust_integral_widths(OUTPUT_DIR)
 
-    write_boilerplate(OUTPUT_DIR, FONT_ID, FONT_NAME)
     print(f"Done! Output in {OUTPUT_DIR}")
+
+    # Scale uppercase Greek caps (must be last — after all other post-build steps)
+    # Process each file line by line to avoid cross-entry contamination
+    hex_set = set(f'0x{cp:X}' for cp in uc_greek_cps)
+    for js_path in [os.path.join(OUTPUT_DIR, "cjs/svg/normal.js"),
+                     os.path.join(OUTPUT_DIR, "cjs/svg/italic.js")]:
+        with open(js_path) as f:
+            lines = f.readlines()
+        changed = 0
+        for i, line in enumerate(lines):
+            m = _re.match(r'(\s*)(0x[0-9A-F]+)(:.*)', line)
+            if not m or m.group(2) not in hex_set:
+                continue
+            # Scale all numbers in the line
+            prefix = m.group(1) + m.group(2) + ': ['
+            entry_m = _re.search(r'\[([^\]]+)\]', line)
+            if not entry_m:
+                continue
+            entry = entry_m.group(1)
+            parts = entry.split(',', 3)
+            if len(parts) < 3:
+                continue
+            orig_h = float(parts[0])
+            # Per-glyph scale to normalize to PT Sans cap height
+            glyph_scale = 0.700 / orig_h if orig_h > 0.5 else scale
+            h = round(orig_h * glyph_scale, 3)
+            d = round(float(parts[1]) * glyph_scale, 3)
+            w_str = parts[2].split('{')[0].strip()
+            w = round(float(w_str) * glyph_scale, 3)
+            rest = parts[3] if len(parts) > 3 else ''
+            path_m = _re.search(r"p:\s*'([^']+)'", rest)
+            if path_m:
+                path = path_m.group(1)
+                new_path = _re.sub(r'-?\d+(?:\.\d+)?',
+                                    lambda m2: str(round(float(m2.group()) * glyph_scale)),
+                                    path)
+                rest = rest.replace(path, new_path)
+            lines[i] = f'{prefix}{h}, {d}, {w},{rest}],\n'
+            changed += 1
+        with open(js_path, 'w') as f:
+            f.writelines(lines)
+        print(f"  Greek cap scaling: {changed} glyphs in {os.path.basename(js_path)}")
 
 
 if __name__ == '__main__':
