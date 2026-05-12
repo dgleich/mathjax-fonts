@@ -79,6 +79,29 @@ def main():
     for base in [0x1D6A8, 0x1D6E2, 0x1D71C, 0x1D756, 0x1D790]:
         uc_greek_cps.update(range(base, base + 25))
 
+    # Post-build: fix overbrace/underbrace HDW width (Lete has width=0 on base glyph)
+    for delim_path in [
+        os.path.join(OUTPUT_DIR, "cjs/svg/delimiters.js"),
+        os.path.join(OUTPUT_DIR, "cjs/chtml/delimiters.js"),
+    ]:
+        with open(delim_path) as f:
+            dc = f.read()
+        # Set HDW width to first size variant width for overbrace/underbrace
+        for cp_hex in ['0x23DE', '0x23DF']:
+            # Find the sizes array and use first value as HDW width
+            m = re.search(rf'{cp_hex}: \{{[^}}]*sizes: \[([^,]+)', dc)
+            if m:
+                first_size = m.group(1).strip()
+                # Replace HDW width (3rd value)
+                dc = re.sub(
+                    rf'({cp_hex}: \{{[^}}]*HDW: \[[^,]+, [^,]+, )([^\]]+)(\])',
+                    lambda mx: mx.group(1) + first_size + mx.group(3),
+                    dc
+                )
+        with open(delim_path, 'w') as f:
+            f.write(dc)
+    print("  Fixed overbrace/underbrace HDW width")
+
     # Post-build: adjust overbrace/underbrace label spacing
     for delim_path in [
         os.path.join(OUTPUT_DIR, "cjs/svg/delimiters.js"),
