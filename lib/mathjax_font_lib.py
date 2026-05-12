@@ -644,9 +644,11 @@ def compute_visual_skews(font):
             continue
 
         # Classify by codepoint range, not glyph height
-        # (f, b, d, etc. have tall ascenders but accent sits at x-height)
         is_uppercase = (0x41 <= cp <= 0x5A) or (0x391 <= cp <= 0x3A9)
-        sk = uc_sk if is_uppercase else lc_sk
+        # For letters with ascenders (b,d,f,h,k,l,t etc.), accent sits at
+        # ascender height, not x-height. Use yMax for accent placement.
+        accent_y = bounds[3] if bounds[3] > x_height * 1.2 else (cap_height if is_uppercase else x_height)
+        sk = round3(accent_y * tan_a / 2 / upm)
 
         if sk != 0:
             sk_map[cp] = sk
