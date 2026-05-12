@@ -2494,6 +2494,25 @@ def build_all_variants(output_dir, text_fonts, math_font, text_ranges, math_rang
     if greek_from_text:
         _override_math_greek_from_text(svg_normal, text_fonts, em_scale)
 
+    # Propagate italic text font sk values to math alphanumeric codepoints in normal variant.
+    # Must run AFTER greek_from_text override (which drops sk from replaced glyphs).
+    # \hat{f} uses U+1D453 (math italic f) from normal variant, but the sk from the
+    # italic text font only covers basic U+0066. Map italic sk to math alphanumeric.
+    italic_sk = sk_maps_text.get('italic', {})
+    if italic_sk:
+        _math_italic_sk_map = [
+            (0x1D434, 0x41, 26),   # math italic A-Z <- A-Z
+            (0x1D44E, 0x61, 26),   # math italic a-z <- a-z
+            (0x1D468, 0x41, 26),   # math bold italic A-Z <- A-Z
+            (0x1D482, 0x61, 26),   # math bold italic a-z <- a-z
+        ]
+        for math_start, basic_start, n in _math_italic_sk_map:
+            for i in range(n):
+                basic_cp = basic_start + i
+                math_cp = math_start + i
+                if basic_cp in italic_sk and math_cp in svg_normal:
+                    svg_normal[math_cp]['sk'] = italic_sk[basic_cp]
+
     # Report source breakdown
     sources = {}
     for cp, info in svg_normal.items():
