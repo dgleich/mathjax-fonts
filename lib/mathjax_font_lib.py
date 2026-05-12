@@ -265,6 +265,54 @@ def scale_svg_path(path_str, scale):
     return ''.join(result)
 
 
+def _shift_svg_path_x(path_str, shift):
+    """Shift all x-coordinates in an SVG path by `shift` units.
+
+    SVG path commands alternate x,y coordinates. We need to add `shift`
+    to every x-coordinate while leaving y-coordinates unchanged.
+    H (horizontal lineto) only has x. V (vertical lineto) only has y.
+    """
+    tokens = re.findall(r'[A-Za-z]|-?\d+(?:\.\d+)?', path_str)
+    result = []
+    i = 0
+    while i < len(tokens):
+        t = tokens[i]
+        if t in 'MLCSQT':
+            result.append(t)
+            i += 1
+            pairs = {'M': 1, 'L': 1, 'S': 2, 'Q': 2, 'C': 3, 'T': 1}
+            for _ in range(pairs.get(t, 1)):
+                if i + 1 < len(tokens):
+                    result.append(str(round(float(tokens[i]) + shift)))  # x + shift
+                    result.append(tokens[i + 1])  # y unchanged
+                    i += 2
+        elif t == 'H':
+            result.append('H')
+            i += 1
+            if i < len(tokens):
+                result.append(str(round(float(tokens[i]) + shift)))
+                i += 1
+        elif t == 'V':
+            result.append('V')
+            i += 1
+            if i < len(tokens):
+                result.append(tokens[i])  # y unchanged
+                i += 1
+        elif t == 'Z':
+            result.append('Z')
+            i += 1
+        else:
+            # Implicit coordinate pair
+            if i + 1 < len(tokens) and not tokens[i + 1].isalpha():
+                result.append(str(round(float(tokens[i]) + shift)))
+                result.append(tokens[i + 1])
+                i += 2
+            else:
+                result.append(tokens[i])
+                i += 1
+    return ' '.join(result)
+
+
 def round_path_coords(path_str):
     """Round all numeric coordinates in a path string to integers."""
     def replace_num(m):
@@ -322,12 +370,22 @@ def get_glyph_metrics_and_path(font, codepoint, target_upm=1000, em_scale=1.0):
 
     height = round3(yMax / upm * em_scale)
     depth = round3(-yMin / upm * em_scale)
-    width = round3(advance_width / upm * em_scale)
+
+    # Use advance width, but if zero, fall back to bounds width
+    if advance_width > 0:
+        width = round3(advance_width / upm * em_scale)
+    else:
+        width = round3((xMax - xMin) / upm * em_scale)
 
     # Get SVG path
     svg_pen = SVGPathPen(glyph_set)
     glyph_set[glyph_name].draw(svg_pen)
     path_data = svg_pen.getCommands()
+
+    # If advance_width is 0 and path is offset (xMin < 0), shift path to start at x=0
+    if advance_width == 0 and xMin < 0:
+        shift = -xMin  # shift right by |xMin|
+        path_data = _shift_svg_path_x(path_data, shift)
 
     # Scale path to target coordinate system
     if scale != 1.0:
@@ -415,11 +473,18 @@ def get_glyph_data_by_name_svg(font, glyph_name, target_upm=1000, em_scale=1.0):
     xMin, yMin, xMax, yMax = bounds
     height = round3(yMax / upm * em_scale)
     depth = round3(-yMin / upm * em_scale)
-    width = round3(advance_width / upm * em_scale)
+    if advance_width > 0:
+        width = round3(advance_width / upm * em_scale)
+    else:
+        width = round3((xMax - xMin) / upm * em_scale)
 
     svg_pen = SVGPathPen(glyph_set)
     glyph_set[glyph_name].draw(svg_pen)
     path_data = svg_pen.getCommands()
+
+    # If advance_width is 0 and path is offset, shift to start at x=0
+    if advance_width == 0 and xMin < 0:
+        path_data = _shift_svg_path_x(path_data, -xMin)
 
     if scale != 1.0:
         path_data = scale_svg_path(path_data, scale)
@@ -938,7 +1003,10 @@ def get_glyph_height_depth_width(font, glyph_name, em_scale=1.0):
     xMin, yMin, xMax, yMax = bounds
     h = round3(yMax / upm * em_scale)
     d = round3(-yMin / upm * em_scale)
-    w = round3(advance_width / upm * em_scale)
+    if advance_width > 0:
+        w = round3(advance_width / upm * em_scale)
+    else:
+        w = round3((xMax - xMin) / upm * em_scale)
     return (h, d, w)
 
 
