@@ -79,28 +79,73 @@ def main():
     for base in [0x1D6A8, 0x1D6E2, 0x1D71C, 0x1D756, 0x1D790]:
         uc_greek_cps.update(range(base, base + 25))
 
-    # Post-build: fix overbrace/underbrace HDW width (Lete has width=0 on base glyph)
-    for delim_path in [
-        os.path.join(OUTPUT_DIR, "cjs/svg/delimiters.js"),
-        os.path.join(OUTPUT_DIR, "cjs/chtml/delimiters.js"),
-    ]:
-        with open(delim_path) as f:
-            dc = f.read()
-        # Set HDW width to first size variant width for overbrace/underbrace
-        for cp_hex in ['0x23DE', '0x23DF']:
-            # Find the sizes array and use first value as HDW width
-            m = re.search(rf'{cp_hex}: \{{[^}}]*sizes: \[([^,]+)', dc)
-            if m:
-                first_size = m.group(1).strip()
-                # Replace HDW width (3rd value)
-                dc = re.sub(
-                    rf'({cp_hex}: \{{[^}}]*HDW: \[[^,]+, [^,]+, )([^\]]+)(\])',
-                    lambda mx: mx.group(1) + first_size + mx.group(3),
+    # Post-build: fix overbrace/underbrace zero-width glyphs
+    # Lete Sans Math's base overbrace glyph has width=0 (but advance=601).
+    # Fix HDW, normal.js, and smallop.js width fields.
+    import re as _re2
+    # Build a map of correct widths from MATH table advance measurements
+    _lete = load_font(LETE_MATH)
+    _lete_math = _lete['MATH'].table
+    _lete_mv = _lete_math.MathVariants
+    _lete_cmap = _lete.getBestCmap()
+    _lete_gs = _lete.getGlyphSet()
+    _lete_upm = _lete['head'].unitsPerEm
+    _zero_width_fixes = {}  # cp -> correct_width_em
+    if _lete_mv.HorizGlyphCoverage:
+        for i, gn in enumerate(_lete_mv.HorizGlyphCoverage.glyphs):
+            cp = {v: k for k, v in _lete_cmap.items()}.get(gn)
+            if cp is None:
+                continue
+            if _lete_gs[gn].width == 0:
+                rec = _lete_mv.HorizGlyphConstruction[i]
+                if rec.MathGlyphVariantRecord:
+                    adv = rec.MathGlyphVariantRecord[0].AdvanceMeasurement
+                    _zero_width_fixes[cp] = round(adv / _lete_upm, 3)
+    if _lete_mv.VertGlyphCoverage:
+        for i, gn in enumerate(_lete_mv.VertGlyphCoverage.glyphs):
+            cp = {v: k for k, v in _lete_cmap.items()}.get(gn)
+            if cp is None:
+                continue
+            if _lete_gs[gn].width == 0:
+                rec = _lete_mv.VertGlyphConstruction[i]
+                if rec.MathGlyphVariantRecord:
+                    adv = rec.MathGlyphVariantRecord[0].AdvanceMeasurement
+                    _zero_width_fixes[cp] = round(adv / _lete_upm, 3)
+    if _zero_width_fixes:
+        # Fix in normal.js, smallop.js, and delimiters HDW
+        for js_name in ['normal.js', 'smallop.js']:
+            js_path = os.path.join(OUTPUT_DIR, f"cjs/svg/{js_name}")
+            if not os.path.exists(js_path):
+                continue
+            with open(js_path) as f:
+                c = f.read()
+            for cp, correct_w in _zero_width_fixes.items():
+                m = _re2.search(rf'(0x{cp:X}:\s*\[[^,]+,\s*[^,]+,\s*)0(,)', c)
+                if m:
+                    c = c[:m.start(2)] + f', ' + c[m.end(2):]
+                    c = c[:m.start()] + m.group(1) + str(correct_w) + c[m.start(2):]
+                    # Simpler: just replace the whole entry's width
+                m = _re2.search(rf'(0x{cp:X}:\s*\[[^,]+,\s*[^,]+,\s*)(0)(,)', c)
+                if m:
+                    c = c.replace(m.group(0), m.group(1) + str(correct_w) + m.group(3))
+            with open(js_path, 'w') as f:
+                f.write(c)
+        # Fix delimiters HDW
+        for delim_path in [
+            os.path.join(OUTPUT_DIR, "cjs/svg/delimiters.js"),
+            os.path.join(OUTPUT_DIR, "cjs/chtml/delimiters.js"),
+        ]:
+            with open(delim_path) as f:
+                dc = f.read()
+            for cp, correct_w in _zero_width_fixes.items():
+                dc = _re2.sub(
+                    rf'(0x{cp:X}: \{{[^}}]*HDW: \[[^,]+, [^,]+, )0(\])',
+                    lambda mx: mx.group(1) + str(correct_w) + mx.group(2),
                     dc
                 )
-        with open(delim_path, 'w') as f:
-            f.write(dc)
-    print("  Fixed overbrace/underbrace HDW width")
+            with open(delim_path, 'w') as f:
+                f.write(dc)
+        print(f"  Fixed {len(_zero_width_fixes)} zero-width glyphs from Lete (overbrace etc.)")
 
     # Post-build: adjust overbrace/underbrace label spacing
     for delim_path in [
