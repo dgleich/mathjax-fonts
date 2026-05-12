@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html><head><meta charset="utf-8">
+<title>PT Sans — Accent Positioning Check</title>
+<script id="MathJax-script" async src="tex-mml-svg-mathjax-ptsans.js"></script>
+<style>
+@font-face { font-family: "PT Sans"; src: url("chtml/woff2/mjx-ptsans-n.woff2") format("woff2"); font-weight: normal; font-style: normal; }
+@font-face { font-family: "PT Sans"; src: url("chtml/woff2/mjx-ptsans-b.woff2") format("woff2"); font-weight: bold; font-style: normal; }
+body { font-family: "PT Sans", sans-serif; max-width: 1100px; margin: 2em auto; font-size: 16px; }
+h2 { font-size: 1em; color: #666; margin-top: 1.5em; }
+.demo { font-size: 2.5em; padding: 0.5em; margin: 0.3em 0; background: #fafafa; border: 1px solid #ddd; border-radius: 6px; line-height: 2; }
+.demo-big { font-size: 3.5em; }
+.note { font-size: 0.8em; color: #999; }
+</style></head><body>
+<h1>PT Sans — Accent Positioning</h1>
+
+<h2>Single-letter accents (large)</h2>
+<div class="demo demo-big">
+\(\hat{a}\) &ensp; \(\hat{x}\) &ensp; \(\hat{A}\) &ensp; \(\hat{H}\) &ensp; \(\hat{M}\)
+</div>
+<div class="demo demo-big">
+\(\tilde{a}\) &ensp; \(\tilde{x}\) &ensp; \(\tilde{A}\) &ensp; \(\tilde{H}\) &ensp; \(\tilde{M}\)
+</div>
+<div class="demo demo-big">
+\(\bar{a}\) &ensp; \(\bar{x}\) &ensp; \(\bar{A}\) &ensp; \(\bar{H}\) &ensp; \(\bar{M}\)
+</div>
+<div class="demo demo-big">
+\(\dot{a}\) &ensp; \(\dot{x}\) &ensp; \(\dot{A}\) &ensp; \(\dot{H}\) &ensp; \(\dot{M}\)
+</div>
+<div class="demo demo-big">
+\(\ddot{a}\) &ensp; \(\ddot{x}\) &ensp; \(\ddot{A}\) &ensp; \(\ddot{H}\) &ensp; \(\ddot{M}\)
+</div>
+<div class="demo demo-big">
+\(\vec{a}\) &ensp; \(\vec{x}\) &ensp; \(\vec{A}\) &ensp; \(\vec{H}\) &ensp; \(\vec{M}\)
+</div>
+
+<h2>Wide accents (large)</h2>
+<div class="demo demo-big">
+\(\widehat{a}\) &ensp; \(\widehat{ab}\) &ensp; \(\widehat{abc}\) &ensp; \(\widehat{abcde}\)
+</div>
+<div class="demo demo-big">
+\(\widetilde{a}\) &ensp; \(\widetilde{ab}\) &ensp; \(\widetilde{abc}\) &ensp; \(\widetilde{abcde}\)
+</div>
+<div class="demo demo-big">
+\(\overline{a}\) &ensp; \(\overline{ab}\) &ensp; \(\overline{abc}\) &ensp; \(\overline{abcde}\)
+</div>
+
+<h2>Accents on Greek</h2>
+<div class="demo demo-big">
+\(\hat{\alpha}\) &ensp; \(\tilde{\beta}\) &ensp; \(\bar{\gamma}\) &ensp; \(\dot{\theta}\) &ensp; \(\vec{\sigma}\)
+</div>
+
+<h2>In expressions</h2>
+<div class="demo">
+\(\hat{f}(x) = \sum_{k=0}^n \hat{a}_k x^k\) &emsp;
+\(\tilde{x} = x - \bar{x}\) &emsp;
+\(\dot{q} = \frac{\partial H}{\partial p}\)
+</div>
+<div class="demo">
+\(\widehat{AB} = \widehat{A}\widehat{B}\) &emsp;
+\(\widetilde{f \circ g} = \widetilde{f} \circ \widetilde{g}\) &emsp;
+\(\overline{z_1 + z_2} = \overline{z_1} + \overline{z_2}\)
+</div>
+
+</body></html>

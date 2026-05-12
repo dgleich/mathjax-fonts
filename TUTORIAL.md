@@ -645,6 +645,29 @@ These values were tuned visually across ~40 variants. They work well for
 Shantell Sans (Noto Sans Math integrals) and should be a reasonable starting
 point for other fonts, though per-font tuning may be needed.
 
+### 21. Accent positioning finalization (sk tuning)
+
+After building a font package, verify accent centering visually. The `sk:` field
+on each glyph controls horizontal accent offset — MathJax uses it to center
+accents like `\hat`, `\tilde`, `\bar`, `\dot` over letters.
+
+Check these at large size:
+- `\hat{a}`, `\hat{x}`, `\hat{A}`, `\hat{M}` — single accents
+- `\widehat{ab}`, `\widehat{abc}` — wide accents
+- `\widetilde{abc}`, `\overline{abc}` — wide tilde and bar
+- Accents on Greek: `\hat{\alpha}`, `\tilde{\beta}`
+
+Common issues:
+- **All accents shifted one direction**: The text font's visual centering differs
+  from the math font's TopAccentAttachment values. May need a global sk offset.
+- **Wide accents shifted but single accents OK** (or vice versa): Different code
+  paths. Wide accents use delimiter stretch; single accents use the sk value.
+- **Symmetric stretchy glyphs offset** (overbrace, underbrace): Force sk=0 for
+  these (gotcha #20 handles this for zero-advance-width glyphs; also done
+  explicitly in sk_map_math for known symmetric codepoints).
+
+This is typically one of the last tuning steps when finalizing a font package.
+
 ## File Inventory
 
 A complete MathJax font package contains:
