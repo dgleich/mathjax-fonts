@@ -600,21 +600,40 @@ def extract_top_accent_skews(font):
 
 
 def compute_visual_skews(font):
-    """Compute accent skews from a font's actual glyph bounding boxes.
+    """Compute accent skews from the font's italic angle.
 
-    For each glyph, sk = (visual_center - advance_center) / upm.
-    This is more accurate than MATH table TopAccentAttachment when the
-    rendered glyphs come from a different font than the math font.
-    Particularly important for italic text fonts.
+    For italic fonts, accents should be centered at the accent placement height
+    (x-height for lowercase, cap-height for uppercase). The italic slant shifts
+    the visual center at height y by y * tan(angle) / 2.
+
+    This gives uniform sk per category (all lowercase get the same sk, all
+    uppercase get the same sk), which is more visually consistent than
+    per-glyph bounding-box centering where letters like W and A get very
+    different offsets.
+
+    For upright fonts (italic_angle=0), returns empty dict (no sk needed).
     """
     sk_map = {}
     upm = font['head'].unitsPerEm
     cmap = font.getBestCmap()
     gs = font.getGlyphSet()
 
+    italic_angle = abs(font['post'].italicAngle)
+    if italic_angle < 1:
+        return sk_map  # upright font, no skew needed
+
+    import math
+    tan_a = math.tan(math.radians(italic_angle))
+    x_height = font['OS/2'].sxHeight if hasattr(font['OS/2'], 'sxHeight') else upm * 0.5
+    cap_height = font['OS/2'].sCapHeight if hasattr(font['OS/2'], 'sCapHeight') else upm * 0.7
+
+    lc_sk = round3(x_height * tan_a / 2 / upm)
+    uc_sk = round3(cap_height * tan_a / 2 / upm)
+
     for cp, gn in cmap.items():
         if gn not in gs:
             continue
+        # Determine if uppercase or lowercase by checking height
         try:
             bp = BoundsPen(gs)
             gs[gn].draw(bp)
@@ -624,10 +643,12 @@ def compute_visual_skews(font):
         if bounds is None or bounds == (0, 0, 0, 0):
             continue
 
-        adv = gs[gn].width
-        vis_center = (bounds[0] + bounds[2]) / 2
-        adv_center = adv / 2
-        sk = round3((vis_center - adv_center) / upm)
+        h = bounds[3]  # yMax
+        if h > (x_height + cap_height) / 2:
+            sk = uc_sk
+        else:
+            sk = lc_sk
+
         if sk != 0:
             sk_map[cp] = sk
     return sk_map

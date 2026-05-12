@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html><head><meta charset="utf-8">
+<script id="MathJax-script" async src="tex-mml-svg-mathjax-ptsans.js"></script>
+</head><body>
+<div id="math" style="font-size:4em">\(\hat{a}\) \(\hat{A}\)</div>
+<pre id="out" style="font-size:12px;max-height:400px;overflow:auto"></pre>
+<script>
+window.MathJax = {
+  startup: {
+    pageReady: function() {
+      return MathJax.startup.defaultPageReady().then(function() {
+        setTimeout(function() {
+          var out = document.getElementById('out');
+          var svgs = document.querySelectorAll('#math svg');
+          svgs.forEach(function(svg, i) {
+            out.textContent += '=== SVG ' + i + ' ===\n';
+            // Show all g elements with data-mml-node
+            svg.querySelectorAll('[data-mml-node]').forEach(function(g) {
+              var t = g.getAttribute('transform') || '';
+              out.textContent += g.getAttribute('data-mml-node') + ' ' + t + '\n';
+              g.querySelectorAll('use').forEach(function(u) {
+                out.textContent += '  use data-c=' + u.getAttribute('data-c') + '\n';
+              });
+            });
+          });
+        }, 1000);
+      });
+    }
+  }
+};
+</script>
+</body></html>

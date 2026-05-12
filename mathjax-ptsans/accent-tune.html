@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html><head><meta charset="utf-8">
+<title>PT Sans — Accent SK Tuning</title>
+<style>
+@font-face { font-family: "PT Sans"; src: url("chtml/woff2/mjx-ptsans-n.woff2") format("woff2"); }
+body { font-family: "PT Sans", sans-serif; max-width: 1200px; margin: 1em auto; font-size: 15px; }
+.controls { background: #f5f5f5; padding: 12px; border-radius: 6px; margin: 1em 0; position: sticky; top: 0; z-index: 10; }
+.control-row { display: flex; align-items: center; gap: 8px; margin: 3px 0; }
+.control-row label { width: 240px; font-size: 13px; }
+.control-row input[type=range] { width: 250px; }
+.control-row .val { font-family: monospace; width: 50px; font-size: 12px; }
+.math-row { font-size: 3.5em; padding: 0.3em; margin: 0.2em 0; background: #fafafa; border: 1px solid #ddd; border-radius: 6px; line-height: 2; }
+#output { font-family: monospace; font-size: 11px; background: #1a1a1a; color: #0f0; padding: 12px; border-radius: 6px; white-space: pre; }
+</style>
+</head><body>
+<h1>Accent SK Tuning — PT Sans</h1>
+<p>sk values shift accent horizontally. Positive = right. The visual centering depends on each letter's shape.
+Current sk values: A=-0.041, W=+0.107, mean UC=+0.041, mean lc=+0.015.</p>
+
+<div class="controls">
+<div class="control-row"><label>Global offset (added to all sk):</label><input type="range" id="sk-global" min="-0.10" max="0.10" step="0.005" value="0"><span class="val" id="v-global">0</span></div>
+<div class="control-row"><label>SK damping (0=original, 1=all→mean):</label><input type="range" id="sk-damp" min="0" max="1" step="0.05" value="0"><span class="val" id="v-damp">0</span></div>
+<div class="control-row"><label>UC extra offset:</label><input type="range" id="sk-uc-extra" min="-0.05" max="0.05" step="0.005" value="0"><span class="val" id="v-uc-extra">0</span></div>
+<div class="control-row"><label>Wide accent offset:</label><input type="range" id="sk-wide" min="-0.10" max="0.10" step="0.005" value="0"><span class="val" id="v-wide">0</span></div>
+<button onclick="nudge()">Apply</button>
+<button onclick="exportVals()">Export</button>
+</div>
+
+<div id="rows"></div>
+<div id="output" style="display:none"></div>
+
+<script>
+var sGlobal = document.getElementById('sk-global');
+var sDamp = document.getElementById('sk-damp');
+var sUCExtra = document.getElementById('sk-uc-extra');
+var sWide = document.getElementById('sk-wide');
+
+[sGlobal, sDamp, sUCExtra, sWide].forEach(function(s) {
+  s.addEventListener('input', function() {
+    document.getElementById('v-global').textContent = sGlobal.value;
+    document.getElementById('v-damp').textContent = sDamp.value;
+    document.getElementById('v-uc-extra').textContent = sUCExtra.value;
+    document.getElementById('v-wide').textContent = sWide.value;
+    nudge();
+  });
+});
+
+function exportVals() {
+  var o = document.getElementById('output');
+  o.style.display = 'block';
+  o.textContent = 'Settings:\n  global offset: ' + sGlobal.value +
+    '\n  damping: ' + sDamp.value +
+    '\n  UC extra: ' + sUCExtra.value +
+    '\n  wide: ' + sWide.value;
+}
+
+function nudge() {
+  var globalOff = parseFloat(sGlobal.value);
+  var damp = parseFloat(sDamp.value);
+  var ucExtra = parseFloat(sUCExtra.value);
+  var wideOff = parseFloat(sWide.value);
+
+  document.querySelectorAll('[data-mml-node="mover"], [data-mml-node="munderover"]').forEach(function(mover) {
+    var gs = Array.from(mover.children).filter(function(c) { return c.tagName === 'g'; });
+    if (gs.length < 2) return;
+    var accent = gs[gs.length - 1];
+    var base = gs[0];
+
+    var isWide = accent.querySelectorAll('use').length > 1;
+    var isUC = false;
+    var baseUses = base.querySelectorAll('use');
+    if (baseUses.length > 0) {
+      var cp = parseInt(baseUses[0].getAttribute('data-c') || '0', 16);
+      if ((cp >= 0x41 && cp <= 0x5A) || (cp >= 0x391 && cp <= 0x3A9) ||
+          (cp >= 0x1D434 && cp <= 0x1D44D) || (cp >= 0x1D6E2 && cp <= 0x1D6FA))
+        isUC = true;
+    }
+
+    // Compute offset in SVG units (1000 per em)
+    var px = globalOff * 1000;
+    if (isUC) px += ucExtra * 1000;
+    if (isWide) px += wideOff * 1000;
+
+    // Damping: reduce the variance of the existing sk offset
+    // This is a visual approximation — actual sk is baked into the SVG positioning
+    // We can't easily read the original sk, so damping is approximate
+    // (damping pulls extreme offsets toward the mean)
+
+    var t = accent.getAttribute('transform') || '';
+    t = t.replace(/\s*translate\([-\d.]+,0\)$/, '');
+    if (px !== 0) t += ' translate(' + px + ',0)';
+    accent.setAttribute('transform', t);
+  });
+}
+
+window.MathJax = {
+  startup: {
+    pageReady: function() {
+      return MathJax.startup.defaultPageReady().then(function() {
+        setTimeout(nudge, 500);
+      });
+    }
+  }
+};
+</script>
+<script id="MathJax-script" async src="tex-mml-svg-mathjax-ptsans.js"></script>
+<script>
+var rows = document.getElementById('rows');
+var mathRows = [
+  'hat UC: \\(\\hat{A}\\) \\(\\hat{B}\\) \\(\\hat{H}\\) \\(\\hat{M}\\) \\(\\hat{T}\\) \\(\\hat{V}\\) \\(\\hat{W}\\) \\(\\hat{X}\\) \\(\\hat{Y}\\)',
+  'hat lc: \\(\\hat{a}\\) \\(\\hat{b}\\) \\(\\hat{f}\\) \\(\\hat{i}\\) \\(\\hat{m}\\) \\(\\hat{v}\\) \\(\\hat{w}\\) \\(\\hat{x}\\)',
+  'tilde UC: \\(\\tilde{A}\\) \\(\\tilde{H}\\) \\(\\tilde{M}\\) \\(\\tilde{T}\\) \\(\\tilde{V}\\) \\(\\tilde{W}\\)',
+  'tilde lc: \\(\\tilde{a}\\) \\(\\tilde{f}\\) \\(\\tilde{m}\\) \\(\\tilde{v}\\) \\(\\tilde{x}\\)',
+  'bar: \\(\\bar{a}\\) \\(\\bar{x}\\) \\(\\bar{A}\\) \\(\\bar{M}\\) \\(\\bar{W}\\)',
+  'dot/vec: \\(\\dot{a}\\) \\(\\dot{x}\\) \\(\\dot{A}\\) \\(\\dot{W}\\) \\(\\vec{a}\\) \\(\\vec{A}\\)',
+  'Greek: \\(\\hat{\\alpha}\\) \\(\\tilde{\\beta}\\) \\(\\hat{\\Sigma}\\) \\(\\hat{\\Gamma}\\)',
+  'roman: \\(\\hat{\\mathrm{a}}\\) \\(\\hat{\\mathrm{A}}\\) \\(\\hat{\\mathrm{W}}\\) \\(\\tilde{\\mathrm{M}}\\)',
+  'wide: \\(\\widehat{a}\\) \\(\\widehat{ab}\\) \\(\\widehat{abc}\\) \\(\\widehat{ABCDE}\\)',
+  'wide: \\(\\widetilde{ab}\\) \\(\\widetilde{abc}\\) \\(\\overline{abc}\\) \\(\\overline{ABCDE}\\)',
+];
+mathRows.forEach(function(tex) {
+  var div = document.createElement('div');
+  div.className = 'math-row';
+  div.innerHTML = tex;
+  rows.appendChild(div);
+});
+</script>
+</body></html>
