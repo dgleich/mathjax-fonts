@@ -1,64 +1,109 @@
 <!DOCTYPE html>
 <html><head><meta charset="utf-8">
-<title>PT Sans — Accent Positioning Check</title>
+<title>PT Sans — Accent Check by Mathematical Prominence</title>
 <script id="MathJax-script" async src="tex-mml-svg-mathjax-ptsans.js"></script>
 <style>
-@font-face { font-family: "PT Sans"; src: url("chtml/woff2/mjx-ptsans-n.woff2") format("woff2"); font-weight: normal; font-style: normal; }
-@font-face { font-family: "PT Sans"; src: url("chtml/woff2/mjx-ptsans-b.woff2") format("woff2"); font-weight: bold; font-style: normal; }
-body { font-family: "PT Sans", sans-serif; max-width: 1100px; margin: 2em auto; font-size: 16px; }
+@font-face { font-family: "PT Sans"; src: url("chtml/woff2/mjx-ptsans-n.woff2") format("woff2"); }
+@font-face { font-family: "PT Sans"; src: url("chtml/woff2/mjx-ptsans-b.woff2") format("woff2"); font-weight: bold; }
+body { font-family: "PT Sans", sans-serif; max-width: 1200px; margin: 1em auto; font-size: 15px; }
 h2 { font-size: 1em; color: #666; margin-top: 1.5em; }
-.demo { font-size: 2.5em; padding: 0.5em; margin: 0.3em 0; background: #fafafa; border: 1px solid #ddd; border-radius: 6px; line-height: 2; }
-.demo-big { font-size: 3.5em; }
-.note { font-size: 0.8em; color: #999; }
+h3 { font-size: 0.9em; color: #999; margin-top: 1em; }
+.demo { font-size: 3em; padding: 0.3em 0.5em; margin: 0.2em 0; background: #fafafa; border: 1px solid #ddd; border-radius: 6px; line-height: 2.2; }
+.demo-sm { font-size: 1.8em; }
+.note { font-size: 0.75em; color: #aaa; }
 </style></head><body>
-<h1>PT Sans — Accent Positioning</h1>
+<h1>Accent Check — By Mathematical Prominence</h1>
 
-<h2>Single-letter accents (large)</h2>
-<div class="demo demo-big">
-\(\hat{a}\) &ensp; \(\hat{x}\) &ensp; \(\hat{A}\) &ensp; \(\hat{H}\) &ensp; \(\hat{M}\)
-</div>
-<div class="demo demo-big">
-\(\tilde{a}\) &ensp; \(\tilde{x}\) &ensp; \(\tilde{A}\) &ensp; \(\tilde{H}\) &ensp; \(\tilde{M}\)
-</div>
-<div class="demo demo-big">
-\(\bar{a}\) &ensp; \(\bar{x}\) &ensp; \(\bar{A}\) &ensp; \(\bar{H}\) &ensp; \(\bar{M}\)
-</div>
-<div class="demo demo-big">
-\(\dot{a}\) &ensp; \(\dot{x}\) &ensp; \(\dot{A}\) &ensp; \(\dot{H}\) &ensp; \(\dot{M}\)
-</div>
-<div class="demo demo-big">
-\(\ddot{a}\) &ensp; \(\ddot{x}\) &ensp; \(\ddot{A}\) &ensp; \(\ddot{H}\) &ensp; \(\ddot{M}\)
-</div>
-<div class="demo demo-big">
-\(\vec{a}\) &ensp; \(\vec{x}\) &ensp; \(\vec{A}\) &ensp; \(\vec{H}\) &ensp; \(\vec{M}\)
-</div>
+<h2>Tier 1 — Very common in math</h2>
 
-<h2>Wide accents (large)</h2>
-<div class="demo demo-big">
-\(\widehat{a}\) &ensp; \(\widehat{ab}\) &ensp; \(\widehat{abc}\) &ensp; \(\widehat{abcde}\)
-</div>
-<div class="demo demo-big">
-\(\widetilde{a}\) &ensp; \(\widetilde{ab}\) &ensp; \(\widetilde{abc}\) &ensp; \(\widetilde{abcde}\)
-</div>
-<div class="demo demo-big">
-\(\overline{a}\) &ensp; \(\overline{ab}\) &ensp; \(\overline{abc}\) &ensp; \(\overline{abcde}\)
-</div>
-
-<h2>Accents on Greek</h2>
-<div class="demo demo-big">
-\(\hat{\alpha}\) &ensp; \(\tilde{\beta}\) &ensp; \(\bar{\gamma}\) &ensp; \(\dot{\theta}\) &ensp; \(\vec{\sigma}\)
-</div>
-
-<h2>In expressions</h2>
+<h3>f (functions), x y z (variables), a b c (constants), n m k (indices)</h3>
 <div class="demo">
-\(\hat{f}(x) = \sum_{k=0}^n \hat{a}_k x^k\) &emsp;
-\(\tilde{x} = x - \bar{x}\) &emsp;
-\(\dot{q} = \frac{\partial H}{\partial p}\)
+\(\hat{f}\) \(\tilde{f}\) \(\bar{f}\) \(\dot{f}\) &emsp;
+\(\hat{x}\) \(\hat{y}\) \(\hat{z}\) &emsp;
+\(\hat{a}\) \(\hat{b}\) \(\hat{c}\) &emsp;
+\(\hat{n}\) \(\hat{m}\) \(\hat{k}\)
 </div>
+
+<h3>Greek: alpha beta gamma delta epsilon theta lambda mu sigma omega</h3>
 <div class="demo">
-\(\widehat{AB} = \widehat{A}\widehat{B}\) &emsp;
-\(\widetilde{f \circ g} = \widetilde{f} \circ \widetilde{g}\) &emsp;
-\(\overline{z_1 + z_2} = \overline{z_1} + \overline{z_2}\)
+\(\hat{\alpha}\) \(\hat{\beta}\) \(\hat{\gamma}\) \(\hat{\delta}\) \(\hat{\epsilon}\) &emsp;
+\(\hat{\theta}\) \(\hat{\lambda}\) \(\hat{\mu}\) \(\hat{\sigma}\) \(\hat{\omega}\)
+</div>
+
+<h3>Capital: A B C D H (Hilbert, Hamiltonian) N P Q R S T</h3>
+<div class="demo">
+\(\hat{A}\) \(\hat{B}\) \(\hat{C}\) \(\hat{D}\) \(\hat{H}\) &emsp;
+\(\hat{N}\) \(\hat{P}\) \(\hat{Q}\) \(\hat{R}\) \(\hat{S}\) \(\hat{T}\)
+</div>
+
+<h3>Capital Greek: Gamma Delta Sigma Omega Phi Psi Lambda</h3>
+<div class="demo">
+\(\hat{\Gamma}\) \(\hat{\Delta}\) \(\hat{\Sigma}\) \(\hat{\Omega}\) \(\hat{\Phi}\) \(\hat{\Psi}\) \(\hat{\Lambda}\)
+</div>
+
+<h2>Tier 2 — Common</h2>
+
+<h3>p q r s t u v w (physics, probability)</h3>
+<div class="demo">
+\(\hat{p}\) \(\hat{q}\) \(\hat{r}\) \(\hat{s}\) \(\hat{t}\) \(\hat{u}\) \(\hat{v}\) \(\hat{w}\)
+</div>
+
+<h3>E F G J K L M V W X Y (operators, spaces, groups)</h3>
+<div class="demo">
+\(\hat{E}\) \(\hat{F}\) \(\hat{G}\) \(\hat{J}\) \(\hat{K}\) \(\hat{L}\) \(\hat{M}\) \(\hat{V}\) \(\hat{W}\) \(\hat{X}\) \(\hat{Y}\)
+</div>
+
+<h3>Greek: phi psi eta zeta xi rho tau nu kappa iota</h3>
+<div class="demo">
+\(\hat{\phi}\) \(\hat{\psi}\) \(\hat{\eta}\) \(\hat{\zeta}\) \(\hat{\xi}\) \(\hat{\rho}\) \(\hat{\tau}\) \(\hat{\nu}\) \(\hat{\kappa}\) \(\hat{\iota}\)
+</div>
+
+<h2>Common accent patterns in expressions</h2>
+
+<div class="demo demo-sm">
+\(\hat{f}(x) = \sum \hat{a}_k x^k\) &emsp;
+\(\hat{y} = X\hat{\beta}\) &emsp;
+\(\bar{x} = \frac{1}{n}\sum x_i\) &emsp;
+\(\dot{q} = \partial H / \partial p\)
+</div>
+
+<div class="demo demo-sm">
+\(\tilde{f} = \mathcal{F}[f]\) &emsp;
+\(\hat{\theta}_{\mathrm{ML}}\) &emsp;
+\(\vec{v} = \dot{r}\hat{r} + r\dot{\theta}\hat{\theta}\) &emsp;
+\(\ddot{x} + \omega^2 x = 0\)
+</div>
+
+<div class="demo demo-sm">
+\(\hat{H} = -\frac{\hbar^2}{2m}\nabla^2 + V\) &emsp;
+\(\hat{A}\hat{B} \neq \hat{B}\hat{A}\) &emsp;
+\(\tilde{\chi}^2\)
+</div>
+
+<h2>Tilde comparison</h2>
+<div class="demo">
+\(\tilde{f}\) \(\tilde{x}\) \(\tilde{y}\) \(\tilde{a}\) \(\tilde{n}\) &emsp;
+\(\tilde{A}\) \(\tilde{H}\) \(\tilde{M}\) \(\tilde{V}\) \(\tilde{W}\)
+</div>
+
+<h2>Bar comparison</h2>
+<div class="demo">
+\(\bar{f}\) \(\bar{x}\) \(\bar{y}\) \(\bar{a}\) \(\bar{n}\) &emsp;
+\(\bar{A}\) \(\bar{H}\) \(\bar{M}\) \(\bar{V}\) \(\bar{W}\)
+</div>
+
+<h2>Dot comparison</h2>
+<div class="demo">
+\(\dot{f}\) \(\dot{x}\) \(\dot{y}\) \(\dot{q}\) \(\dot{r}\) &emsp;
+\(\dot{A}\) \(\dot{H}\) \(\dot{M}\) &emsp;
+\(\ddot{x}\) \(\ddot{y}\) \(\ddot{q}\)
+</div>
+
+<h2>Wide accents</h2>
+<div class="demo">
+\(\widehat{xy}\) \(\widehat{abc}\) \(\widehat{ABCD}\) &emsp;
+\(\widetilde{xy}\) \(\widetilde{abc}\) &emsp;
+\(\overline{xy}\) \(\overline{abc}\)
 </div>
 
 </body></html>

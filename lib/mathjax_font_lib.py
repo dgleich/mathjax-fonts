@@ -643,11 +643,10 @@ def compute_visual_skews(font):
         if bounds is None or bounds == (0, 0, 0, 0):
             continue
 
-        h = bounds[3]  # yMax
-        if h > (x_height + cap_height) / 2:
-            sk = uc_sk
-        else:
-            sk = lc_sk
+        # Classify by codepoint range, not glyph height
+        # (f, b, d, etc. have tall ascenders but accent sits at x-height)
+        is_uppercase = (0x41 <= cp <= 0x5A) or (0x391 <= cp <= 0x3A9)
+        sk = uc_sk if is_uppercase else lc_sk
 
         if sk != 0:
             sk_map[cp] = sk
