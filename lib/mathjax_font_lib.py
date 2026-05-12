@@ -647,19 +647,11 @@ def compute_visual_skews(font):
         is_uppercase = (0x41 <= cp <= 0x5A) or (0x391 <= cp <= 0x3A9)
         # Accent placement height: actual yMax if ascender, else category default
         accent_y = bounds[3] if bounds[3] > x_height * 1.2 else (cap_height if is_uppercase else x_height)
-        # Base angle-based sk (uniform per height category)
-        angle_sk = accent_y * tan_a / 2 / upm
-        # Bounding-box visual center offset
-        adv = gs[gn].width
-        vis_center = (bounds[0] + bounds[2]) / 2
-        adv_center = adv / 2
-        bbox_sk = (vis_center - adv_center) / upm
-        # Use angle-based as the baseline. If bbox says MORE rightward, follow it partially.
-        # This handles f (narrow, leaning) without hurting A (symmetric, bbox says left).
-        if bbox_sk > angle_sk:
-            sk = round3(angle_sk + 0.4 * (bbox_sk - angle_sk))
-        else:
-            sk = round3(angle_sk)
+        # For letters with descenders, the italic slant operates over the full
+        # vertical span (yMax - yMin), shifting the top further right.
+        if bounds[1] < -upm * 0.05:  # has significant descender
+            accent_y = bounds[3] - bounds[1]  # full span
+        sk = round3(accent_y * tan_a / 2 / upm)
 
         if sk != 0:
             sk_map[cp] = sk
