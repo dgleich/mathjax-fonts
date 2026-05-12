@@ -398,12 +398,18 @@ def get_glyph_metrics_and_path(font, codepoint, target_upm=1000, em_scale=1.0):
     if path_data.startswith('M'):
         path_data = path_data[1:]
 
-    return {
+    result = {
         'height': height,
         'depth': depth,
         'width': width,
         'path': path_data
     }
+    # Zero-advance-width glyphs (like overbrace) are centered by design.
+    # After path shift, they have no intrinsic skew. Force sk=0 to prevent
+    # accent skew computation from using stale/wrong centering data.
+    if advance_width == 0:
+        result['sk'] = 0
+    return result
 
 
 def get_glyph_metrics_only(font, codepoint, em_scale=1.0):
@@ -495,7 +501,10 @@ def get_glyph_data_by_name_svg(font, glyph_name, target_upm=1000, em_scale=1.0):
     if path_data.startswith('M'):
         path_data = path_data[1:]
 
-    return {'height': height, 'depth': depth, 'width': width, 'path': path_data}
+    result = {'height': height, 'depth': depth, 'width': width, 'path': path_data}
+    if advance_width == 0:
+        result['sk'] = 0
+    return result
 
 
 def get_glyph_data_by_name_chtml(font, glyph_name, em_scale=1.0):
@@ -625,10 +634,17 @@ def compute_visual_skews(font):
 
 
 def apply_skews(data, sk_map):
-    """Merge top accent skew values into variant data. Returns count applied."""
+    """Merge top accent skew values into variant data. Returns count applied.
+
+    Skips glyphs that already have sk=0 explicitly set (e.g., zero-advance-width
+    glyphs like overbrace that are centered by design).
+    """
     applied = 0
     for cp, sk_val in sk_map.items():
         if cp in data:
+            # Don't overwrite sk=0 that was explicitly set for centered glyphs
+            if 'sk' in data[cp] and data[cp]['sk'] == 0:
+                continue
             data[cp]['sk'] = sk_val
             applied += 1
     return applied
@@ -2380,6 +2396,10 @@ def build_all_variants(output_dir, text_fonts, math_font, text_ranges, math_rang
     # Extract top accent skew values for accent centering
     # Use MATH table skews as base (for math-only glyphs like Greek, operators)
     sk_map_math = extract_top_accent_skews(math_font)
+    # Force sk=0 for symmetric horizontal stretchy glyphs (overbrace, underbrace, etc.)
+    for _sym_cp in [0x23DE, 0x23DF, 0x23B4, 0x23B5, 0x23DC, 0x23DD]:
+        if _sym_cp in sk_map_math:
+            sk_map_math[_sym_cp] = 0
     print(f"  MATH table accent skews: {len(sk_map_math)} glyphs")
 
     # Compute visual skews from the actual text fonts (more accurate for text glyphs,
