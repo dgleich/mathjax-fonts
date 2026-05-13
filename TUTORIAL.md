@@ -651,20 +651,77 @@ After building a font package, verify accent centering visually. The `sk:` field
 on each glyph controls horizontal accent offset — MathJax uses it to center
 accents like `\hat`, `\tilde`, `\bar`, `\dot` over letters.
 
-Check these at large size:
-- `\hat{a}`, `\hat{x}`, `\hat{A}`, `\hat{M}` — single accents
-- `\widehat{ab}`, `\widehat{abc}` — wide accents
-- `\widetilde{abc}`, `\overline{abc}` — wide tilde and bar
-- Accents on Greek: `\hat{\alpha}`, `\tilde{\beta}`
+#### How sk works
 
-Common issues:
-- **All accents shifted one direction**: The text font's visual centering differs
-  from the math font's TopAccentAttachment values. May need a global sk offset.
-- **Wide accents shifted but single accents OK** (or vice versa): Different code
-  paths. Wide accents use delimiter stretch; single accents use the sk value.
-- **Symmetric stretchy glyphs offset** (overbrace, underbrace): Force sk=0 for
-  these (gotcha #20 handles this for zero-advance-width glyphs; also done
-  explicitly in sk_map_math for known symmetric codepoints).
+MathJax looks up the sk value for the BASE glyph (the letter under the accent)
+and shifts the accent horizontally by that amount. Positive sk = shift right.
+
+For `\hat{f}` in math mode, MathJax uses the math italic f (U+1D453) from the
+**normal variant**, not U+0066 from the italic variant. So the sk must be on
+U+1D453 in normal.js.
+
+#### sk computation (angle-based formula)
+
+The library computes sk from the italic text font using:
+
+    sk = accent_y * tan(italic_angle) / 2 / upm
+
+where `accent_y` is the height where the accent sits:
+- For lowercase without ascenders: x-height (e.g., a, x → sk≈0.053 at 12°)
+- For lowercase with ascenders: actual yMax (e.g., b, d, h → sk≈0.074)
+- For letters with descenders: full span yMax-yMin (e.g., f → sk≈0.098)
+- For uppercase: cap height (e.g., A, H → sk≈0.074)
+
+The descender bonus is critical for `f` — the italic slant operates over the
+full vertical span, shifting the visual top further right.
+
+#### sk propagation
+
+The italic sk values must be propagated to math alphanumeric codepoints in the
+normal variant (U+1D434-1D467 for italic, U+1D468-1D49B for bold-italic).
+This happens AFTER the `greek_from_text` override (which drops sk).
+
+#### Symmetric glyphs must have sk=0
+
+These codepoints get sk=0 forced in `sk_map_math`:
+- Overbrace/underbrace: U+23DE, U+23DF, U+23DC, U+23DD
+- Top/bottom brackets: U+23B4, U+23B5
+- Combining accents: U+0302 (hat), U+0303 (tilde), U+0304 (bar),
+  U+0305 (overline), U+030C (caron), U+2015 (horizontal bar)
+
+Without this, the MATH table's TopAccentAttachment gives these symmetric
+glyphs nonzero sk (e.g., -0.2 for widehat), offsetting them.
+
+#### Verification checklist
+
+Test at large font size (3-4em). Check by mathematical prominence:
+
+**Tier 1 — most common (must be right):**
+- `\hat{f}` `\hat{x}` `\hat{a}` `\hat{n}` — lowercase with hat
+- `\hat{A}` `\hat{H}` `\hat{T}` `\hat{W}` — uppercase with hat
+- `\hat{\alpha}` `\hat{\Sigma}` — Greek with hat
+- `\tilde{f}` `\tilde{x}` `\tilde{A}` — tilde variants
+- `\bar{x}` `\bar{A}` — bar variants
+- `\dot{x}` `\dot{A}` — dot variants
+
+**Wide accents (symmetric — should be centered):**
+- `\widehat{ab}` `\widehat{abc}` `\widehat{abcde}`
+- `\widetilde{abc}` `\overline{abc}`
+
+**Overbrace/underbrace (symmetric — no horizontal offset):**
+- `\overbrace{a+b+c}^{3}` — superscript centered over brace
+- `\underbrace{x+y}_{n}` — subscript centered
+
+**In expressions:**
+- `\hat{f}(x) = \sum \hat{a}_k x^k`
+- `\hat{H} = -\frac{\hbar^2}{2m}\nabla^2 + V`
+- `\bar{x} = \frac{1}{n}\sum x_i`
+
+**Common failure modes:**
+- A and W have different accent centering → bbox-based sk, fix with angle-based
+- f accent too far left → missing descender bonus or not propagated to U+1D453
+- Wide accents offset → sk≠0 on combining accent codepoints in size variants
+- Overbrace superscript shifted → sk≠0 or zero-width glyph (see gotcha #20)
 
 This is typically one of the last tuning steps when finalizing a font package.
 
