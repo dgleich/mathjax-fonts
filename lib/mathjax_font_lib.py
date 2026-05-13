@@ -2422,7 +2422,10 @@ def build_all_variants(output_dir, text_fonts, math_font, text_ranges, math_rang
     # Use MATH table skews as base (for math-only glyphs like Greek, operators)
     sk_map_math = extract_top_accent_skews(math_font)
     # Force sk=0 for symmetric horizontal stretchy glyphs (overbrace, underbrace, etc.)
-    for _sym_cp in [0x23DE, 0x23DF, 0x23B4, 0x23B5, 0x23DC, 0x23DD]:
+    for _sym_cp in [0x23DE, 0x23DF, 0x23B4, 0x23B5, 0x23DC, 0x23DD,
+                     0x302, 0x303, 0x304, 0x305, 0x30C,  # combining hat, tilde, bar, overline, caron
+                     0x2015,  # horizontal bar (overline)
+                    ]:
         if _sym_cp in sk_map_math:
             sk_map_math[_sym_cp] = 0
     print(f"  MATH table accent skews: {len(sk_map_math)} glyphs")
