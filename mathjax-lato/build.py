@@ -41,15 +41,8 @@ def main():
     text_fonts = {k: load_font(v) for k, v in TEXT_FONTS.items()}
     math_font = load_font(LETE_MATH)
 
-    # Swap I (U+0049) with serifed I.ss01 alternate in all text fonts
-    for style, font in text_fonts.items():
-        go = font.getGlyphOrder()
-        if 'I.ss01' in go:
-            cmap_table = font['cmap']
-            for table in cmap_table.tables:
-                if 0x49 in table.cmap:
-                    table.cmap[0x49] = 'I.ss01'
-            print(f"  Swapped I -> I.ss01 (serifed) in {style}")
+    # Lato's default I is already serifed — no swap needed
+    # (I.ss01 is the SANS alternate, opposite of PT Sans)
 
     x_height = get_x_height(text_fonts['regular'])
     print(f"  x_height: {x_height}")
