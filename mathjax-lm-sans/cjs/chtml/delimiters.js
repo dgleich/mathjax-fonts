@@ -142,7 +142,7 @@ exports.delimiters = {
         sizes: [0.362, 0.569],
         stretch: [0xE028, 0xE029, 0xE02A],
         stretchv: [3, 1, 4],
-        HDW: [-0.123, 0.187, 0],
+        HDW: [-0.123, 0.187, 0.361],
         hd: [-0.123, 0.187]
     },
     0x333: {
@@ -150,7 +150,7 @@ exports.delimiters = {
         sizes: [0.362, 0.569],
         stretch: [0xE02B, 0xE02C, 0xE02D],
         stretchv: [3, 1, 4],
-        HDW: [-0.083, 0.276, 0],
+        HDW: [-0.083, 0.276, 0.361],
         hd: [-0.083, 0.276]
     },
     0x33F: {
@@ -166,7 +166,7 @@ exports.delimiters = {
         sizes: [0.553, 0.624],
         stretch: [0xE031, 0xE032, 0xE033],
         stretchv: [3, 1, 4],
-        HDW: [-0.025, 0.275, 0],
+        HDW: [-0.025, 0.275, 0.552],
         hd: [-0.025, 0.275]
     },
     0x2013: {
@@ -206,7 +206,7 @@ exports.delimiters = {
         sizes: [0.569, 0.569],
         stretch: [0xE034, 0xE035, 0xE036],
         stretchv: [3, 1, 4],
-        HDW: [0.747, -0.597, 0],
+        HDW: [0.747, -0.597, 0.568],
         hd: [0.747, -0.597]
     },
     0x20D1: {
@@ -214,7 +214,7 @@ exports.delimiters = {
         sizes: [0.569, 0.569],
         stretch: [0xE037, 0xE038, 0xE039],
         stretchv: [3, 1, 4],
-        HDW: [0.747, -0.597, 0],
+        HDW: [0.747, -0.597, 0.568],
         hd: [0.747, -0.597]
     },
     0x20D6: {
@@ -222,7 +222,7 @@ exports.delimiters = {
         sizes: [0.569, 0.569],
         stretch: [0xE03A, 0xE03B, 0xE03C],
         stretchv: [3, 1, 4],
-        HDW: [0.747, -0.497, 0],
+        HDW: [0.747, -0.497, 0.568],
         hd: [0.747, -0.497]
     },
     0x20D7: {
@@ -230,7 +230,7 @@ exports.delimiters = {
         sizes: [0.569, 0.569],
         stretch: [0xE03D, 0xE03E, 0xE03F],
         stretchv: [3, 1, 4],
-        HDW: [0.747, -0.497, 0],
+        HDW: [0.747, -0.497, 0.568],
         hd: [0.747, -0.497]
     },
     0x20E1: {
@@ -238,7 +238,7 @@ exports.delimiters = {
         sizes: [0.655, 0.624],
         stretch: [0xE040, 0xE041, 0xE042],
         stretchv: [3, 1, 4],
-        HDW: [0.782, -0.45, 0],
+        HDW: [0.782, -0.45, 0.654],
         hd: [0.782, -0.45]
     },
     0x20E9: {
@@ -246,7 +246,7 @@ exports.delimiters = {
         sizes: [0.361, 0.736, 1.111, 1.486, 1.861, 2.236, 2.611, 2.986],
         stretch: [0xE043, 0xE044, 0xE045],
         stretchv: [3, 1, 4],
-        HDW: [0.726, -0.552, 0],
+        HDW: [0.726, -0.552, 0.36],
         hd: [0.726, -0.552]
     },
     0x20EC: {
@@ -254,7 +254,7 @@ exports.delimiters = {
         sizes: [0.519, 0.569],
         stretch: [0xE046, 0xE047, 0xE048],
         stretchv: [3, 1, 4],
-        HDW: [-0.167, 0.352, 0],
+        HDW: [-0.167, 0.352, 0.518],
         hd: [-0.167, 0.352]
     },
     0x20ED: {
@@ -262,7 +262,7 @@ exports.delimiters = {
         sizes: [0.519, 0.569],
         stretch: [0xE049, 0xE04A, 0xE04B],
         stretchv: [3, 1, 4],
-        HDW: [-0.167, 0.352, 0],
+        HDW: [-0.167, 0.352, 0.518],
         hd: [-0.167, 0.352]
     },
     0x20EE: {
@@ -270,7 +270,7 @@ exports.delimiters = {
         sizes: [0.569, 0.569],
         stretch: [0xE04C, 0xE04D, 0xE04E],
         stretchv: [3, 1, 4],
-        HDW: [-0.02, 0.352, 0],
+        HDW: [-0.02, 0.352, 0.568],
         hd: [-0.02, 0.352]
     },
     0x20EF: {
@@ -278,7 +278,7 @@ exports.delimiters = {
         sizes: [0.569, 0.569],
         stretch: [0xE04F, 0xE050, 0xE051],
         stretchv: [3, 1, 4],
-        HDW: [-0.02, 0.352, 0],
+        HDW: [-0.02, 0.352, 0.568],
         hd: [-0.02, 0.352]
     },
     0x2140: {
