@@ -633,17 +633,39 @@ IC, but `appendScripts()` adds `adjustedIc` back. The net effect is approximatel
 left. IC then separately controls the superscript offset (push right to clear
 the top of the integral's curve).
 
-Use `adjust_integral_widths()` as a post-build step:
+Use `adjust_integral_widths()` as a post-build step. Both parameters must be
+tuned per math font based on the integral's **slant angle**:
+
+- **`smallop_w_ratio`**: Width reduction for inline integrals (subscript tucking)
+- **`smallop_ic`**: Superscript offset for inline integrals
+- **`largeop_w_ratio`**: Width reduction for display integrals
+- **`largeop_ic`**: Superscript offset for display integrals
+
+#### Upright vs slanted integrals
+
+The integral slant determines how much adjustment is needed:
+
+| Math font | Slant | smallop_w | smallop_ic | largeop_w | largeop_ic |
+|-----------|-------|-----------|------------|-----------|------------|
+| Libertinus Math | ~200 (nearly upright) | 0.94 | 0.02 | 0.82 | 0.03 |
+| Euler Math | ~277 | 0.92 | 0.14 | 0.75 | 0.23 |
+| LM Math | ~350 | 0.91 | 0.15 | 0.73 | 0.25 |
+| Lete Sans Math | ~353 | 0.89 | 0.22 | 0.68 | 0.37 |
+| Noto Sans Math | ~444 (most slanted) | 0.88 | 0.22 | 0.64 | 0.37 |
+
+**Key principle**: For upright integrals, superscript and subscript should align
+vertically (IC ≈ 0). For slanted integrals, superscript needs to be pushed right
+to clear the top curve (IC > 0). The width ratio controls how much the subscript
+tucks under — less slanted integrals need less tucking.
+
+To measure integral slant: compare the x-center of the glyph near the top vs
+near the bottom. The difference is the slant in font units.
 
 ```python
 adjust_integral_widths(OUTPUT_DIR,
-    smallop_w=0.52, smallop_ic=0.22,   # inline integrals
-    largeop_w=0.63, largeop_ic=0.37)   # display integrals
+    smallop_w_ratio=0.94, smallop_ic=0.02,   # nearly upright (Libertinus)
+    largeop_w_ratio=0.82, largeop_ic=0.03)
 ```
-
-These values were tuned visually across ~40 variants. They work well for
-Shantell Sans (Noto Sans Math integrals) and should be a reasonable starting
-point for other fonts, though per-font tuning may be needed.
 
 ### 21. Accent positioning finalization (sk tuning)
 
