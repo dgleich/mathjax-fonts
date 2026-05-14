@@ -84,7 +84,7 @@ def main():
     print("  Adjusted overbrace/underbrace label spacing (+0.35em)")
 
     # Adjust integral widths for better subscript tucking
-    adjust_integral_widths(OUTPUT_DIR, smallop_w_ratio=0.91, largeop_w_ratio=0.73)
+    adjust_integral_widths(OUTPUT_DIR, smallop_w_ratio=0.91, smallop_ic=0.15, largeop_w_ratio=0.73, largeop_ic=0.25)
 
     write_boilerplate(OUTPUT_DIR, FONT_ID, FONT_NAME)
     print(f"Done! Output in {OUTPUT_DIR}")
