@@ -129,6 +129,7 @@ MathJax = {
 <nav>
   <a href="#alphabet">Alphabet</a>
   <a href="#typmatrix">Typography Matrix</a>
+  <a href="#integrals">Integrals</a>
   <a href="#linalg">Linear Algebra</a>
   <a href="#analysis">Analysis &amp; PDEs</a>
   <a href="#topology">Topology</a>
@@ -243,6 +244,71 @@ Each row should use the text font's own glyphs, not the math font's.</p>
 <tr><td style="padding:4px 8px;font-size:0.8em;color:#666;">Mixed (expressions)</td><td style="padding:4px 8px;">$\boldsymbol{\mu} = \frac{1}{n}\sum_{i=1}^n \mathbf{x}_i \quad \boldsymbol{\Sigma} = \mathbb{E}[(\mathbf{x}-\boldsymbol{\mu})(\mathbf{x}-\boldsymbol{\mu})^T] \quad \rho(\mathbf{A}) = \max|\lambda_i|$</td></tr>
 <tr style="background:#f5f5f5;"><td style="padding:4px 8px;font-size:0.8em;color:#666;">Mixed (physics)</td><td style="padding:4px 8px;">$\boldsymbol{F} = m\mathbf{a} \quad \boldsymbol{\omega} \times \mathbf{r} = \mathbf{v} \quad \boldsymbol{\nabla} \cdot \mathbf{E} = \frac{\rho}{\varepsilon_0} \quad \Psi(\mathbf{r},t) = \phi(\mathbf{r})e^{-i\omega t}$</td></tr>
 </table>
+</div>
+
+<div class="specimen-block">
+<span class="field-label">Greek/Latin scaling checks (large)</span>
+<p style="font-size:1.5em;">$b\beta p\beta a\beta f\beta$ &emsp; $\mathrm{b\beta p\beta a\beta f\beta}$ &emsp; $\mathbf{b}\boldsymbol{\beta}\mathbf{p}\boldsymbol{\beta}\mathbf{a}\boldsymbol{\beta}\mathbf{f}\boldsymbol{\beta}$</p>
+<p style="font-size:1.5em;">$\alpha\boldsymbol{\alpha}$ &ensp; $\beta\boldsymbol{\beta}$ &ensp; $\gamma\boldsymbol{\gamma}$ &ensp; $\theta\boldsymbol{\theta}$ &ensp; $\sigma\boldsymbol{\sigma}$ &ensp; $\Sigma\boldsymbol{\Sigma}$ &ensp; $\Gamma\boldsymbol{\Gamma}$ &ensp; $\Omega\boldsymbol{\Omega}$</p>
+<p style="font-size:1.5em;">$A\Sigma B\Gamma C\Omega$ &emsp; $\mathbf{A}\boldsymbol{\Sigma}\mathbf{B}\boldsymbol{\Gamma}\mathbf{C}\boldsymbol{\Omega}$ &emsp; $x\alpha y\beta z\gamma$ &emsp; $\mathbf{x}\boldsymbol{\alpha}\mathbf{y}\boldsymbol{\beta}\mathbf{z}\boldsymbol{\gamma}$</p>
+</div>
+
+</div>
+
+<!-- ==================== INTEGRALS & LARGE OPERATORS ==================== -->
+<div id="integrals">
+<h2>Integrals &amp; Large Operators</h2>
+
+<div class="specimen-block">
+<span class="field-label">Inline integrals (subscript/superscript positioning)</span>
+<p style="font-size:1.3em;">
+$\int_a^b f(x)\,dx$ &emsp;
+$\int_0^1 g(t)\,dt$ &emsp;
+$\int_\Omega \nabla u \cdot \nabla v\,dx$ &emsp;
+$\int_{-\infty}^{\infty} e^{-x^2}\,dx$ &emsp;
+$\oint_\gamma f(z)\,dz$
+</p>
+<p style="font-size:1.3em;">
+$\iint_\Omega f\,dA$ &emsp;
+$\iiint_V \rho\,dV$ &emsp;
+$\int_0^\pi \sin\theta\,d\theta$ &emsp;
+$\int_a^b \int_c^d f(x,y)\,dy\,dx$
+</p>
+</div>
+
+<div class="specimen-block">
+<span class="field-label">Display integrals</span>
+<div class="display">$$\int_a^b f(x)\,dx = F(b) - F(a)$$</div>
+<div class="display">$$\int_0^\infty e^{-x^2}\,dx = \frac{\sqrt{\pi}}{2}$$</div>
+<div class="display">$$\oint_\gamma f(z)\,dz = 2\pi i \sum_k \operatorname{Res}(f, z_k)$$</div>
+<div class="display">$$\iint_\Omega \nabla u \cdot \nabla v\,dx = \int_\Omega f\,v\,dx \quad \forall v \in H_0^1(\Omega)$$</div>
+</div>
+
+<div class="specimen-block">
+<span class="field-label">Inline large operators</span>
+<p style="font-size:1.3em;">
+$\sum_{i=1}^n a_i$ &emsp;
+$\prod_{j=1}^m b_j$ &emsp;
+$\coprod_{k \in K} G_k$ &emsp;
+$\bigcup_{i=1}^n A_i$ &emsp;
+$\bigcap_{i=1}^n A_i$
+</p>
+</div>
+
+<div class="specimen-block">
+<span class="field-label">Display large operators</span>
+<div class="display">$$\sum_{i=1}^{n} a_i = a_1 + a_2 + \cdots + a_n$$</div>
+<div class="display">$$\prod_{i=1}^{n} \left(1 + \frac{x}{i}\right) \qquad \coprod_{\alpha \in A} G_\alpha$$</div>
+</div>
+
+<div class="specimen-block">
+<span class="field-label">Integral sub/super alignment check (large, look for centering)</span>
+<p style="font-size:2em;">
+$\int_a^b$ &ensp; $\int_0^1$ &ensp; $\int_\Omega$ &ensp; $\oint_\gamma$ &ensp; $\iint_D$ &ensp; $\iiint_V$
+</p>
+<p style="font-size:2em;">
+$\sum_{i=1}^n$ &ensp; $\prod_{j=1}^m$ &ensp; $\bigcup_{k}^{}$ &ensp; $\bigcap_{k}^{}$
+</p>
 </div>
 
 </div>
