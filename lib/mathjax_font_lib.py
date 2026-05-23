@@ -2540,14 +2540,13 @@ def build_all_variants(output_dir, text_fonts, math_font, text_ranges, math_rang
                   + list(range(0x3F0, 0x3F7)))
     for cp in _greek_cps:
         svg_bold.pop(cp, None)
-    # When greek_from_text is on, also remove math alphanumeric Greek+Latin from
-    # bold variant — they duplicate what's in normal and would use math font metrics
-    if greek_from_text:
-        for math_start, basic_start, n, font_key in _MATH_ALPHA_MAPPINGS:
-            for i in range(n):
-                svg_bold.pop(math_start + i, None)
-        for math_cp, greek_cps, font_key in _MATH_GREEK_VARIANT_SYMBOLS:
-            svg_bold.pop(math_cp, None)
+    # Always remove math alphanumeric Greek+Latin from bold variant —
+    # they duplicate what's in normal and their copies lack correct ic/sk values.
+    for math_start, basic_start, n, font_key in _MATH_ALPHA_MAPPINGS:
+        for i in range(n):
+            svg_bold.pop(math_start + i, None)
+    for math_cp, greek_cps, font_key in _MATH_GREEK_VARIANT_SYMBOLS:
+        svg_bold.pop(math_cp, None)
     write_svg_variant_file(
         os.path.join(output_dir, "cjs/svg/bold.js"), "bold", svg_bold
     )
@@ -2566,11 +2565,11 @@ def build_all_variants(output_dir, text_fonts, math_font, text_ranges, math_rang
     _replace_with_math_italic_greek(svg_italic, math_font, em_scale)
     if greek_from_text:
         _override_variant_greek_from_text(svg_italic, text_fonts, 'italic', em_scale)
-        for math_start, basic_start, n, font_key in _MATH_ALPHA_MAPPINGS:
-            for i in range(n):
-                svg_italic.pop(math_start + i, None)
-        for math_cp, greek_cps, font_key in _MATH_GREEK_VARIANT_SYMBOLS:
-            svg_italic.pop(math_cp, None)
+    for math_start, basic_start, n, font_key in _MATH_ALPHA_MAPPINGS:
+        for i in range(n):
+            svg_italic.pop(math_start + i, None)
+    for math_cp, greek_cps, font_key in _MATH_GREEK_VARIANT_SYMBOLS:
+        svg_italic.pop(math_cp, None)
     write_svg_variant_file(
         os.path.join(output_dir, "cjs/svg/italic.js"), "italic", svg_italic
     )
@@ -2592,12 +2591,11 @@ def build_all_variants(output_dir, text_fonts, math_font, text_ranges, math_rang
     _latin_cps = list(range(0x41, 0x5B)) + list(range(0x61, 0x7B))  # A-Z, a-z
     for cp in _latin_cps:
         svg_bold_italic.pop(cp, None)
-    if greek_from_text:
-        for math_start, basic_start, n, font_key in _MATH_ALPHA_MAPPINGS:
-            for i in range(n):
-                svg_bold_italic.pop(math_start + i, None)
-        for math_cp, greek_cps, font_key in _MATH_GREEK_VARIANT_SYMBOLS:
-            svg_bold_italic.pop(math_cp, None)
+    for math_start, basic_start, n, font_key in _MATH_ALPHA_MAPPINGS:
+        for i in range(n):
+            svg_bold_italic.pop(math_start + i, None)
+    for math_cp, greek_cps, font_key in _MATH_GREEK_VARIANT_SYMBOLS:
+        svg_bold_italic.pop(math_cp, None)
     write_svg_variant_file(
         os.path.join(output_dir, "cjs/svg/bold-italic.js"), "boldItalic", svg_bold_italic
     )
