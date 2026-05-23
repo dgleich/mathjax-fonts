@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html><head><meta charset="utf-8">
+<script>MathJax={options:{enableExplorer:false,enableComplexity:false,enableEnrichment:false}};</script>
+<script id="MathJax-script" async src="tex-mml-svg-mathjax-libertinus.js"></script>
+</head><body>
+<div style="font-size:4em">
+<p>\(f(x)\) vs \(g(x)\)</p>
+<p>\(f(\theta)\) vs \(g(\theta)\)</p>
+</div>
+<p id="info" style="font-family:monospace;font-size:12px"></p>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+  setTimeout(function() {
+    var info = document.getElementById('info');
+    // Find the rendered SVGs and measure actual spacing
+    var svgs = document.querySelectorAll('mjx-container svg');
+    svgs.forEach(function(svg, idx) {
+      var gs = svg.querySelectorAll('[data-mml-node="mi"], [data-mml-node="mo"]');
+      var out = 'SVG ' + idx + ': ';
+      gs.forEach(function(g) {
+        var t = g.getAttribute('transform') || 'none';
+        var uses = g.querySelectorAll('use');
+        var dc = uses.length ? uses[0].getAttribute('data-c') : '?';
+        out += dc + '@' + t + ' | ';
+      });
+      info.textContent += out + '\n';
+    });
+  }, 2000);
+});
+</script>
+</body></html>
