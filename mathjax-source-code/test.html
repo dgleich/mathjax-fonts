@@ -277,6 +277,20 @@ $\int_a^b \int_c^d f(x,y)\,dy\,dx$
 </div>
 
 <div class="specimen-block">
+<span class="field-label">Inline integrals in prose</span>
+<p>The fundamental theorem of calculus states that if $F$ is an antiderivative of $f$,
+then $\int_a^b f(x)\,dx = F(b) - F(a)$. For instance, $\int_0^1 x^2\,dx = \frac{1}{3}$
+and $\int_0^\pi \sin\theta\,d\theta = 2$. The Gaussian integral $\int_{-\infty}^{\infty} e^{-x^2}\,dx = \sqrt{\pi}$
+appears throughout probability and physics.</p>
+
+<p>In complex analysis, the residue theorem gives $\oint_\gamma f(z)\,dz = 2\pi i \sum_k \operatorname{Res}(f, z_k)$,
+where the integral is taken over a closed contour $\gamma$.
+For multivariable calculus, the divergence theorem relates $\iiint_V \nabla \cdot \mathbf{F}\,dV = \iint_{\partial V} \mathbf{F}\cdot\mathbf{n}\,dS$.
+The energy of a signal $f$ is $E = \int_0^T |f(t)|^2\,dt$, and the Fourier transform is
+$\hat{f}(\xi) = \int_{-\infty}^{\infty} f(x)\,e^{-2\pi i x \xi}\,dx$.</p>
+</div>
+
+<div class="specimen-block">
 <span class="field-label">Display integrals</span>
 <div class="display">$$\int_a^b f(x)\,dx = F(b) - F(a)$$</div>
 <div class="display">$$\int_0^\infty e^{-x^2}\,dx = \frac{\sqrt{\pi}}{2}$$</div>
