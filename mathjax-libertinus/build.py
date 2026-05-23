@@ -28,10 +28,27 @@ TEXT_FONTS = {
 }
 MATH_FONT = os.path.join(FONTS_DIR, 'LibertinusMath-Regular.otf')
 
-# Libertinus Serif has Greek built in — no middle layer needed
-TEXT_RANGES = DEFAULT_TEXT_RANGES
+# Libertinus Serif has Greek built in — no middle layer needed.
+# Use math font for parens/brackets/braces (designed for italic math context,
+# wider than text font versions to prevent overlap with italic letters).
+TEXT_RANGES = [
+    (0x20, 0x27),     # space through apostrophe (before parens)
+    (0x2A, 0x5A),     # * through Z (skip ( ) )
+    (0x5E, 0x7A),     # ^ through z (skip [ \ ] )
+    (0x7E, 0x7E),     # ~ (skip { | } )
+    (0xA0, 0xFF),     # Latin-1 Supplement
+    (0x2C6, 0x2C6),   # modifier circumflex
+    (0x2C7, 0x2C7),   # caron
+    (0x2C9, 0x2C9),   # macron
+    (0x2D8, 0x2DC),   # breve through small tilde
+]
 MATH_RANGES = DEFAULT_MATH_RANGES
-EXTRA_MATH = DEFAULT_EXTRA_MATH
+EXTRA_MATH = (DEFAULT_EXTRA_MATH or []) + [
+    0x28, 0x29,   # ( ) — use math font versions (wider, designed for italic context)
+    0x5B, 0x5D,   # [ ]
+    0x7B, 0x7D,   # { }
+    0x7C,         # |
+]
 
 
 def main():
