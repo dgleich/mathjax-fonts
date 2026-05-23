@@ -118,6 +118,8 @@ MathJax = {
   <a href="#probability">Probability</a>
   <a href="#algebra">Abstract Algebra</a>
   <a href="#physics">Physics</a>
+  <a href="#complex">Complex Analysis</a>
+  <a href="#discrete">Discrete &amp; Algorithms</a>
   <a href="#display">Display Specimens</a>
   <a href="#inventory">Glyph Inventory</a>
 </nav>
@@ -508,6 +510,74 @@ $\hat{H} = -\frac{\hbar^2}{2m}\nabla^2 + V$ has eigenvalues $E_n$ forming the en
 <p>where $R_{\mu\nu}$ is the Ricci tensor, $R = g^{\mu\nu}R_{\mu\nu}$ is the scalar curvature,
 $g_{\mu\nu}$ is the metric tensor, $\Lambda$ is the cosmological constant,
 and $T_{\mu\nu}$ is the stress&ndash;energy tensor.</p>
+</div>
+</div>
+
+<!-- ==================== COMPLEX ANALYSIS ==================== -->
+<div id="complex">
+<h2>Complex Analysis</h2>
+
+<div class="specimen-block">
+<p>A function $f : \C \to \C$ is <em>holomorphic</em> on a domain $\Omega$ if
+$\bar{\partial} f = 0$, where $\bar{\partial} = \frac{1}{2}\left(\frac{\partial}{\partial x} + i\frac{\partial}{\partial y}\right)$.
+Equivalently, $f$ satisfies the <em>Cauchy&ndash;Riemann equations</em>:</p>
+
+<div class="display">$$\frac{\partial u}{\partial x} = \frac{\partial v}{\partial y}, \qquad \frac{\partial u}{\partial y} = -\frac{\partial v}{\partial x}$$</div>
+
+<p>where $f = u + iv$. Cauchy's integral formula gives the value of $f$ at any point
+$z_0$ inside a simple closed contour $\gamma$:</p>
+
+<div class="display">$$f(z_0) = \frac{1}{2\pi i} \oint_\gamma \frac{f(z)}{z - z_0}\,dz$$</div>
+
+<p>and its $n$-th derivative is $f^{(n)}(z_0) = \frac{n!}{2\pi i} \oint_\gamma \frac{f(z)}{(z - z_0)^{n+1}}\,dz$.
+A function with an isolated singularity at $z_0$ has a <em>Laurent expansion</em></p>
+
+<div class="display">$$f(z) = \sum_{n=-\infty}^{\infty} a_n (z - z_0)^n, \qquad a_n = \frac{1}{2\pi i}\oint_\gamma \frac{f(z)}{(z - z_0)^{n+1}}\,dz$$</div>
+
+<p>The coefficient $a_{-1} = \operatorname{Res}(f, z_0)$ is the <em>residue</em>, and the
+<em>residue theorem</em> states $\oint_\gamma f(z)\,dz = 2\pi i \sum_k \operatorname{Res}(f, z_k)$.
+A useful application: $\int_0^\infty \frac{\sin x}{x}\,dx = \frac{\pi}{2}$, proved via
+the contour integral $\oint_\gamma \frac{e^{iz}}{z}\,dz$ over an indented semicircle.</p>
+
+<p>The <em>Riemann mapping theorem</em> states that any simply connected domain
+$\Omega \subsetneq \C$ is biholomorphic to the unit disk $\mathbb{D} = \{z : |z| < 1\}$.
+The <em>Schwarz&ndash;Christoffel formula</em> maps $\mathbb{H} \to P$:</p>
+
+<div class="display">$$f(z) = A + C \int^z \prod_{k=1}^{n} (\zeta - x_k)^{\alpha_k - 1}\,d\zeta$$</div>
+</div>
+</div>
+
+<!-- ==================== DISCRETE & ALGORITHMS ==================== -->
+<div id="discrete">
+<h2>Discrete Mathematics &amp; Algorithms</h2>
+
+<div class="specimen-block">
+<p>The number of subsets of $\{1, 2, \ldots, n\}$ of size $k$ is the binomial coefficient
+$\binom{n}{k} = \frac{n!}{k!(n-k)!}$. The <em>binomial theorem</em> gives</p>
+
+<div class="display">$$(x + y)^n = \sum_{k=0}^{n} \binom{n}{k} x^k y^{n-k}$$</div>
+
+<p>A graph $G = (V, E)$ has adjacency matrix $\mathbf{A} \in \{0,1\}^{n \times n}$ where
+$A_{ij} = 1$ iff $\{i, j\} \in E$. The number of walks of length $k$ from $i$ to $j$
+is $(\mathbf{A}^k)_{ij}$. The <em>chromatic polynomial</em> $P(G, k)$ counts the number of proper
+$k$-colorings; for a tree on $n$ vertices, $P(T_n, k) = k(k-1)^{n-1}$.</p>
+
+<p>The <em>Master theorem</em> for divide-and-conquer recurrences: if $T(n) = aT(n/b) + \Theta(n^c)$, then</p>
+
+<div class="display">$$T(n) = \begin{cases} \Theta(n^c) & \text{if } \log_b a < c \\ \Theta(n^c \log n) & \text{if } \log_b a = c \\ \Theta(n^{\log_b a}) & \text{if } \log_b a > c \end{cases}$$</div>
+
+<p>For instance, merge sort has $T(n) = 2T(n/2) + \Theta(n)$, so $a = b = 2$, $c = 1$,
+$\log_2 2 = 1 = c$, giving $T(n) = \Theta(n \log n)$. Strassen's matrix multiplication
+achieves $T(n) = 7T(n/2) + \Theta(n^2)$, yielding $T(n) = \Theta(n^{\log_2 7}) \approx \Theta(n^{2.807})$.</p>
+
+<p>The <em>generating function</em> for the Fibonacci numbers $F_n$ is</p>
+
+<div class="display">$$\sum_{n=0}^{\infty} F_n x^n = \frac{x}{1 - x - x^2}$$</div>
+
+<p>and the closed form is $F_n = \frac{\varphi^n - \hat{\varphi}^n}{\sqrt{5}}$ where
+$\varphi = \frac{1 + \sqrt{5}}{2}$ and $\hat{\varphi} = \frac{1 - \sqrt{5}}{2}$.
+The number of binary trees with $n$ internal nodes is the Catalan number
+$C_n = \frac{1}{n+1}\binom{2n}{n} = \frac{(2n)!}{(n+1)!\,n!}$.</p>
 </div>
 </div>
 
