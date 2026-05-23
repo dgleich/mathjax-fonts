@@ -744,14 +744,16 @@ def apply_italic_corrections(data, ic_map):
     return applied
 
 
-def ensure_ic_covers_overhang(data, font, scale=0.5):
-    """Ensure each glyph's IC covers a fraction of its right overhang.
+def ensure_width_covers_overhang(data, font):
+    """Widen glyphs so advance width covers the full visual extent.
 
-    For italic fonts, glyph outlines often extend past the advance width.
-    Sets IC to max(existing_ic, overhang * scale). The scale factor (default
-    0.5) balances f( spacing (needs more IC) with x^2 spacing (needs less).
+    For italic fonts, glyph outlines often extend past the advance width
+    (overhang). This increases the declared width to match xMax so the
+    next character starts after the visual extent. This matches how newCM
+    handles italic spacing — no IC needed for overlap prevention, and
+    superscript positioning is unaffected (unlike IC-based fixes).
 
-    Only increases IC — never reduces it.
+    Only increases width — never reduces it.
     """
     cmap = font.getBestCmap()
     gs = font.getGlyphSet()
@@ -769,17 +771,13 @@ def ensure_ic_covers_overhang(data, font, scale=0.5):
             continue
         if not bounds:
             continue
-        adv = gs[gn].width
-        overhang = (bounds[2] - adv) / upm
-        if overhang <= 0:
-            continue
-        needed_ic = round3(overhang * scale)
-        current_ic = info.get('ic', 0)
-        if needed_ic > current_ic:
-            info['ic'] = needed_ic
+        visual_w = round3(bounds[2] / upm)
+        current_w = info.get('width', 0)
+        if visual_w > current_w:
+            info['width'] = visual_w
             adjusted += 1
     if adjusted:
-        print(f"    Increased IC on {adjusted} glyphs (overhang * {scale})")
+        print(f"    Widened {adjusted} glyphs to cover overhang")
     return adjusted
 
 
@@ -2597,7 +2595,7 @@ def build_all_variants(output_dir, text_fonts, math_font, text_ranges, math_rang
         text_source=text_source, em_scale=em_scale
     )
     apply_all_corrections(svg_italic, 'italic')
-    ensure_ic_covers_overhang(svg_italic, text_fonts["italic"])
+    ensure_width_covers_overhang(svg_italic, text_fonts['italic'])
     svg_italic.update(pua_glyph_data)
     # Replace basic Greek in italic variant with math font's math-italic Greek.
     # The variant builder puts upright math font Greek (U+03B1) into the italic
