@@ -698,6 +698,55 @@ adjust_integral_widths(OUTPUT_DIR,
    to see how they sit within flowing text. Display integrals are usually less
    sensitive since they have more space.
 
+### 22. Italic glyph spacing (overhang, ic, oc, dx, width)
+
+MathJax has NO kern pair support. Each glyph is positioned by its advance
+width plus optional corrections. The per-glyph fields in font data are:
+
+- **`ic`** (italic correction): Space added after an italic char when followed
+  by an upright char (e.g., `f` → `(`). Also affects superscript positioning
+  via `getAdjustedIc()`.
+- **`oc`** (outgoing correction): Used instead of `ic` when the next char is
+  the same variant (italic→italic). Currently unused in most fonts.
+- **`sk`** (accent skew): Horizontal offset for accent centering.
+- **`dx`** (horizontal shift): Shifts the glyph rendering within its advance width.
+
+#### The overhang problem
+
+Italic glyphs often extend past their advance width (right overhang). For
+example, Libertinus italic f has advance=314 but xMax=523, a 209-unit overhang.
+This causes `f(` to visually overlap.
+
+#### Approaches tried and lessons learned
+
+1. **IC-based fix** (adding overhang to ic): Fixes `f(` but breaks `x^2` because
+   IC also pushes superscripts right. Scale factors (0.4–0.5) help but can't
+   balance both contexts.
+
+2. **Width-based fix** (final approach): Extend advance width to cover xMax.
+   `ensure_width_covers_overhang()` sets `width = max(width, xMax/upm)` for all
+   italic glyphs. This matches how newCM handles italic spacing — the advance
+   width IS the visual width. No IC inflation needed, superscripts unaffected.
+   Trade-off: slightly looser spacing overall, but consistent and no overlaps.
+
+3. **Math font delimiters**: Text font parentheses may be narrower than math font
+   versions. For Libertinus, text `(` is W=0.298 vs math `(` W=0.356. Using math
+   font parens gives better side bearings for italic context. Exclude `( ) [ ] { } |`
+   from text ranges and add via `EXTRA_MATH`.
+
+4. **Math alphanumeric duplicates**: Non-normal variants (bold, italic, bold-italic)
+   contain math alphanumeric codepoints (U+1D400+) that shadow the normal variant's
+   ic/sk values in the webpack bundle. These MUST be removed from non-normal variants
+   regardless of `greek_from_text`. Without this, the ic from the MATH table never
+   reaches the rendered glyph.
+
+#### MathJax codepoint routing (critical to understand)
+
+- `\(f\)` uses **U+0066 from italic variant** (data-c=66), NOT U+1D453
+- `\hat{f}` accent sk comes from **U+1D453 in normal variant**
+- `\mathrm{f}` uses **U+0066 from normal variant**
+- IC on U+1D453 in normal variant does NOT affect `f(` spacing!
+
 ### 21. Accent positioning finalization (sk tuning)
 
 After building a font package, verify accent centering visually. The `sk:` field
