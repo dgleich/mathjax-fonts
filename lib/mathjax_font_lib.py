@@ -2597,7 +2597,7 @@ def build_all_variants(output_dir, text_fonts, math_font, text_ranges, math_rang
         text_source=text_source, em_scale=em_scale
     )
     apply_all_corrections(svg_italic, 'italic')
-    ensure_ic_covers_overhang(svg_italic, text_fonts['italic'])
+    ensure_ic_covers_overhang(svg_italic, text_fonts["italic"])
     svg_italic.update(pua_glyph_data)
     # Replace basic Greek in italic variant with math font's math-italic Greek.
     # The variant builder puts upright math font Greek (U+03B1) into the italic
