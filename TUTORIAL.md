@@ -667,6 +667,37 @@ adjust_integral_widths(OUTPUT_DIR,
     largeop_w_ratio=0.82, largeop_ic=0.03)
 ```
 
+#### How to adjust integral offsets for a font
+
+1. **Build the font** and check the specimen page (`test.html#integrals`).
+   Look at both inline (`$\int_a^b f(x)\,dx$`) and display (`$$\int_a^b$$`).
+
+2. **If subscripts are too far right** (not tucked under the curve):
+   Decrease `smallop_w_ratio` (inline) or `largeop_w_ratio` (display).
+   The ratio multiplies the original glyph width — lower = tighter.
+
+3. **If superscripts are too far right** (gap between top of integral and superscript):
+   Decrease `smallop_ic` or `largeop_ic`. For upright integrals, IC should be
+   near 0. For slanted integrals, IC=0.15–0.37.
+
+4. **If superscripts are too far LEFT** (overlapping the top of the integral):
+   Increase the IC value.
+
+5. **Key test**: For upright integrals (Libertinus, Euler), the superscript and
+   subscript should be at roughly the same x-coordinate. If the superscript is
+   visually further right than the subscript, the IC is too high.
+
+6. **Rebuild and check**: After changing values in `build.py`:
+   ```bash
+   python mathjax-{name}/build.py
+   cd mathjax-{name}/build && npx webpack --config webpack.config.cjs
+   ```
+   Hard-refresh the browser (Cmd+Shift+R) — webpack bundles cache aggressively.
+
+7. **Check inline integrals in prose** (the "Inline integrals in prose" section)
+   to see how they sit within flowing text. Display integrals are usually less
+   sensitive since they have more space.
+
 ### 21. Accent positioning finalization (sk tuning)
 
 After building a font package, verify accent centering visually. The `sk:` field
