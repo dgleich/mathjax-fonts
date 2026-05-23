@@ -744,12 +744,13 @@ def apply_italic_corrections(data, ic_map):
     return applied
 
 
-def ensure_ic_covers_overhang(data, font, gap=0.04):
-    """Ensure each glyph's IC is large enough to cover its right overhang.
+def ensure_ic_covers_overhang(data, font, min_overhang=0.12, gap=0.02):
+    """Ensure glyphs with large right overhang have enough IC.
 
-    For italic fonts, glyph outlines often extend past the advance width
-    (overhang). The IC must be at least as large as the overhang plus a small
-    gap to prevent visual overlap with the next character.
+    Only adjusts glyphs where overhang exceeds `min_overhang` (default 0.12em).
+    This targets letters like italic f (overhang=0.209em) without affecting
+    letters with small overhang that already have reasonable IC from the
+    MATH table. A small gap (default 0.02em) is added beyond the overhang.
 
     Only increases IC — never reduces it.
     """
@@ -771,7 +772,7 @@ def ensure_ic_covers_overhang(data, font, gap=0.04):
             continue
         adv = gs[gn].width
         overhang = (bounds[2] - adv) / upm
-        if overhang <= 0:
+        if overhang < min_overhang:
             continue
         needed_ic = round3(overhang + gap)
         current_ic = info.get('ic', 0)
@@ -779,7 +780,7 @@ def ensure_ic_covers_overhang(data, font, gap=0.04):
             info['ic'] = needed_ic
             adjusted += 1
     if adjusted:
-        print(f"    Increased IC on {adjusted} glyphs to cover overhang")
+        print(f"    Increased IC on {adjusted} glyphs (overhang > {min_overhang}em)")
     return adjusted
 
 
