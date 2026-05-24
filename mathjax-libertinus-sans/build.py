@@ -23,8 +23,7 @@ TEXT_FONTS = {
     'regular':     os.path.join(FONTS_DIR, 'LibertinusSans-Regular.otf'),
     'bold':        os.path.join(FONTS_DIR, 'LibertinusSans-Bold.otf'),
     'italic':      os.path.join(FONTS_DIR, 'LibertinusSans-Italic.otf'),
-    # No Bold Italic exists — LaTeX package uses Italic + embolden=3
-    # For MathJax SVG paths, just use Italic as bold-italic (difference is minimal)
+    # No Bold Italic exists — use Italic as fallback
     'bold_italic': os.path.join(FONTS_DIR, 'LibertinusSans-Italic.otf'),
 }
 MATH_FONT = os.path.join(FONTS_DIR, 'LibertinusMath-Regular.otf')
@@ -61,7 +60,9 @@ def main():
         css_prefix=CSS_PREFIX,
         x_height=x_height,
         text_font_paths=TEXT_FONTS,
-        greek_from_text=True,
+        # NOT using greek_from_text — Libertinus Math has proper bold italic
+        # glyphs that match the family. Sans has no bold italic font, so
+        # greek_from_text would replace bold italic with plain italic.
     )
 
     # Post-build: adjust overbrace/underbrace label spacing
