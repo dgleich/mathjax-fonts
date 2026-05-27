@@ -653,16 +653,22 @@ The MATH table's italic corrections live at math alphanumeric codepoints (U+1D43
 in `normal.js`. MathJax reaches these via "smp redirects" — but only if the italic
 variant does NOT have the basic codepoint.
 
-**The fix: remove basic Latin A-Z, a-z from `italic.js`.**
+**The fix: remove basic Latin A-Z, a-z AND basic Greek from `italic.js`.**
 
 ```python
 for variant_file in ['cjs/svg/italic.js', 'cjs/chtml/italic.js']:
-    for cp in list(range(0x41, 0x5B)) + list(range(0x61, 0x7B)):
-        # Remove 0x41-0x5A (A-Z) and 0x61-0x7A (a-z) entries
+    for cp in (list(range(0x41, 0x5B)) + list(range(0x61, 0x7B)) +
+               list(range(0x391, 0x3AA)) + list(range(0x3B1, 0x3CA))):
+        # Remove entries so smp redirects work
 ```
 
-This forces MathJax to follow the smp redirect: italic variant U+0055 → not found →
+This forces MathJax to follow smp redirects: italic variant U+0055 → not found →
 smp redirect to U+1D448 in normal.js → entry has `ic: 0.146` → spacing works.
+Same for Greek: U+03B1 → not found → redirect to U+1D6FC → entry has `sk: 0.06`.
+
+**Greek must also be removed** — otherwise `\hat{\alpha}` uses U+03B1 from italic.js
+(no sk), instead of U+1D6FC from normal.js (which has angle-based sk for accent
+centering).
 
 **The fallback chain problem:** If you also remove from `bold-italic.js`, MathJax
 falls back to `bold.js` (which has upright bold, not bold italic). So either:
@@ -885,6 +891,16 @@ where `accent_y` is the height where the accent sits:
 
 The descender bonus is critical for `f` — the italic slant operates over the
 full vertical span, shifting the visual top further right.
+
+**Scaling factor**: The base formula sometimes under-corrects. A 1.3× multiplier
+on sk values improves centering for some fonts (e.g., CMU Sans at 12° italic angle).
+Apply when accents appear slightly too far left.
+
+**Greek sk**: When using a Latin-only override (section 18b), Greek entries in
+normal.js keep the MATH table's TopAccentAttachment sk values, which may differ
+from the angle-based formula. Apply angle-based sk to math italic/bold-italic
+Greek ranges (U+1D6E2+, U+1D6FC+, U+1D71C+, U+1D736+, U+1D790+, U+1D7AA+)
+using the same formula with x-height for lowercase, cap-height for uppercase.
 
 #### sk propagation
 

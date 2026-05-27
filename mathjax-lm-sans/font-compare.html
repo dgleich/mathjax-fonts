@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html><head><meta charset="utf-8">
+<title>CMU Sans vs NewCM Sans Comparison</title>
+<style>
+@font-face { font-family: 'CMU'; src: url('../fonts/cmu-sans/cmunss.otf'); font-weight: 400; font-style: normal; }
+@font-face { font-family: 'CMU'; src: url('../fonts/cmu-sans/cmunsi.otf'); font-weight: 400; font-style: italic; }
+@font-face { font-family: 'CMU'; src: url('../fonts/cmu-sans/cmunsx.otf'); font-weight: 700; font-style: normal; }
+@font-face { font-family: 'CMU'; src: url('../fonts/cmu-sans/cmunso.otf'); font-weight: 700; font-style: italic; }
+
+@font-face { font-family: 'NewCM'; src: url('../fonts/cmu-sans/NewCMSans10-Regular.otf'); font-weight: 400; font-style: normal; }
+@font-face { font-family: 'NewCM'; src: url('../fonts/cmu-sans/NewCMSans10-Oblique.otf'); font-weight: 400; font-style: italic; }
+@font-face { font-family: 'NewCM'; src: url('../fonts/cmu-sans/NewCMSans10-Bold.otf'); font-weight: 700; font-style: normal; }
+@font-face { font-family: 'NewCM'; src: url('../fonts/cmu-sans/NewCMSans10-BoldOblique.otf'); font-weight: 700; font-style: italic; }
+
+body { font-family: system-ui; max-width: 1100px; margin: 1.5em auto; }
+.sample { font-size: 24px; line-height: 1.6; margin: 0.3em 0; }
+.big { font-size: 48px; }
+table { border-collapse: collapse; margin: 1em 0; }
+td { padding: 6px 12px; border: 1px solid #ddd; }
+.cmu { font-family: 'CMU', sans-serif; }
+.newcm { font-family: 'NewCM', sans-serif; }
+.label { font-size: 12px; color: #666; font-family: system-ui; font-weight: normal; font-style: normal; }
+h2 { margin-top: 2em; }
+</style>
+</head><body>
+<h1>CMU Sans Serif vs NewCM Sans 10</h1>
+
+<h2>Style Matrix (24px)</h2>
+<table>
+<tr><td class="label"></td><td class="label">Regular</td><td class="label">Bold</td><td class="label">Italic/Oblique</td><td class="label">Bold Italic/Oblique</td></tr>
+<tr><td class="label">CMU</td>
+<td class="cmu sample">abcdefg</td>
+<td class="cmu sample" style="font-weight:700">abcdefg</td>
+<td class="cmu sample" style="font-style:italic">abcdefg</td>
+<td class="cmu sample" style="font-weight:700;font-style:italic">abcdefg</td></tr>
+<tr><td class="label">NewCM</td>
+<td class="newcm sample">abcdefg</td>
+<td class="newcm sample" style="font-weight:700">abcdefg</td>
+<td class="newcm sample" style="font-style:italic">abcdefg</td>
+<td class="newcm sample" style="font-weight:700;font-style:italic">abcdefg</td></tr>
+</table>
+
+<h2>Focus: a e f g l (48px)</h2>
+<table>
+<tr><td class="label"></td><td class="label">Regular</td><td class="label">Bold</td><td class="label">Italic</td><td class="label">Bold Italic</td></tr>
+<tr><td class="label">CMU</td>
+<td class="cmu big">aegfl</td>
+<td class="cmu big" style="font-weight:700">aegfl</td>
+<td class="cmu big" style="font-style:italic">aegfl</td>
+<td class="cmu big" style="font-weight:700;font-style:italic">aegfl</td></tr>
+<tr><td class="label">NewCM</td>
+<td class="newcm big">aegfl</td>
+<td class="newcm big" style="font-weight:700">aegfl</td>
+<td class="newcm big" style="font-style:italic">aegfl</td>
+<td class="newcm big" style="font-weight:700;font-style:italic">aegfl</td></tr>
+</table>
+
+<h2>Prose Comparison</h2>
+<div class="label">CMU Regular</div>
+<p class="cmu sample">The quick brown fox jumps over the lazy dog. A fundamental algebraic equation.</p>
+<div class="label">CMU Italic</div>
+<p class="cmu sample" style="font-style:italic">The quick brown fox jumps over the lazy dog. A fundamental algebraic equation.</p>
+<div class="label">CMU Bold</div>
+<p class="cmu sample" style="font-weight:700">The quick brown fox jumps over the lazy dog. A fundamental algebraic equation.</p>
+<div class="label">CMU Bold Italic</div>
+<p class="cmu sample" style="font-weight:700;font-style:italic">The quick brown fox jumps over the lazy dog. A fundamental algebraic equation.</p>
+
+<hr>
+
+<div class="label">NewCM Regular</div>
+<p class="newcm sample">The quick brown fox jumps over the lazy dog. A fundamental algebraic equation.</p>
+<div class="label">NewCM Oblique</div>
+<p class="newcm sample" style="font-style:italic">The quick brown fox jumps over the lazy dog. A fundamental algebraic equation.</p>
+<div class="label">NewCM Bold</div>
+<p class="newcm sample" style="font-weight:700">The quick brown fox jumps over the lazy dog. A fundamental algebraic equation.</p>
+<div class="label">NewCM Bold Oblique</div>
+<p class="newcm sample" style="font-weight:700;font-style:italic">The quick brown fox jumps over the lazy dog. A fundamental algebraic equation.</p>
+
+<h2>Greek</h2>
+<table>
+<tr><td class="label"></td><td class="label">Regular</td><td class="label">Italic</td><td class="label">Bold</td><td class="label">Bold Italic</td></tr>
+<tr><td class="label">CMU</td>
+<td class="cmu sample">αβγδεΓΔΣΩ</td>
+<td class="cmu sample" style="font-style:italic">αβγδεΓΔΣΩ</td>
+<td class="cmu sample" style="font-weight:700">αβγδεΓΔΣΩ</td>
+<td class="cmu sample" style="font-weight:700;font-style:italic">αβγδεΓΔΣΩ</td></tr>
+<tr><td class="label">NewCM</td>
+<td class="newcm sample">αβγδεΓΔΣΩ</td>
+<td class="newcm sample" style="font-style:italic">αβγδεΓΔΣΩ</td>
+<td class="newcm sample" style="font-weight:700">αβγδεΓΔΣΩ</td>
+<td class="newcm sample" style="font-weight:700;font-style:italic">αβγδεΓΔΣΩ</td></tr>
+</table>
+
+</body></html>
