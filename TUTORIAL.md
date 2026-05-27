@@ -602,6 +602,115 @@ The `greek_from_text=True` parameter in `build_all_variants()` handles this:
 Also use `TEXT_RANGES_WITH_GREEK` for the text_ranges parameter to pull
 basic Greek from the text font layer instead of the math font layer.
 
+### 18b. Latin-only override (when you want text Latin but math Greek)
+
+Sometimes you want math italic/bold Latin from your text font (to match surrounding
+text) but Greek from the math font (which has proper math Greek letterforms).
+`greek_from_text=True` overrides BOTH Latin and Greek, which is wrong if your text
+font has Greek that differs from the math font's design.
+
+**Solution: post-build Latin-only override.** Don't use `greek_from_text`. Instead,
+after `build_all_variants()`, manually replace only the Latin math alphanumeric
+codepoints in `normal.js` with glyphs extracted from the text font:
+
+```python
+from mathjax_font_lib import get_glyph_metrics_and_path
+
+_LATIN_MAPPINGS = [
+    (0x1D434, 0x41, 26, 'italic'),      # math italic A-Z
+    (0x1D44E, 0x61, 26, 'italic'),      # math italic a-z
+    (0x1D400, 0x41, 26, 'bold'),         # math bold A-Z
+    (0x1D41A, 0x61, 26, 'bold'),         # math bold a-z
+    (0x1D468, 0x41, 26, 'bold_italic'),  # math bold italic A-Z
+    (0x1D482, 0x61, 26, 'bold_italic'),  # math bold italic a-z
+    # ... plus sans-serif variants (see _MATH_ALPHA_MAPPINGS in library)
+]
+
+for math_start, basic_start, n, font_key in _LATIN_MAPPINGS:
+    font = text_fonts[font_key]
+    for i in range(n):
+        math_cp = math_start + i
+        basic_cp = basic_start + i
+        info = get_glyph_metrics_and_path(font, basic_cp)
+        ic_val = ic_map.get(math_cp, 0)  # preserve MATH table ic
+        # Build entry with ic + sk + path, replace in normal.js
+```
+
+This preserves:
+- MATH table italic corrections (ic) — critical for `U Σ V^T` spacing
+- Math font Greek at all codepoints
+- Text font Latin letterforms in all styles
+
+Used by: `mathjax-lm-sans` (CMU Sans Latin + NewCM Sans Math Greek).
+
+### 18c. Italic corrections and the smp redirect chain
+
+MathJax renders `$U$` by looking up U+0055 in the **italic variant**, not U+1D448
+in the normal variant. If `italic.js` has an entry for U+0055, that entry is used
+directly — and it typically has NO `ic` (italic correction).
+
+The MATH table's italic corrections live at math alphanumeric codepoints (U+1D434+)
+in `normal.js`. MathJax reaches these via "smp redirects" — but only if the italic
+variant does NOT have the basic codepoint.
+
+**The fix: remove basic Latin A-Z, a-z from `italic.js`.**
+
+```python
+for variant_file in ['cjs/svg/italic.js', 'cjs/chtml/italic.js']:
+    for cp in list(range(0x41, 0x5B)) + list(range(0x61, 0x7B)):
+        # Remove 0x41-0x5A (A-Z) and 0x61-0x7A (a-z) entries
+```
+
+This forces MathJax to follow the smp redirect: italic variant U+0055 → not found →
+smp redirect to U+1D448 in normal.js → entry has `ic: 0.146` → spacing works.
+
+**The fallback chain problem:** If you also remove from `bold-italic.js`, MathJax
+falls back to `bold.js` (which has upright bold, not bold italic). So either:
+- Keep basic Latin in `bold-italic.js` (from the bold italic text font), OR
+- Also remove from `bold.js` if the math bold entries in normal.js are correct
+
+**When `greek_from_text` is used:** It replaces entries in normal.js, dropping ic
+values that were applied earlier. Fix with a post-build step that re-injects ic
+from `ic_map`:
+
+```python
+for cp, ic_val in ic_map.items():
+    if ic_val == 0: continue
+    # Find entry in normal.js, add ic: value if missing
+```
+
+### 18d. Synthetic bold italic for fonts missing one
+
+When a text font has no bold italic (e.g., Libertinus Sans), you can synthesize one:
+
+1. **Skew the bold font** by the italic angle (typically 12°):
+   ```python
+   # Desubroutinize CFF first (fontTools Subsetter with options.desubroutinize=True)
+   # Then transform each glyph:
+   TransformPen(t2pen, (1, 0, tan(12°), 1, 0, 0))
+   ```
+
+2. **Replace select glyphs** where italic shape differs fundamentally from upright
+   (e.g., single-story 'a', descending 'f', curved 'l'). These need hand-edited
+   outlines — algorithmic emboldening produces artifacts at corners.
+
+3. **Edit in Inkscape**: Export emboldened paths to SVG, add reference overlays
+   (italic outline in blue, skewed bold in red), edit nodes, read back.
+
+4. **Set advance widths**: `italic_width × (bold_width / regular_width)` per glyph
+   for the whole font, plus manual L/R sidebearing tuning for hand-edited glyphs.
+
+5. **Copy GPOS** (kerning) from the italic font, subset to common glyphs.
+
+6. **Visual rhythm tuning**: Use test strings like `nnnanonn`, `fundamental`,
+   `algebra` at multiple sizes. Professional typographers space by eye, not formula.
+
+See `mathjax-libertinus-sans/BOLD-ITALIC.md` for the full pipeline.
+
+**Licensing note:** GPL3 fonts (e.g., NewCM) cannot have modified glyphs
+redistributed without the derivative also being GPL3. SIL OFL fonts (e.g., CMU)
+are more permissive for modifications. Check the license before synthesizing.
+
 ### 19. Two-part stretchy assemblies (arrows and vert bars)
 
 Some math fonts use 2-part assemblies for arrows (extender + arrowhead) and

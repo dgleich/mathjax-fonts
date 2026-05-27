@@ -64,15 +64,70 @@ def main():
         css_prefix=CSS_PREFIX,
         x_height=x_height,
         text_font_paths=TEXT_FONTS,
-        # Not using greek_from_text — CMU Sans Greek in TEXT_RANGES is not needed,
-        # and enabling it with DEFAULT_TEXT_RANGES breaks bold/bold-italic Greek.
-        # IC fix is handled by removing basic Latin from italic.js instead.
+        # NOT using greek_from_text — it overrides both Latin AND Greek from text font.
+        # We want Latin from CMU Sans but Greek from NewCM Math.
+        # Post-build step handles Latin-only override.
     )
 
-    # Remove basic Latin A-Z, a-z from italic/bold-italic variants so MathJax
-    # follows smp redirects to normal.js (which has ic from MATH table).
-    # Remove basic Latin from italic and bold-italic variants so MathJax
-    # follows smp redirects to normal.js (which has ic and correct glyphs).
+    # Override math alphanumeric LATIN (not Greek) with CMU Sans text font glyphs.
+    from mathjax_font_lib import get_glyph_metrics_and_path
+    _LATIN_MAPPINGS = [
+        (0x1D434, 0x41, 26, 'italic'),     # math italic A-Z
+        (0x1D44E, 0x61, 26, 'italic'),     # math italic a-z
+        (0x1D400, 0x41, 26, 'bold'),        # math bold A-Z
+        (0x1D41A, 0x61, 26, 'bold'),        # math bold a-z
+        (0x1D468, 0x41, 26, 'bold_italic'), # math bold italic A-Z
+        (0x1D482, 0x61, 26, 'bold_italic'), # math bold italic a-z
+        (0x1D5A0, 0x41, 26, 'regular'),     # math sans A-Z
+        (0x1D5BA, 0x61, 26, 'regular'),     # math sans a-z
+        (0x1D5D4, 0x41, 26, 'bold'),        # math sans bold A-Z
+        (0x1D5EE, 0x61, 26, 'bold'),        # math sans bold a-z
+        (0x1D608, 0x41, 26, 'italic'),      # math sans italic A-Z
+        (0x1D622, 0x61, 26, 'italic'),      # math sans italic a-z
+        (0x1D63C, 0x41, 26, 'bold_italic'), # math sans bold italic A-Z
+        (0x1D656, 0x61, 26, 'bold_italic'), # math sans bold italic a-z
+    ]
+    for js_subdir in ['cjs/svg', 'cjs/chtml']:
+        normal_path = os.path.join(OUTPUT_DIR, js_subdir, 'normal.js')
+        if not os.path.exists(normal_path):
+            continue
+        with open(normal_path) as f:
+            content = f.read()
+        count = 0
+        for math_start, basic_start, n, font_key in _LATIN_MAPPINGS:
+            font = text_fonts.get(font_key)
+            if not font:
+                continue
+            cmap_tf = font.getBestCmap()
+            for i in range(n):
+                math_cp = math_start + i
+                basic_cp = basic_start + i
+                if basic_cp not in cmap_tf:
+                    continue
+                info = get_glyph_metrics_and_path(font, basic_cp)
+                if not info:
+                    continue
+                h, d, w = info['height'], info['depth'], info['width']
+                p = info['path']
+                sk = info.get('sk', 0)
+                # Preserve ic from MATH table if available
+                ic_val = ic_map.get(math_cp, 0)
+                props = []
+                if ic_val: props.append(f"ic: {ic_val}")
+                if sk: props.append(f"sk: {sk}")
+                props.append(f"p: '{p}'")
+                new_entry = f"0x{math_cp:X}: [{h}, {d}, {w}, {{ {', '.join(props)} }}]"
+                pattern = rf'0x{math_cp:X}: \[[^\]]+\]'
+                m = re.search(pattern, content)
+                if m:
+                    content = content.replace(m.group(0), new_entry)
+                    count += 1
+        with open(normal_path, 'w') as f:
+            f.write(content)
+        print(f"  Overrode {count} math-alpha Latin with CMU Sans in {js_subdir}/normal.js")
+
+    # Remove basic Latin from italic variant so MathJax follows smp redirects
+    # to normal.js (which has ic from MATH table).
     for variant_file in ['cjs/svg/italic.js',
                          'cjs/chtml/italic.js']:
         fpath = os.path.join(OUTPUT_DIR, variant_file)
