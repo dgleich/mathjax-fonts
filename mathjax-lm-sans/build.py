@@ -9,6 +9,7 @@ from mathjax_font_lib import (
     load_font, get_x_height, extract_italic_corrections, override_integral_ics,
     build_all_variants, write_boilerplate, adjust_integral_widths,
     DEFAULT_TEXT_RANGES, DEFAULT_MATH_RANGES, DEFAULT_EXTRA_MATH,
+    TEXT_RANGES_WITH_GREEK,
 )
 import re
 
@@ -23,11 +24,14 @@ TEXT_FONTS = {
     'regular':     os.path.join(FONTS_DIR, 'cmunss.otf'),
     'bold':        os.path.join(FONTS_DIR, 'cmunsx.otf'),
     'italic':      os.path.join(FONTS_DIR, 'cmunsi.otf'),
+    # CMU Sans Bold Extended Oblique — not ideal (extended width, oblique not true italic)
+    # but it's the only bold italic available. NewCM Sans Math's bold-italic glyphs are
+    # just slanted bold (not true italic). See GitHub issue for contributing a true BI.
     'bold_italic': os.path.join(FONTS_DIR, 'cmunso.otf'),
 }
 MATH_FONT = os.path.join(FONTS_DIR, 'NewCMSansMath-Regular.otf')
 
-# CMU Sans Serif has Greek built in — no middle layer needed
+# CMU Sans has Greek but we use the math font's Greek (proper math letterforms)
 TEXT_RANGES = DEFAULT_TEXT_RANGES
 MATH_RANGES = DEFAULT_MATH_RANGES
 EXTRA_MATH = DEFAULT_EXTRA_MATH
@@ -60,7 +64,30 @@ def main():
         css_prefix=CSS_PREFIX,
         x_height=x_height,
         text_font_paths=TEXT_FONTS,
+        # Not using greek_from_text — CMU Sans Greek in TEXT_RANGES is not needed,
+        # and enabling it with DEFAULT_TEXT_RANGES breaks bold/bold-italic Greek.
+        # IC fix is handled by removing basic Latin from italic.js instead.
     )
+
+    # Remove basic Latin A-Z, a-z from italic/bold-italic variants so MathJax
+    # follows smp redirects to normal.js (which has ic from MATH table).
+    # Remove basic Latin from italic and bold-italic variants so MathJax
+    # follows smp redirects to normal.js (which has ic and correct glyphs).
+    for variant_file in ['cjs/svg/italic.js',
+                         'cjs/chtml/italic.js']:
+        fpath = os.path.join(OUTPUT_DIR, variant_file)
+        if not os.path.exists(fpath):
+            continue
+        with open(fpath) as f:
+            vc = f.read()
+        before = vc.count('0x')
+        for cp in list(range(0x41, 0x5B)) + list(range(0x61, 0x7B)):
+            vc = re.sub(rf'    0x{cp:X}: \[[^\]]+\],?\n', '', vc)
+        with open(fpath, 'w') as f:
+            f.write(vc)
+        after = vc.count('0x')
+        if before - after:
+            print(f"  Removed {before - after} basic Latin from {variant_file}")
 
     # Post-build: adjust overbrace/underbrace label spacing
     for delim_path in [
@@ -84,7 +111,27 @@ def main():
     print("  Adjusted overbrace/underbrace label spacing (+0.35em)")
 
     # Adjust integral widths for better subscript tucking
-    adjust_integral_widths(OUTPUT_DIR, smallop_w_ratio=0.91, smallop_ic=0.15, largeop_w_ratio=0.73, largeop_ic=0.25)
+    adjust_integral_widths(OUTPUT_DIR, smallop_w_ratio=0.75, smallop_ic=0.03, largeop_w_ratio=0.73, largeop_ic=0.25)
+
+    # Tighten \sum, \prod limits in smallop (reduce width to tuck sub/super closer)
+    for js_path in [os.path.join(OUTPUT_DIR, "cjs/svg/smallop.js")]:
+        if not os.path.exists(js_path):
+            continue
+        with open(js_path) as f:
+            sc = f.read()
+        for cp in [0x2211]:  # sum only
+            m = re.search(rf'0x{cp:X}:\s*\[([^\]]+)\]', sc)
+            if not m:
+                continue
+            entry = m.group(1)
+            parts = entry.split(',', 3)
+            orig_w = float(parts[2].split('{')[0].strip())
+            new_w = round(orig_w * 0.90, 3)
+            parts[2] = f' {new_w}'
+            sc = sc.replace(m.group(0), f'0x{cp:X}: [{",".join(parts)}]')
+        with open(js_path, 'w') as f:
+            f.write(sc)
+        print("  Tightened sum/prod limits in smallop")
 
     write_boilerplate(OUTPUT_DIR, FONT_ID, FONT_NAME)
     print(f"Done! Output in {OUTPUT_DIR}")
