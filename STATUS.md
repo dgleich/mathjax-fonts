@@ -44,7 +44,7 @@ Each package has a `build.py` that:
 4. Applies post-build tweaks (overbrace spacing, etc.)
 5. Calls `write_boilerplate()` for webpack configs
 
-## Known Issues / Gotchas (17 total in TUTORIAL.md)
+## Known Issues / Gotchas (22+ in TUTORIAL.md)
 
 Critical ones to remember:
 - **\overline uses U+2015**, not U+0305 — needs self-stretching delimiter entry
@@ -57,11 +57,37 @@ Critical ones to remember:
 - **Overbrace/underbrace**: HDW values may need +0.35em adjustment
 - **Integral IC**: Set to 0 for Libertinus (LM Math raw values too large). Largeop IC override in library.
 
+## Recent Fixes (session 05-26/27)
+
+### Libertinus Sans Bold Italic — RESOLVED
+Synthesized `LibertinusSans-BoldItalic-Synth.otf`: skew bold 12° + hand-edited
+paths for a, e, f, g, l, kappa (Inkscape node editing). Per-glyph sidebearing
+tuning via visual rhythm matching. See `BOLD-ITALIC.md` for full pipeline.
+
+### Italic Corrections (ic) via smp redirects — ALL FONTS
+MathJax renders `$U$` via U+0055 in italic.js, not U+1D448 in normal.js.
+If italic.js has the entry, ic from MATH table is never used → `U Σ V^T` too close.
+**Fix**: Remove basic Latin A-Z/a-z AND basic Greek from italic.js so MathJax
+follows smp redirects to normal.js (which has ic). Applied to Libertinus Sans
+and CMU Sans; needs applying to all other fonts.
+
+### Latin-only override (CMU Sans)
+`greek_from_text=True` overrides both Latin AND Greek. CMU Sans needs Latin from
+text font but Greek from NewCM Sans Math. Solution: post-build Latin-only override
+using `get_glyph_metrics_and_path` + `compute_visual_skews` with 1.3× sk factor.
+
+### Accent sk on Greek
+Basic Greek in italic.js blocked smp redirects to normal.js (same as Latin).
+Removing Greek from italic.js + applying angle-based sk to math italic/bold-italic
+Greek ranges fixed `\hat{\alpha}` centering.
+
+### NewCM Sans Bold Italic — NO SOLUTION
+NewCM Sans Math's bold-italic glyphs are slanted bold, not true italic.
+GPL3 license prevents synthesis. GitHub issue #1 filed.
+
 ## Open Items / Future Improvements
 
-- **Libertinus Sans Bold Italic**: Currently uses Italic as fallback. LaTeX package
-  uses `embolden=3` (synthetic stroke thickening). Could implement via fontTools
-  outline offset for slightly bolder SVG paths, but effect is very subtle (0.3%).
+- **Libertinus Sans Bold Italic**: RESOLVED (see above).
 - **Angle bracket scaling (langle/rangle)**: NewCM Sans Math only has 8 size
   variants (~3em max) and no stretchy assembly for U+27E8/27E9. They don't grow
   large enough for tall fractions. Fix: synthesize a stretchy assembly by splitting
@@ -155,7 +181,7 @@ Source Code Pro provides Greek (25/25). Use `build_middle_layer_from_otf()` from
 newtxsf Type 1 fonts provide sans-serif Greek. Library has `load_ntxsf_font()`, `build_ntxsf_layer()`, and the glyph maps.
 
 ### Libertinus Sans Bold Italic
-No BI font exists. LaTeX uses Italic+embolden=3 (very subtle). Current build uses Italic as BI fallback.
+Synthesized from skewed bold + hand-edited italic-shape glyphs. See `BOLD-ITALIC.md`.
 
 ## Build Commands
 
