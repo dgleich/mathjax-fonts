@@ -95,8 +95,71 @@ def main():
             f.write(dc)
     print("  Adjusted overbrace/underbrace label spacing (+0.35em)")
     
+    # Remove basic Latin + Greek from italic.js so MathJax follows smp redirects
+    # to normal.js (which has ic from MATH table and proper sk values).
+    for variant_file in ['cjs/svg/italic.js', 'cjs/chtml/italic.js']:
+        fpath = os.path.join(OUTPUT_DIR, variant_file)
+        if not os.path.exists(fpath):
+            continue
+        with open(fpath) as f:
+            vc = f.read()
+        before = vc.count('0x')
+        for cp in (list(range(0x41, 0x5B)) + list(range(0x61, 0x7B)) +
+                   list(range(0x391, 0x3AA)) + list(range(0x3B1, 0x3CA))):
+            vc = re.sub(rf'    0x{cp:X}: \[[^\]]+\],?\n', '', vc)
+        with open(fpath, 'w') as f:
+            f.write(vc)
+        after = vc.count('0x')
+        if before - after:
+            print(f"  Removed {before - after} basic Latin+Greek from {variant_file}")
+
+    # Apply angle-based sk to math italic/bold-italic Greek in normal.js
+    import math as _math
+    italic_angle = 12.024  # Noto Sans italic angle
+    upm = 1000
+    xh = 536
+    cap = 714
+    tan_a = _math.tan(_math.radians(italic_angle))
+    sk_factor = 1.3
+    sk_lc = round(xh * tan_a / 2 / upm * sk_factor, 4)
+    sk_uc = round(cap * tan_a / 2 / upm * sk_factor, 4)
+    print(f"  Greek sk: lowercase={sk_lc}, uppercase={sk_uc} (angle={italic_angle}°, {sk_factor}x)")
+
+    _GREEK_SK_RANGES = [
+        (0x1D6FC, 25, sk_lc), (0x1D6E2, 25, sk_uc),  # math italic
+        (0x1D736, 25, sk_lc), (0x1D71C, 25, sk_uc),  # math bold italic
+        (0x1D7AA, 25, sk_lc), (0x1D790, 25, sk_uc),  # sans bold italic
+    ]
+    for js_subdir in ['cjs/svg', 'cjs/chtml']:
+        normal_path = os.path.join(OUTPUT_DIR, js_subdir, 'normal.js')
+        if not os.path.exists(normal_path):
+            continue
+        with open(normal_path) as f:
+            content = f.read()
+        gcount = 0
+        for start_cp, n, sk_val in _GREEK_SK_RANGES:
+            for i in range(n):
+                cp = start_cp + i
+                pattern = rf'0x{cp:X}: \[([^\]]+)\]'
+                m = re.search(pattern, content)
+                if not m: continue
+                entry = m.group(0)
+                if 'sk:' in entry:
+                    new_entry = re.sub(r'sk: [-\d.]+', f'sk: {sk_val}', entry)
+                elif '{ p:' in entry:
+                    new_entry = entry.replace('{ p:', f'{{ sk: {sk_val}, p:')
+                elif '{ ic:' in entry:
+                    new_entry = entry.replace('{ ic:', f'{{ sk: {sk_val}, ic:')
+                else: continue
+                content = content.replace(entry, new_entry)
+                gcount += 1
+        with open(normal_path, 'w') as f:
+            f.write(content)
+        if gcount:
+            print(f"  Applied angle-based sk to {gcount} Greek in {js_subdir}/normal.js")
+
     # Adjust integral widths for better subscript tucking
-    adjust_integral_widths(OUTPUT_DIR)
+    adjust_integral_widths(OUTPUT_DIR, smallop_w_ratio=0.80, smallop_ic=0.15, largeop_w_ratio=0.64, largeop_ic=0.37)
 
     # Clean up temp files
     import shutil
