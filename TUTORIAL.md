@@ -717,6 +717,65 @@ See `mathjax-libertinus-sans/BOLD-ITALIC.md` for the full pipeline.
 redistributed without the derivative also being GPL3. SIL OFL fonts (e.g., CMU)
 are more permissive for modifications. Check the license before synthesizing.
 
+### 18e. Separate calligraphic (\mathcal) from script (\mathscr)
+
+By default, `\mathcal` and `\mathscr` use the same Unicode codepoints (U+1D49C+),
+so they render identically. MathJax supports separating them via the
+`-tex-calligraphic` variant, which is checked before falling through to the
+`script` variant (which uses normal.js).
+
+**Architecture:**
+- `\mathscr{A}` → `script` variant → falls through to `normal.js` U+1D49C
+- `\mathcal{A}` → `-tex-calligraphic` variant → checks `tex-calligraphic.js` first
+  → if found, uses that glyph; if not, falls through to `script` → `normal.js`
+
+**To use a different font for \mathcal (e.g., Lete Sans Math calligraphic):**
+
+1. **Create `tex-calligraphic.js`** with glyphs from the donor font at script
+   codepoints (U+1D49C-1D4B5 for uppercase, plus letterlike redirects like
+   U+212C for script B, U+210B for script H, etc.):
+   ```python
+   # Scale donor font to match target cap height
+   scale = target_cap / donor_cap  # e.g., 714/662 = 1.079
+   # Extract glyphs with RoundingScalePen (integer coords!)
+   # Strip leading 'M' from paths (MathJax prepends its own)
+   ```
+
+2. **Create empty `tex-calligraphic-bold.js`** (bold calligraphic falls through).
+
+3. **Wire up in `svg.js`**: Add requires and entries in `defaultChars` and
+   `variantCacheIds` for `-tex-calligraphic` and `-tex-bold-calligraphic`.
+
+4. **Critical: remove script codepoints from bold.js, italic.js, bold-italic.js**.
+   These duplicates shadow the normal.js entries that `\mathscr` needs, AND they
+   shadow the tex-calligraphic.js entries that `\mathcal` needs. Without removal,
+   MathJax finds the duplicate first and never reaches the correct variant data.
+   ```python
+   SCRIPT_CPS = list(range(0x1D49C, 0x1D504))  # script + bold script
+   LETTERLIKE = [0x212C, 0x2130, 0x2131, 0x210B, 0x2110, 0x2112, 0x2133, 0x211B]
+   # Remove from bold.js, italic.js, bold-italic.js
+   ```
+
+**Path format requirements:**
+- Integer coordinates only (no floats — MathJax won't render them)
+- No leading `M` (MathJax prepends its own `M x y` when inserting paths)
+- Scale coordinates to match target font's UPM/metrics
+
+**Variant inheritance chain (from MathJax core FontData.js):**
+```
+-tex-calligraphic → inherits from italic
+-tex-bold-calligraphic → inherits from bold-italic
+script → inherits from italic
+bold-script → inherits from bold-italic
+```
+
+The `-tex-calligraphic` variant is checked first for `\mathcal`. If a glyph
+exists there, it's used. Otherwise it falls through to `italic` → smp redirect
+→ `normal.js` (same path as `\mathscr`).
+
+Used by: `mathjax-noto-sans` (Lete Sans Math calligraphic for \mathcal, Noto
+Sans Math script for \mathscr).
+
 ### 19. Two-part stretchy assemblies (arrows and vert bars)
 
 Some math fonts use 2-part assemblies for arrows (extender + arrowhead) and

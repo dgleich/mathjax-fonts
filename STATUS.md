@@ -81,6 +81,12 @@ Basic Greek in italic.js blocked smp redirects to normal.js (same as Latin).
 Removing Greek from italic.js + applying angle-based sk to math italic/bold-italic
 Greek ranges fixed `\hat{\alpha}` centering.
 
+### Calligraphic/Script Separation (Noto Sans) — RESOLVED
+Lete Sans Math calligraphic for `\mathcal`, Noto script for `\mathscr`. Uses
+`tex-calligraphic.js` variant file with Lete glyphs scaled to Noto cap height.
+Script codepoint duplicates removed from bold/italic/bold-italic variants.
+Integer coordinates + no leading M required for paths. See tutorial 18e.
+
 ### NewCM Sans Bold Italic — NO SOLUTION
 NewCM Sans Math's bold-italic glyphs are slanted bold, not true italic.
 GPL3 license prevents synthesis. GitHub issue #1 filed.
