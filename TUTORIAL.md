@@ -729,27 +729,65 @@ so they render identically. MathJax supports separating them via the
 - `\mathcal{A}` → `-tex-calligraphic` variant → checks `tex-calligraphic.js` first
   → if found, uses that glyph; if not, falls through to `script` → `normal.js`
 
-**To use a different font for \mathcal (e.g., Lete Sans Math calligraphic):**
+**How MathJax routes \mathcal vs \mathscr:**
 
-1. **Create `tex-calligraphic.js`** with glyphs from the donor font at script
-   codepoints (U+1D49C-1D4B5 for uppercase, plus letterlike redirects like
-   U+212C for script B, U+210B for script H, etc.):
-   ```python
-   # Scale donor font to match target cap height
-   scale = target_cap / donor_cap  # e.g., 714/662 = 1.079
-   # Extract glyphs with RoundingScalePen (integer coords!)
-   # Strip leading 'M' from paths (MathJax prepends its own)
-   ```
+The lookup order for `\mathcal{A}` is:
+1. `-tex-calligraphic` chars (`tex-calligraphic.js`)
+2. `script` chars (`script.js`) — because `-tex-calligraphic` inherits from `script`
+3. `italic` chars
+4. `normal` chars (via smp redirect to U+1D49C+)
 
-2. **Create empty `tex-calligraphic-bold.js`** (bold calligraphic falls through).
+The lookup order for `\mathscr{A}` is:
+1. `script` chars (`script.js`)
+2. `italic` chars
+3. `normal` chars (via smp redirect to U+1D49C+)
 
-3. **Wire up in `svg.js`**: Add requires and entries in `defaultChars` and
-   `variantCacheIds` for `-tex-calligraphic` and `-tex-bold-calligraphic`.
+To make them different, you need data in BOTH `tex-calligraphic.js` (for \mathcal)
+AND `script.js` (for \mathscr). If only one has data, both commands find the same
+glyphs because \mathcal falls through to script.
 
-4. **Critical: remove script codepoints from bold.js, italic.js, bold-italic.js**.
-   These duplicates shadow the normal.js entries that `\mathscr` needs, AND they
-   shadow the tex-calligraphic.js entries that `\mathcal` needs. Without removal,
-   MathJax finds the duplicate first and never reaches the correct variant data.
+**Pattern A: Math font has OpenType stylistic alternates (NewCM Sans Math)**
+
+NewCM Sans Math has `ss01` feature that substitutes script glyphs with alternates:
+- Default glyphs = calligraphic style (for `\mathcal`)
+- ss01 `.alt` glyphs = script style (for `\mathscr`)
+
+```python
+# Extract ss01 mapping from GSUB table
+for feat_rec in gsub.FeatureList.FeatureRecord:
+    if feat_rec.FeatureTag == 'ss01':
+        for li in feat_rec.Feature.LookupListIndex:
+            for st in gsub.LookupList.Lookup[li].SubTable:
+                ss01_map.update(st.mapping)  # e.g. u1D49C -> u1D49C.alt
+
+# Put defaults in tex-calligraphic.js, ss01 alternates in script.js
+```
+
+Used by: `mathjax-lm-sans` (NewCM default = \mathcal, NewCM ss01 = \mathscr).
+
+**Pattern B: Use a donor font for calligraphic (Lete Sans Math)**
+
+When the math font doesn't have alternates, use a different font's calligraphic:
+
+```python
+# Scale donor font to match target cap height
+scale = target_cap / donor_cap  # e.g., 714/662 = 1.079
+# Extract glyphs with RoundingScalePen (integer coords!)
+# Strip leading 'M' from paths (MathJax prepends its own)
+# Put in tex-calligraphic.js; leave normal.js untouched for \mathscr
+```
+
+Used by: `mathjax-noto-sans` (Lete calligraphic = \mathcal, Noto script = \mathscr).
+
+**For both patterns:**
+
+1. **Wire up in `svg.js`**: Add requires and entries in `defaultChars` and
+   `variantCacheIds` for `-tex-calligraphic`, `-tex-bold-calligraphic`,
+   `script`, and `bold-script`.
+
+2. **Critical: remove script codepoints from bold.js, italic.js, bold-italic.js**.
+   These duplicates shadow the variant data. Without removal, MathJax finds the
+   duplicate first and never reaches the correct variant data.
    ```python
    SCRIPT_CPS = list(range(0x1D49C, 0x1D504))  # script + bold script
    LETTERLIKE = [0x212C, 0x2130, 0x2131, 0x210B, 0x2110, 0x2112, 0x2133, 0x211B]
@@ -763,18 +801,16 @@ so they render identically. MathJax supports separating them via the
 
 **Variant inheritance chain (from MathJax core FontData.js):**
 ```
--tex-calligraphic → inherits from italic
--tex-bold-calligraphic → inherits from bold-italic
+-tex-calligraphic → inherits from script → italic
+-tex-bold-calligraphic → inherits from bold-script → bold-italic
 script → inherits from italic
 bold-script → inherits from bold-italic
 ```
 
-The `-tex-calligraphic` variant is checked first for `\mathcal`. If a glyph
-exists there, it's used. Otherwise it falls through to `italic` → smp redirect
-→ `normal.js` (same path as `\mathscr`).
-
-Used by: `mathjax-noto-sans` (Lete Sans Math calligraphic for \mathcal, Noto
-Sans Math script for \mathscr).
+**How the CDN MathJax does it:** The CDN bundle has EMPTY `tex-calligraphic.js`
+and `script.js`. It relies on runtime dynamic font loading with OpenType features
+(ss01) applied via CSS. Our pre-extracted SVG bundles can't do this, so we must
+extract both glyph sets explicitly.
 
 ### 19. Two-part stretchy assemblies (arrows and vert bars)
 
