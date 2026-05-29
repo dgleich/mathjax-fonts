@@ -26,9 +26,39 @@ UPRIGHT_VAR = os.path.join(FONTS_DIR, 'SourceCodePro[wght].ttf')
 ITALIC_VAR = os.path.join(FONTS_DIR, 'SourceCodePro-Italic[wght].ttf')
 
 # Source Code Pro has Greek built in — no middle layer needed
-TEXT_RANGES = TEXT_RANGES_WITH_GREEK
+# Exclude parens/brackets from text font — monospace versions are too short for math.
+# Use math font (Noto Sans Math) versions instead via EXTRA_MATH.
+TEXT_RANGES = [
+    (0x20, 0x27),     # space through apostrophe (before parens)
+    # skip 0x28-0x29 ( )
+    (0x2A, 0x2A),     # *
+    # skip 0x2B + 0x2C , 0x2D - (use math font for operators)
+    (0x2C, 0x2C),     # comma
+    (0x2E, 0x2F),     # . /
+    (0x30, 0x39),     # digits 0-9
+    (0x3A, 0x3B),     # : ;
+    # skip 0x3C < 0x3D = 0x3E > (use math font)
+    (0x3F, 0x5A),     # ? @ A-Z
+    # skip 0x5B [
+    (0x5C, 0x5C),     # backslash
+    # skip 0x5D ]
+    (0x5E, 0x7A),     # ^ through z (before {)
+    # skip 0x7B { 0x7C | 0x7D }
+    (0x7E, 0x7E),     # tilde
+    (0xA0, 0xFF),     # Latin-1 Supplement
+    (0x391, 0x3A9),   # Greek capitals
+    (0x3B1, 0x3C9),   # Greek lowercase
+    (0x3D1, 0x3D6),   # Greek symbols
+    (0x3F0, 0x3F6),   # Greek symbols
+]
 MATH_RANGES = DEFAULT_MATH_RANGES
-EXTRA_MATH = DEFAULT_EXTRA_MATH
+EXTRA_MATH = (DEFAULT_EXTRA_MATH or []) + [
+    0x28, 0x29,   # ( ) — use math font
+    0x5B, 0x5D,   # [ ] — use math font
+    0x2B, 0x2D,       # + - — use math font
+    0x3C, 0x3D, 0x3E, # < = > — use math font
+    0x7B, 0x7C, 0x7D, # { | } — use math font
+]
 
 
 def main():
@@ -95,7 +125,7 @@ def main():
     print("  Adjusted overbrace/underbrace label spacing (+0.35em)")
     
     # Adjust integral widths for better subscript tucking
-    adjust_integral_widths(OUTPUT_DIR)
+    adjust_integral_widths(OUTPUT_DIR, smallop_w_ratio=0.75, smallop_ic=0.15, largeop_w_ratio=0.64, largeop_ic=0.37)
 
     shutil.rmtree(tmpdir, ignore_errors=True)
 

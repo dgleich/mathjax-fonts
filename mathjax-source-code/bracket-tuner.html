@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html><head><meta charset="utf-8">
+<title>Source Code Pro — Bracket &amp; Operator Tuner</title>
+<script>
+MathJax = {
+  tex: { inlineMath: [['$', '$']], displayMath: [['$$', '$$']] }
+};
+</script>
+<script id="MathJax-script" async src="tex-mml-svg-mathjax-source-code.js"></script>
+<style>
+@font-face { font-family: 'SCP'; src: url('../fonts/source-code-pro/SourceCodePro[wght].ttf'); font-style: normal; }
+@font-face { font-family: 'SCP'; src: url('../fonts/source-code-pro/SourceCodePro-Italic[wght].ttf'); font-style: italic; }
+body { font-family: 'SCP', monospace; max-width: 1000px; margin: 1.5em auto; font-size: 16px; }
+.controls { background: #f5f5f5; padding: 12px; border-radius: 8px; margin: 1em 0; position: sticky; top: 0; z-index: 10; }
+.ctrl-row { display: flex; align-items: center; gap: 6px; margin: 3px 0; }
+.ctrl-row label { width: 80px; font-size: 13px; }
+.ctrl-row input[type=range] { width: 200px; }
+.ctrl-row .val { width: 50px; font-size: 12px; font-family: monospace; }
+h3 { margin-top: 1.5em; border-bottom: 1px solid #ddd; }
+.note { font-size: 11px; color: #888; }
+.side-by-side { display: flex; gap: 30px; }
+.side-by-side > div { flex: 1; }
+.label { font-size: 12px; color: #999; margin-bottom: 4px; }
+</style>
+</head><body>
+<h1>Source Code Pro — Brackets &amp; Operators</h1>
+
+<h3>Operator comparison: Source Code Pro vs Noto Sans Math</h3>
+<div class="side-by-side">
+<div>
+<div class="label">Current (from Noto Sans Math)</div>
+<p>$a + b - c = d$</p>
+<p>$x < y > z$</p>
+<p>$f(x) = [a + b] \times c \div d$</p>
+<p>$\{x \in \mathbb{R} : |x| \leq 1\}$</p>
+</div>
+<div>
+<div class="label">In text italic (Source Code Pro)</div>
+<p><i>a</i> + <i>b</i> - <i>c</i> = <i>d</i></p>
+<p><i>x</i> &lt; <i>y</i> &gt; <i>z</i></p>
+<p><i>f</i>(<i>x</i>) = [<i>a</i> + <i>b</i>] × <i>c</i> ÷ <i>d</i></p>
+<p>{<i>x</i> ∈ ℝ : |<i>x</i>| ≤ 1}</p>
+</div>
+</div>
+
+<h3>Bracket/paren specimens</h3>
+<p>$(a)$ $[a]$ $\{a\}$ $|a|$ &nbsp; vs text: (a) [a] {a} |a|</p>
+<p>$(A + B)$ $[A + B]$ $\{A + B\}$</p>
+<p>$f(x) = g(x) + h[n]$</p>
+<p>Text f(x) = g(x) + h[n]</p>
+
+<h3>Inline expressions</h3>
+<p>The function $f(x) = \sum_{i=0}^n a_i x^i$ evaluates to $f(2) = [3 + 4] = 7$.</p>
+<p>Given $\{x_1, \ldots, x_n\}$ with $|x_i| \leq M$ for all $i$.</p>
+
+<h3>Operators in context</h3>
+<p>$a + b$, $a - b$, $a \times b$, $a \div b$, $a = b$, $a < b$, $a > b$</p>
+<p>$\int_0^1 f(x)\,dx + \sum_{k=1}^n a_k = \prod_{j} b_j$</p>
+
+<h3>Display mode</h3>
+$$f(x) = \left(\frac{a+b}{c-d}\right) \cdot \left[\sum_{i=1}^n x_i\right]$$
+$$\{x \in \mathbb{R} : |x - a| < \epsilon\}$$
+
+</body></html>

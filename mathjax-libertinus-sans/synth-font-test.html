@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html><head><meta charset="utf-8">
+<title>Synthetic Bold Italic Font Test</title>
+<style>
+@font-face { font-family: 'LibSans'; src: url('../fonts/libertinus/LibertinusSans-Regular.otf'); font-weight: normal; font-style: normal; }
+@font-face { font-family: 'LibSans'; src: url('../fonts/libertinus/LibertinusSans-Bold.otf'); font-weight: bold; font-style: normal; }
+@font-face { font-family: 'LibSans'; src: url('../fonts/libertinus/LibertinusSans-Italic.otf'); font-weight: normal; font-style: italic; }
+@font-face { font-family: 'LibSans'; src: url('../fonts/libertinus/LibertinusSans-BoldItalic-Synth.otf'); font-weight: bold; font-style: italic; }
+body { font-family: 'LibSans', sans-serif; max-width: 900px; margin: 2em auto; line-height: 1.6; }
+h1 { font-size: 24px; }
+.sample { font-size: 48px; margin: 0.5em 0; }
+.small { font-size: 24px; }
+.label { font-size: 12px; color: #666; font-weight: normal; font-style: normal; }
+table { border-collapse: collapse; }
+td { padding: 4px 12px; border: 1px solid #ddd; }
+.bi { font-weight: bold; font-style: italic; }
+.b { font-weight: bold; }
+.i { font-style: italic; }
+</style>
+</head><body>
+<h1>Libertinus Sans — Synthetic Bold Italic</h1>
+
+<h2>Weight/Style Matrix</h2>
+<table>
+<tr><td class="label">Style</td><td>Regular</td><td class="b">Bold</td><td class="i">Italic</td><td class="bi">Bold Italic</td></tr>
+<tr class="sample"><td class="label">Latin</td><td>Aa Bb Cc</td><td class="b">Aa Bb Cc</td><td class="i">Aa Bb Cc</td><td class="bi">Aa Bb Cc</td></tr>
+<tr class="small"><td class="label">All LC</td><td>abcdefghijklmnopqrstuvwxyz</td><td class="b">abcdefghijklmnopqrstuvwxyz</td><td class="i">abcdefghijklmnopqrstuvwxyz</td><td class="bi">abcdefghijklmnopqrstuvwxyz</td></tr>
+<tr class="small"><td class="label">All UC</td><td>ABCDEFGHIJKLMNOPQRSTUVWXYZ</td><td class="b">ABCDEFGHIJKLMNOPQRSTUVWXYZ</td><td class="i">ABCDEFGHIJKLMNOPQRSTUVWXYZ</td><td class="bi">ABCDEFGHIJKLMNOPQRSTUVWXYZ</td></tr>
+<tr class="small"><td class="label">Digits</td><td>0123456789</td><td class="b">0123456789</td><td class="i">0123456789</td><td class="bi">0123456789</td></tr>
+</table>
+
+<h2>Focus: Hand-Edited Glyphs (a, e, f, g, l, κ)</h2>
+<table>
+<tr><td class="label"></td><td class="label">Italic</td><td class="label">Bold Italic</td><td class="label">Bold (upright ref)</td></tr>
+<tr style="font-size:72px"><td class="label">a</td><td class="i">a</td><td class="bi">a</td><td class="b">a</td></tr>
+<tr style="font-size:72px"><td class="label">e</td><td class="i">e</td><td class="bi">e</td><td class="b">e</td></tr>
+<tr style="font-size:72px"><td class="label">f</td><td class="i">f</td><td class="bi">f</td><td class="b">f</td></tr>
+<tr style="font-size:72px"><td class="label">g</td><td class="i">g</td><td class="bi">g</td><td class="b">g</td></tr>
+<tr style="font-size:72px"><td class="label">l</td><td class="i">l</td><td class="bi">l</td><td class="b">l</td></tr>
+<tr style="font-size:72px"><td class="label">κ</td><td class="i">κ</td><td class="bi">κ</td><td class="b">κ</td></tr>
+</table>
+
+<h2>Comparison Prose</h2>
+<p>The quick brown fox jumps over the lazy dog. A fundamental algebraic equation: ax² + bx + c = 0. The eigenvalues of a matrix define its spectral properties.</p>
+<p class="i">The quick brown fox jumps over the lazy dog. A fundamental algebraic equation: ax² + bx + c = 0. The eigenvalues of a matrix define its spectral properties.</p>
+<p class="b">The quick brown fox jumps over the lazy dog. A fundamental algebraic equation: ax² + bx + c = 0. The eigenvalues of a matrix define its spectral properties.</p>
+<p class="bi">The quick brown fox jumps over the lazy dog. A fundamental algebraic equation: ax² + bx + c = 0. The eigenvalues of a matrix define its spectral properties.</p>
+
+<h2>Prose Test</h2>
+<p>Regular text looks like this. <b>Bold text is heavier.</b> <i>Italic text is slanted.</i> <b><i>Bold italic combines both weight and slant.</i></b></p>
+<p class="bi">The quick brown fox jumps over the lazy dog. A fundamental algebraic equation: ax² + bx + c = 0. The eigenvalues of a matrix define its spectral properties.</p>
+<p><b><i>Let f(x) = e^x and g(x) = log(x). Then (f ∘ g)(x) = x for all x > 0.</i></b></p>
+
+<h2>Mixed Context</h2>
+<p>In calculus, we define the <b><i>derivative</i></b> of a function <b><i>f</i></b> at point <b><i>a</i></b> as the limit <b><i>f'(a) = lim(h→0) [f(a+h) - f(a)]/h</i></b>.</p>
+<p>The <b><i>Euler–Lagrange equation</i></b> states that for a functional <b><i>J[y] = ∫L(x, y, y')dx</i></b>, the extremal satisfies <b><i>∂L/∂y - d/dx(∂L/∂y') = 0</i></b>.</p>
+</body></html>

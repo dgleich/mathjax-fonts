@@ -97,7 +97,7 @@ def main():
     print("  Adjusted overbrace/underbrace label spacing (+0.35em)")
     
     # Adjust integral widths for better subscript tucking
-    adjust_integral_widths(OUTPUT_DIR)
+    adjust_integral_widths(OUTPUT_DIR, smallop_w_ratio=0.75, smallop_ic=0.15, largeop_w_ratio=0.64, largeop_ic=0.37)
 
     shutil.rmtree(tmpdir, ignore_errors=True)
 
