@@ -812,6 +812,62 @@ and `script.js`. It relies on runtime dynamic font loading with OpenType feature
 (ss01) applied via CSS. Our pre-extracted SVG bundles can't do this, so we must
 extract both glyph sets explicitly.
 
+### 18f. Monospace font operator/bracket handling
+
+Monospace fonts (Source Code Pro) have all glyphs at the same width (~600 units),
+making operators (+, -, =, <, >) and brackets (()[]{}|) too wide and sometimes
+too short for math context. Use the math font's versions instead:
+
+```python
+TEXT_RANGES = [
+    (0x20, 0x27),     # space through apostrophe
+    # skip ( )
+    (0x2A, 0x2A),     # *
+    (0x2C, 0x2C),     # comma
+    (0x2E, 0x2F),     # . /
+    (0x30, 0x39),     # digits
+    (0x3A, 0x3B),     # : ;
+    # skip < = >
+    (0x3F, 0x5A),     # ? @ A-Z
+    # skip [ ]
+    ...
+]
+EXTRA_MATH = [0x28, 0x29, 0x2B, 0x2D, 0x3C, 0x3D, 0x3E, 0x5B, 0x5D, 0x7B, 0x7C, 0x7D]
+```
+
+**Bracket vertical centering**: Math font brackets may sit too low relative to the
+text font's cap height (different design metrics). Fix by adjusting H and D in ALL
+variant files (normal, bold, italic, bold-italic, size3-15, smallop, largeop):
+
+```python
+# Decrease H, increase D by the same amount = shift bracket UP
+# 50 units worked for Source Code Pro with Noto Sans Math brackets
+new_h = round(h - SHIFT/1000, 3)
+new_d = round(d + SHIFT/1000, 3)
+```
+
+Must apply to ALL files (not just normal.js) because brackets appear in
+every size variant. MathJax uses whichever copy it finds first.
+
+### 18g. Slanting upright Greek for fonts without italic Greek
+
+Some fonts (Source Code Pro) have Greek in regular/bold but NOT in italic.
+`greek_from_text=True` falls back to regular Greek, producing upright math italic.
+Fix: slant the regular/bold Greek by the italic angle:
+
+```python
+# Apply 12° skew to regular Greek -> math italic Greek
+svgpen = SVGPathPen(gs)
+tpen = TransformPen(svgpen, (1, 0, tan(12°), 1, 0, 0))
+gs[glyph_name].draw(tpen)
+# Replace U+1D6FC+ entries in normal.js with slanted paths
+```
+
+Apply to:
+- Math italic Greek (U+1D6FC-1D714, U+1D6E2-1D6FA) ← slanted regular
+- Math bold italic Greek (U+1D736-1D74E, U+1D71C-1D734) ← slanted bold
+- Sans bold italic Greek (U+1D7AA-1D7C2, U+1D790-1D7A8) ← slanted bold
+
 ### 19. Two-part stretchy assemblies (arrows and vert bars)
 
 Some math fonts use 2-part assemblies for arrows (extender + arrowhead) and
