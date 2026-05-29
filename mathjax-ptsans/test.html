@@ -24,7 +24,7 @@
   src: url("chtml/woff2/mjx-ptsans-bi.woff2") format("woff2");
   font-weight: bold; font-style: italic;
 }
-  :root { --font-body: "PT Sans", sans-serif; --font-label: "PT Sans + Lete Sans Math"; }
+  :root { --font-body: "PT Sans"; --font-label: "PT Sans + Lete Sans Math"; }
   body {
     font-family: var(--font-body);
     max-width: 850px;
@@ -327,6 +327,36 @@ $\sum_{i=1}^n$ &ensp; $\prod_{j=1}^m$ &ensp; $\bigcup_{k}^{}$ &ensp; $\bigcap_{k
 </p>
 </div>
 
+</div>
+
+<!-- ==================== TEXT-MATH HARMONIZATION ==================== -->
+<div id="harmonization">
+<h2>Text–Math Harmonization</h2>
+
+<div class="specimen-block">
+<span class="field-label">Inline math in prose (cap height, x-height, weight)</span>
+<p>The matrix $A$ has eigenvalues $\lambda_1, \ldots, \lambda_n$.
+Let $X$ be a topological space and $L$ a line bundle.
+The function $f(x) = e^{-x^2}$ is in $L^2(\mathbb{R})$.
+We define $T : V \to W$ where $V$ and $W$ are Banach spaces.</p>
+
+<span class="field-label">Capital letters: text vs math interleaved</span>
+<p>A $A$ B $B$ C $C$ D $D$ E $E$ F $F$ G $G$ H $H$ I $I$ J $J$ K $K$ L $L$ M $M$ N $N$ O $O$ P $P$ Q $Q$ R $R$ S $S$ T $T$ U $U$ V $V$ W $W$ X $X$ Y $Y$ Z $Z$</p>
+
+<span class="field-label">Capital letters: text vs bold math interleaved</span>
+<p>A $\mathbf{A}$ B $\mathbf{B}$ C $\mathbf{C}$ D $\mathbf{D}$ E $\mathbf{E}$ F $\mathbf{F}$ G $\mathbf{G}$ H $\mathbf{H}$ I $\mathbf{I}$ J $\mathbf{J}$ K $\mathbf{K}$ L $\mathbf{L}$ M $\mathbf{M}$</p>
+
+<span class="field-label">Lowercase: text vs math interleaved</span>
+<p>a $a$ b $b$ c $c$ d $d$ e $e$ f $f$ g $g$ h $h$ i $i$ j $j$ k $k$ l $l$ m $m$ n $n$ o $o$ p $p$ q $q$ r $r$ s $s$ t $t$ u $u$ v $v$ w $w$ x $x$ y $y$ z $z$</p>
+
+<span class="field-label">Digits: text vs math interleaved</span>
+<p>0 $0$ 1 $1$ 2 $2$ 3 $3$ 4 $4$ 5 $5$ 6 $6$ 7 $7$ 8 $8$ 9 $9$</p>
+
+<span class="field-label">Mixed text and math sizing</span>
+<p>If $n \geq 3$ then the group $G$ acts on $X$ with $|G| = 12$.
+The constant $C > 0$ satisfies $C \leq M$ for all $M$ in the set $S$.
+Theorem 3.1 states that $\|Tx\| \leq K\|x\|$ for every $x \in H$.</p>
+</div>
 </div>
 
 <!-- ==================== LINEAR ALGEBRA ==================== -->
