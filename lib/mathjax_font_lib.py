@@ -744,6 +744,43 @@ def apply_italic_corrections(data, ic_map):
     return applied
 
 
+def ensure_width_covers_overhang(data, font):
+    """Widen glyphs so advance width covers the full visual extent.
+
+    For italic fonts, glyph outlines often extend past the advance width
+    (overhang). This increases the declared width to match xMax so the
+    next character starts after the visual extent. This matches how newCM
+    handles italic spacing — no IC needed for overlap prevention, and
+    superscript positioning is unaffected (unlike IC-based fixes).
+
+    Only increases width — never reduces it.
+    """
+    cmap = font.getBestCmap()
+    gs = font.getGlyphSet()
+    upm = font['head'].unitsPerEm
+    adjusted = 0
+    for cp, info in data.items():
+        gn = cmap.get(cp)
+        if not gn or gn not in gs:
+            continue
+        try:
+            bp = BoundsPen(gs)
+            gs[gn].draw(bp)
+            bounds = bp.bounds
+        except Exception:
+            continue
+        if not bounds:
+            continue
+        visual_w = round3(bounds[2] / upm)
+        current_w = info.get('width', 0)
+        if visual_w > current_w:
+            info['width'] = visual_w
+            adjusted += 1
+    if adjusted:
+        print(f"    Widened {adjusted} glyphs to cover overhang")
+    return adjusted
+
+
 # ========================================================================
 # Codepoint collection
 # ========================================================================
@@ -2571,6 +2608,7 @@ def build_all_variants(output_dir, text_fonts, math_font, text_ranges, math_rang
                 svg_italic.pop(math_start + i, None)
         for math_cp, greek_cps, font_key in _MATH_GREEK_VARIANT_SYMBOLS:
             svg_italic.pop(math_cp, None)
+    ensure_width_covers_overhang(svg_italic, text_fonts['italic'])
     write_svg_variant_file(
         os.path.join(output_dir, "cjs/svg/italic.js"), "italic", svg_italic
     )
@@ -2598,6 +2636,7 @@ def build_all_variants(output_dir, text_fonts, math_font, text_ranges, math_rang
                 svg_bold_italic.pop(math_start + i, None)
         for math_cp, greek_cps, font_key in _MATH_GREEK_VARIANT_SYMBOLS:
             svg_bold_italic.pop(math_cp, None)
+    ensure_width_covers_overhang(svg_bold_italic, text_fonts['bold_italic'])
     write_svg_variant_file(
         os.path.join(output_dir, "cjs/svg/bold-italic.js"), "boldItalic", svg_bold_italic
     )
