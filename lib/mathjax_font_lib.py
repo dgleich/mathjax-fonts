@@ -835,6 +835,8 @@ def reduce_italic_lsb(data, font, target_lsb=30, em_scale=1.0, cp_map=None):
             path_data = path_data[1:]
 
         # Reduce width by the shift amount (converted to em)
+        # Keep the original advance width relationship — just remove the LSB padding.
+        # Don't extend width to cover xMax (italic overhang is intentional).
         shift_em = round3(-shift / upm * em_scale)
         new_width = round3(info['width'] - shift_em)
 

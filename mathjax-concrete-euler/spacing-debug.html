@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html><head><meta charset="utf-8">
+<title>Concrete/Euler — Spacing Debug</title>
+<script>
+MathJax = {
+  tex: { inlineMath: [['$', '$']], displayMath: [['$$', '$$']] },
+  startup: {
+    ready: function() {
+      MathJax.startup.defaultReady();
+      MathJax.startup.promise.then(function() {
+        // Add bounding boxes to all glyph rects
+        if (document.getElementById('showBoxes').checked) addBoxes();
+      });
+    }
+  }
+};
+</script>
+<script id="MathJax-script" async src="tex-mml-svg-mathjax-concrete-euler.js"></script>
+<style>
+@font-face { font-family: 'Concrete'; src: url('../fonts/concrete/CMUConcrete-Roman.otf'); }
+@font-face { font-family: 'Concrete'; src: url('../fonts/concrete/CMUConcrete-Italic.otf'); font-style: italic; }
+@font-face { font-family: 'Concrete'; src: url('../fonts/concrete/CMUConcrete-Bold.otf'); font-weight: bold; }
+body { font-family: 'Concrete', serif; max-width: 1000px; margin: 1.5em auto; font-size: 18px; }
+h3 { margin-top: 1.5em; border-bottom: 1px solid #ddd; }
+.big { font-size: 36px; }
+.huge { font-size: 48px; }
+.controls { background: #f5f5f5; padding: 10px; border-radius: 8px; margin: 1em 0; }
+</style>
+<script>
+function toggleBoxes(on) {
+  document.querySelectorAll('mjx-container svg').forEach(function(svg) {
+    // Find all <use> or <path> elements (individual glyphs)
+    svg.querySelectorAll('use, path').forEach(function(el) {
+      if (on) {
+        var bbox = el.getBBox();
+        if (bbox.width > 0) {
+          var rect = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
+          rect.setAttribute('x', bbox.x);
+          rect.setAttribute('y', bbox.y);
+          rect.setAttribute('width', bbox.width);
+          rect.setAttribute('height', bbox.height);
+          rect.setAttribute('fill', 'none');
+          rect.setAttribute('stroke', 'rgba(255,0,0,0.6)');
+          rect.setAttribute('stroke-width', '10');
+          rect.setAttribute('class', 'debug-rect');
+          el.parentNode.insertBefore(rect, el);
+        }
+      }
+    });
+    if (!on) {
+      svg.querySelectorAll('.debug-rect').forEach(function(r) { r.remove(); });
+    }
+  });
+}
+</script>
+</head><body>
+<h1>Spacing Debug — Concrete/Euler</h1>
+
+<div class="controls">
+<label><input type="checkbox" id="showBoxes" onchange="toggleBoxes(this.checked)"> Show glyph boxes</label>
+</div>
+
+<h3>Problem cases (huge)</h3>
+<div class="huge">
+<p>$U \Sigma V^T \quad \alpha x + \beta y = \gamma z \quad \Gamma(n) = (n-1)!$</p>
+<p>$b\beta p\beta a\beta f\beta A\Sigma B\Gamma C\Omega \Gamma C$</p>
+<p>$\Gamma C \Gamma A \Gamma f \Sigma C \Sigma A \Sigma f \Omega C \Omega A \Omega f \Pi C \Pi A \Delta C \Delta A$
+$\mathrm{A}C \mathrm{B}C \mathrm{C}C \mathrm{D}C \mathrm{E}C \mathrm{F}C \mathrm{G}C \mathrm{H}C \mathrm{I}C \mathrm{J}C \mathrm{K}C \mathrm{L}C \mathrm{M}C$
+$\mathrm{N}C \mathrm{O}C \mathrm{P}C \mathrm{Q}C \mathrm{R}C \mathrm{S}C \mathrm{T}C \mathrm{U}C \mathrm{V}C \mathrm{W}C \mathrm{X}C \mathrm{Y}C \mathrm{Z}C$
+$C\Gamma A\Sigma f\Omega C\Sigma A\Gamma f\Sigma$
+$XY YX AB BA fg gf$
+$f( F( f(x) F(x) g(t) \int_0^1 g(t)\,dt$</p>
+</div>
+
+<h3>Same in big</h3>
+<div class="big">
+<p>$U \Sigma V^T \quad \alpha x + \beta y = \gamma z \quad \Gamma(n) = (n-1)!$</p>
+<p>$b\beta p\beta a\beta f\beta A\Sigma B\Gamma C\Omega \Gamma C$</p>
+<p>$\Gamma C \Gamma A \Gamma f \Sigma C \Sigma A \Sigma f \Omega C \Omega A \Omega f \Pi C \Pi A \Delta C \Delta A$
+$\mathrm{A}C \mathrm{B}C \mathrm{C}C \mathrm{D}C \mathrm{E}C \mathrm{F}C \mathrm{G}C \mathrm{H}C \mathrm{I}C \mathrm{J}C \mathrm{K}C \mathrm{L}C \mathrm{M}C$
+$\mathrm{N}C \mathrm{O}C \mathrm{P}C \mathrm{Q}C \mathrm{R}C \mathrm{S}C \mathrm{T}C \mathrm{U}C \mathrm{V}C \mathrm{W}C \mathrm{X}C \mathrm{Y}C \mathrm{Z}C$
+$C\Gamma A\Sigma f\Omega C\Sigma A\Gamma f\Sigma$
+$XY YX AB BA fg gf$
+$f( F( f(x) F(x) g(t) \int_0^1 g(t)\,dt$</p>
+</div>
+
+<h3>Text italic comparison (huge)</h3>
+<div class="huge">
+<p>Math: $A B C F U V a b c f u v$</p>
+<p>Text: <i>A B C F U V a b c f u v</i></p>
+</div>
+
+<h3>Interleaved text/math</h3>
+<div class="big">
+<p>A $A$ B $B$ C $C$ F $F$ U $U$ V $V$</p>
+<p>a $a$ b $b$ c $c$ f $f$ u $u$ v $v$</p>
+</div>
+
+<h3>Normal size context</h3>
+<p>The function $F$ is continuous. We have $U \Sigma V^T$ decomposition.</p>
+<p>Let $A$ be a matrix with $\Gamma(n) = (n-1)!$ and $C = A^{-1}$.</p>
+<p>The Fundamental Theorem of Calculus states that if $F$ is an antiderivative of $f$ on $[a,b]$, then $\int_a^b f(x)\,dx = F(b) - F(a)$.</p>
+
+<h3>Inline expressions</h3>
+<p>$f(x) = Ax^2 + Bx + C$</p>
+<p>$\mathbb{E}[X_i] = \mu$</p>
+<p>$\sum_{i=1}^n a_i = S$</p>
+
+</body></html>
