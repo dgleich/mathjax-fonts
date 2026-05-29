@@ -1,0 +1,76 @@
+# Standard test expressions for MathJax font verification
+# One expression per line. Lines starting with # are comments.
+# Categories match the specimen template sections.
+
+# === TEXT-MATH HARMONIZATION ===
+A $A$ B $B$ C $C$ F $F$ U $U$
+a $a$ b $b$ f $f$ x $x$
+
+# === ACCENTS ===
+\hat{f} \quad \hat{x} \quad \hat{a} \quad \hat{A} \quad \hat{F}
+\tilde{f} \quad \tilde{x} \quad \tilde{A}
+\bar{x} \quad \bar{A} \quad \dot{x} \quad \ddot{x}
+\hat{\alpha} \quad \hat{\Sigma} \quad \hat{\beta}
+\widehat{abc} \quad \widetilde{abc} \quad \overline{abc}
+
+# === ITALIC SPACING ===
+f( \quad F( \quad f(x) \quad g(t)
+U \Sigma V^T
+A\Sigma B\Gamma C\Omega
+\alpha x + \beta y = \gamma z
+b\beta \quad p\beta \quad a\beta \quad f\beta
+
+# === INTEGRALS (inline) ===
+\int_a^b f(x)\,dx
+\int_0^1 g(t)\,dt
+\int_\Omega \nabla u \cdot \nabla v\,dx
+\oint_\gamma f(z)\,dz
+
+# === INTEGRALS (display) ===
+\int_0^\infty e^{-x^2}\,dx = \frac{\sqrt{\pi}}{2}
+
+# === LARGE OPERATORS (inline) ===
+\sum_{i=1}^n a_i
+\prod_{j=1}^m b_j
+
+# === LARGE OPERATORS (display) ===
+\sum_{k=0}^{\infty} \frac{x^k}{k!} = e^x
+
+# === FRACTIONS ===
+\frac{a}{b} \quad \frac{x^2+1}{x-1}
+\frac{\partial f}{\partial x}
+
+# === SUPERSCRIPTS/SUBSCRIPTS ===
+x^2 \quad x_i \quad x_i^2 \quad a_{ij}
+e^{i\pi} + 1 = 0
+
+# === CALLIGRAPHIC / SCRIPT ===
+\mathcal{A} \mathcal{B} \mathcal{F} \mathcal{H} \mathcal{L}
+\mathscr{A} \mathscr{B} \mathscr{F} \mathscr{H} \mathscr{L}
+
+# === OTHER ALPHABETS ===
+\mathfrak{A} \mathfrak{B} \mathfrak{g} \mathfrak{h}
+\mathbb{R} \mathbb{C} \mathbb{Z} \mathbb{N} \mathbb{Q}
+\mathbf{A} \mathbf{x} \quad \boldsymbol{\alpha} \boldsymbol{\Sigma}
+
+# === GREEK ===
+\alpha \beta \gamma \delta \epsilon \zeta \eta \theta \kappa \lambda \mu \nu \pi \rho \sigma \tau \phi \chi \psi \omega
+\Gamma \Delta \Theta \Lambda \Xi \Pi \Sigma \Phi \Psi \Omega
+
+# === DELIMITERS ===
+\left( \frac{a}{b} \right) \quad \left[ \frac{a}{b} \right] \quad \left\{ \frac{a}{b} \right\}
+
+# === EXPRESSIONS ===
+\mathbb{E}[X_i] = \mu
+\Gamma(n) = (n-1)!
+\|Tx\| \leq K\|x\|
+f: X \to Y
+\det(\mathbf{A} - \lambda \mathbf{I}) = 0
+
+# === DISPLAY EQUATIONS ===
+\hat{f}(\xi) = \int_{-\infty}^{\infty} f(x)\,e^{-2\pi i x \xi}\,dx
+\frac{\bar{X}_n - \mu}{\sigma / \sqrt{n}} \xrightarrow{d} \mathcal{N}(0, 1)
+
+# === TYPOGRAPHY MATRIX ===
+\mathrm{A\,B\,C} \quad A\,B\,C \quad \mathbf{A\,B\,C} \quad \boldsymbol{A\,B\,C}
+\mathrm{a\,b\,c} \quad a\,b\,c \quad \mathbf{a\,b\,c} \quad \boldsymbol{a\,b\,c}

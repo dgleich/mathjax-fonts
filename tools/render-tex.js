@@ -1,26 +1,33 @@
 #!/usr/bin/env node
 /**
- * Render TeX to PNG using MathJax + sharp.
- * Usage: node render-tex.js <font-package> <tex-string> [output.png]
- * Example: node render-tex.js mathjax-libertinus '\hat{f}\;\hat{x}\;\hat{A}' accents.png
+ * Render TeX to SVG/PNG using MathJax server-side with custom fonts.
+ * Usage: node render-tex.js <font-package> '<tex>' [output.svg]
+ *
+ * IMPORTANT: Use single quotes for the TeX string to preserve backslashes!
+ * Example: node render-tex.js mathjax-libertinus '\hat{f}\;\hat{x}\;U\Sigma V^T' test.svg
  */
-
 const path = require('path');
 const fs = require('fs');
 
 const fontPkg = process.argv[2] || 'mathjax-libertinus';
-const tex = process.argv[3] || '\\hat{f}\\;\\hat{x}\\;U\\Sigma V^T';
-const outFile = process.argv[4] || 'output.png';
+const tex = process.argv[3] || '\\hat{f} \\quad \\hat{x} \\quad U\\Sigma V^T';
+const outFile = process.argv[4] || 'output.svg';
 
-// Load the font bundle
-const bundlePath = path.resolve(__dirname, '..', fontPkg, `tex-mml-svg-${fontPkg}.js`);
-if (!fs.existsSync(bundlePath)) {
-    console.error(`Bundle not found: ${bundlePath}`);
-    process.exit(1);
-}
-
-// MathJax server-side rendering
-require(bundlePath);
+// Redirect font module resolution to our custom font package
+const fontCjsDir = path.resolve(__dirname, '..', fontPkg, 'cjs');
+const Module = require('module');
+const origResolve = Module._resolveFilename;
+Module._resolveFilename = function(request, parent, isMain, options) {
+    if (request.includes('@mathjax/mathjax-newcm-font/cjs')) {
+        const r = request.replace(/@mathjax\/mathjax-newcm-font\/cjs/, fontCjsDir);
+        try { return origResolve.call(this, r, parent, isMain, options); } catch(e) {}
+    }
+    if (request.includes('#default-font')) {
+        const r = request.replace(/#default-font/, fontCjsDir);
+        try { return origResolve.call(this, r, parent, isMain, options); } catch(e) {}
+    }
+    return origResolve.call(this, request, parent, isMain, options);
+};
 
 const {mathjax} = require('@mathjax/src/cjs/mathjax.js');
 const {TeX} = require('@mathjax/src/cjs/input/tex.js');
@@ -38,20 +45,23 @@ const html = mathjax.document('', {InputJax: texInput, OutputJax: svgOutput});
 const node = html.convert(tex, {display: true});
 const svgString = adaptor.outerHTML(node);
 
-// Save SVG
-const svgFile = outFile.replace('.png', '.svg');
-fs.writeFileSync(svgFile, svgString);
-console.log(`SVG saved: ${svgFile}`);
+// Extract just the SVG element
+const svgMatch = svgString.match(/<svg[^>]*>[\s\S]*<\/svg>/);
+const svg = svgMatch ? svgMatch[0] : svgString;
 
-// Convert to PNG
+fs.writeFileSync(outFile, svg);
+console.log(`SVG: ${outFile} (${svg.length} chars)`);
+
+// Also generate PNG via sharp
+const pngFile = outFile.replace(/\.svg$/, '.png');
 try {
     const sharp = require('sharp');
-    sharp(Buffer.from(svgString))
-        .resize({width: 800})
+    sharp(Buffer.from(svg))
+        .resize({width: 1200})
         .png()
-        .toFile(outFile)
-        .then(() => console.log(`PNG saved: ${outFile}`))
-        .catch(err => console.error('PNG conversion failed:', err.message));
+        .toFile(pngFile)
+        .then(() => console.log(`PNG: ${pngFile}`))
+        .catch(e => console.log(`PNG failed: ${e.message}`));
 } catch(e) {
-    console.log('sharp not available, SVG only');
+    console.log('sharp not available for PNG conversion');
 }
