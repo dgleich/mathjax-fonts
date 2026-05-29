@@ -124,10 +124,10 @@ var MathJaxLMSans = (function (_super) {
         '-mid': mid_js_1.mid,
         '-up': up_js_1.up,
         '-dup': dup_js_1.dup,
-        'script': script_js_1.script,
-        'bold-script': script_bold_js_1.scriptBold,
         '-tex-calligraphic': tex_calligraphic_js_1.texCalligraphic,
-        '-tex-bold-calligraphic': tex_calligraphic_bold_js_1.texCalligraphicBold
+        '-tex-bold-calligraphic': tex_calligraphic_bold_js_1.texCalligraphicBold,
+        'script': script_js_1.script,
+        'bold-script': script_bold_js_1.scriptBold
     };
     MathJaxLMSans.variantCacheIds = {
         'normal': 'N',
@@ -156,10 +156,10 @@ var MathJaxLMSans = (function (_super) {
         '-mid': 'MD',
         '-up': 'U',
         '-dup': 'D',
-        'script': 'SC',
-        'bold-script': 'BSC',
         '-tex-calligraphic': 'TC',
-        '-tex-bold-calligraphic': 'TBC'
+        '-tex-bold-calligraphic': 'TBC',
+        'script': 'SC',
+        'bold-script': 'BSC'
     };
     return MathJaxLMSans;
 }(Base));
