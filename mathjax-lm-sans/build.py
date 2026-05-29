@@ -192,8 +192,8 @@ def main():
         if gcount:
             print(f"  Applied angle-based sk to {gcount} Greek in {js_subdir}/normal.js")
 
-    # Remove basic Latin from italic variant so MathJax follows smp redirects
-    # to normal.js (which has ic from MATH table).
+    # Remove basic Latin + Greek from italic variant so MathJax follows smp redirects
+    # to normal.js (which has ic from MATH table and CMU Sans overrides).
     for variant_file in ['cjs/svg/italic.js',
                          'cjs/chtml/italic.js']:
         fpath = os.path.join(OUTPUT_DIR, variant_file)
@@ -209,7 +209,36 @@ def main():
             f.write(vc)
         after = vc.count('0x')
         if before - after:
-            print(f"  Removed {before - after} basic Latin from {variant_file}")
+            print(f"  Removed {before - after} basic Latin+Greek from {variant_file}")
+
+    # Remove math alphanumeric Latin from bold/italic/bold-italic variants.
+    # The Latin-only override puts CMU Sans glyphs in normal.js, but these
+    # variants still have NewCM math font glyphs at the same codepoints.
+    # MathJax checks variants before normal, so the NewCM glyphs shadow ours.
+    _MATH_ALPHA_LATIN = (
+        list(range(0x1D400, 0x1D41A)) +  # math bold A-Z
+        list(range(0x1D41A, 0x1D434)) +  # math bold a-z
+        list(range(0x1D434, 0x1D44E)) +  # math italic A-Z
+        list(range(0x1D44E, 0x1D468)) +  # math italic a-z
+        list(range(0x1D468, 0x1D482)) +  # math bold italic A-Z
+        list(range(0x1D482, 0x1D49C)) +  # math bold italic a-z
+        list(range(0x1D5A0, 0x1D5BA)) +  # sans A-Z
+        list(range(0x1D5BA, 0x1D5D4)) +  # sans a-z
+        list(range(0x1D5D4, 0x1D5EE)) +  # sans bold A-Z
+        list(range(0x1D5EE, 0x1D608)) +  # sans bold a-z
+        list(range(0x1D608, 0x1D622)) +  # sans italic A-Z
+        list(range(0x1D622, 0x1D63C)) +  # sans italic a-z
+        list(range(0x1D63C, 0x1D656)) +  # sans bold italic A-Z
+        list(range(0x1D656, 0x1D670))     # sans bold italic a-z
+    )
+    for variant in ['bold.js', 'italic.js', 'bold-italic.js']:
+        for js_subdir in ['cjs/svg', 'cjs/chtml']:
+            fpath = os.path.join(OUTPUT_DIR, js_subdir, variant)
+            if not os.path.exists(fpath): continue
+            with open(fpath) as f: content = f.read()
+            for cp in _MATH_ALPHA_LATIN:
+                content = re.sub(rf'    0x{cp:X}: \[[^\]]+\],?\n', '', content)
+            with open(fpath, 'w') as f: f.write(content)
 
     # Post-build: adjust overbrace/underbrace label spacing
     for delim_path in [
