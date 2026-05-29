@@ -104,8 +104,11 @@ def main():
         with open(fpath) as f:
             vc = f.read()
         before = vc.count('0x')
-        for cp in (list(range(0x41, 0x5B)) + list(range(0x61, 0x7B)) +
-                   list(range(0x391, 0x3AA)) + list(range(0x3B1, 0x3CA))):
+        # Only remove GREEK from italic.js. Keep Latin — Noto Sans doesn't use
+        # greek_from_text, so math alphanumeric Latin in normal.js has MATH font glyphs.
+        # If we remove Latin from italic.js, MathJax renders math font glyphs (wrong shape)
+        # instead of text font glyphs. Greek removal enables angle-based sk for \hat{\alpha}.
+        for cp in (list(range(0x391, 0x3AA)) + list(range(0x3B1, 0x3CA))):
             vc = re.sub(rf'    0x{cp:X}: \[[^\]]+\],?\n', '', vc)
         with open(fpath, 'w') as f:
             f.write(vc)
@@ -164,6 +167,44 @@ def main():
     # Clean up temp files
     import shutil
     shutil.rmtree(tmpdir, ignore_errors=True)
+
+    # Wire calligraphic in svg.js
+    svg_js = os.path.join(OUTPUT_DIR, 'cjs/svg.js')
+    with open(svg_js) as f: sjs = f.read()
+    if 'tex_calligraphic' not in sjs:
+        sjs = sjs.replace(
+            'var delimiters_js_1 = require("./svg/delimiters.js");',
+            'var tex_calligraphic_js_1 = require("./svg/tex-calligraphic.js");\n'
+            'var tex_calligraphic_bold_js_1 = require("./svg/tex-calligraphic-bold.js");\n'
+            'var delimiters_js_1 = require("./svg/delimiters.js");')
+        sjs = sjs.replace(
+            "'-dup': dup_js_1.dup\n    };",
+            "'-dup': dup_js_1.dup,\n"
+            "        '-tex-calligraphic': tex_calligraphic_js_1.texCalligraphic,\n"
+            "        '-tex-bold-calligraphic': tex_calligraphic_bold_js_1.texCalligraphicBold\n"
+            "    };")
+        sjs = sjs.replace(
+            "'-dup': 'D'\n    };",
+            "'-dup': 'D',\n"
+            "        '-tex-calligraphic': 'TC',\n"
+            "        '-tex-bold-calligraphic': 'TBC'\n"
+            "    };")
+        with open(svg_js, 'w') as f: f.write(sjs)
+        print("  Wired calligraphic in svg.js")
+
+    # Script dupe removal from bold/italic/bold-italic
+    _SCRIPT_CPS = list(range(0x1D49C, 0x1D504))
+    _LETTERLIKE = [0x212C, 0x2130, 0x2131, 0x210B, 0x2110, 0x2112, 0x2133, 0x211B, 0x212F, 0x210A, 0x2134]
+    for variant in ['bold.js', 'italic.js', 'bold-italic.js']:
+        for js_subdir in ['cjs/svg', 'cjs/chtml']:
+            fpath = os.path.join(OUTPUT_DIR, js_subdir, variant)
+            if not os.path.exists(fpath): continue
+            with open(fpath) as f: content = f.read()
+            for cp in _SCRIPT_CPS + _LETTERLIKE:
+                content = re.sub(rf'    0x{cp:X}: \[[^\]]+\],?\n', '', content)
+            with open(fpath, 'w') as f: f.write(content)
+
+    print("  All post-build fixes applied")
 
     write_boilerplate(OUTPUT_DIR, FONT_ID, FONT_NAME)
     print(f"Done! Output in {OUTPUT_DIR}")
