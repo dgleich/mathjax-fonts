@@ -12,7 +12,7 @@ OUT_DIR="$FONTS_DIR/test-renders"
 if [ -n "$1" ]; then
     FONTS="$1"
 else
-    FONTS="mathjax-libertinus mathjax-libertinus-sans mathjax-lm-sans mathjax-noto-sans mathjax-source-sans mathjax-source-code mathjax-concrete-euler"
+    FONTS="mathjax-libertinus mathjax-libertinus-sans mathjax-lm-sans mathjax-noto-sans mathjax-source-sans mathjax-source-code mathjax-concrete-euler mathjax-lato mathjax-ptsans mathjax-shantell"
 fi
 
 mkdir -p "$OUT_DIR"
