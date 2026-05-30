@@ -1,19 +1,20 @@
 # Standard test expressions for MathJax font verification
 # One expression per line. Lines starting with # are comments.
 # Sections with "(inline)" render in inline mode; others use display mode.
+# Only use (inline) for sections with large operators (integrals, sums).
 
-# === TEXT-MATH HARMONIZATION (inline) ===
+# === TEXT-MATH HARMONIZATION ===
 A $A$ B $B$ C $C$ F $F$ U $U$
 a $a$ b $b$ f $f$ x $x$
 
-# === ACCENTS (inline) ===
+# === ACCENTS ===
 \hat{f} \quad \hat{x} \quad \hat{a} \quad \hat{A} \quad \hat{F}
 \tilde{f} \quad \tilde{x} \quad \tilde{A}
 \bar{x} \quad \bar{A} \quad \dot{x} \quad \ddot{x}
 \hat{\alpha} \quad \hat{\Sigma} \quad \hat{\beta}
 \widehat{abc} \quad \widetilde{abc} \quad \overline{abc}
 
-# === ITALIC SPACING (inline) ===
+# === ITALIC SPACING ===
 f( \quad F( \quad f(x) \quad g(t)
 U \Sigma V^T
 A\Sigma B\Gamma C\Omega
@@ -42,31 +43,31 @@ b\beta \quad p\beta \quad a\beta \quad f\beta
 \sum_{k=0}^{\infty} \frac{x^k}{k!} = e^x
 \sum_{i=1}^n a_i = S_n
 
-# === FRACTIONS (display) ===
+# === FRACTIONS ===
 \frac{a}{b} \quad \frac{x^2+1}{x-1}
 \frac{\partial f}{\partial x}
 
-# === SUPERSCRIPTS/SUBSCRIPTS (inline) ===
+# === SUPERSCRIPTS/SUBSCRIPTS ===
 x^2 \quad x_i \quad x_i^2 \quad a_{ij}
 e^{i\pi} + 1 = 0
 
-# === CALLIGRAPHIC / SCRIPT (inline) ===
+# === CALLIGRAPHIC / SCRIPT ===
 \mathcal{A} \mathcal{B} \mathcal{F} \mathcal{H} \mathcal{L}
 \mathscr{A} \mathscr{B} \mathscr{F} \mathscr{H} \mathscr{L}
 
-# === OTHER ALPHABETS (inline) ===
+# === OTHER ALPHABETS ===
 \mathfrak{A} \mathfrak{B} \mathfrak{g} \mathfrak{h}
 \mathbb{R} \mathbb{C} \mathbb{Z} \mathbb{N} \mathbb{Q}
 \mathbf{A} \mathbf{x} \quad \boldsymbol{\alpha} \boldsymbol{\Sigma}
 
-# === GREEK (inline) ===
+# === GREEK ===
 \alpha \beta \gamma \delta \epsilon \zeta \eta \theta \kappa \lambda \mu \nu \pi \rho \sigma \tau \phi \chi \psi \omega
 \Gamma \Delta \Theta \Lambda \Xi \Pi \Sigma \Phi \Psi \Omega
 
-# === DELIMITERS (display) ===
+# === DELIMITERS ===
 \left( \frac{a}{b} \right) \quad \left[ \frac{a}{b} \right] \quad \left\{ \frac{a}{b} \right\}
 
-# === EXPRESSIONS (inline) ===
+# === EXPRESSIONS ===
 \mathbb{E}[X_i] = \mu
 \Gamma(n) = (n-1)!
 \|Tx\| \leq K\|x\|
@@ -77,6 +78,6 @@ f: X \to Y
 \hat{f}(\xi) = \int_{-\infty}^{\infty} f(x)\,e^{-2\pi i x \xi}\,dx
 \frac{\bar{X}_n - \mu}{\sigma / \sqrt{n}} \xrightarrow{d} \mathcal{N}(0, 1)
 
-# === TYPOGRAPHY MATRIX (inline) ===
+# === TYPOGRAPHY MATRIX ===
 \mathrm{A\,B\,C} \quad A\,B\,C \quad \mathbf{A\,B\,C} \quad \boldsymbol{A\,B\,C}
 \mathrm{a\,b\,c} \quad a\,b\,c \quad \mathbf{a\,b\,c} \quad \boldsymbol{a\,b\,c}
