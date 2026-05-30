@@ -2619,6 +2619,36 @@ def build_all_variants(output_dir, text_fonts, math_font, text_ranges, math_rang
                 if basic_cp in italic_sk and math_cp in svg_normal:
                     svg_normal[math_cp]['sk'] = italic_sk[basic_cp]
 
+    # Reduce italic LSB on math-alpha italic/bold-italic entries in normal variant
+    if italic_lsb is not None:
+        _italic_cp_map = {}
+        _bold_italic_cp_map = {}
+        for math_start, basic_start, n, font_key in _MATH_ALPHA_MAPPINGS:
+            for i in range(n):
+                if font_key == 'italic':
+                    _italic_cp_map[math_start + i] = basic_start + i
+                elif font_key == 'bold_italic':
+                    _bold_italic_cp_map[math_start + i] = basic_start + i
+        for math_cp, greek_cps, font_key in _MATH_GREEK_VARIANT_SYMBOLS:
+            if font_key == 'italic' and greek_cps:
+                _italic_cp_map[math_cp] = greek_cps[0]
+            elif font_key == 'bold_italic' and greek_cps:
+                _bold_italic_cp_map[math_cp] = greek_cps[0]
+        # Apply to math-italic entries in normal variant
+        italic_subset = {cp: info for cp, info in svg_normal.items() if cp in _italic_cp_map}
+        if italic_subset:
+            reduce_italic_lsb(italic_subset, text_fonts['italic'],
+                              target_lsb=italic_lsb, em_scale=em_scale,
+                              cp_map=_italic_cp_map)
+            svg_normal.update(italic_subset)
+        # Apply to math-bold-italic entries in normal variant
+        bi_subset = {cp: info for cp, info in svg_normal.items() if cp in _bold_italic_cp_map}
+        if bi_subset:
+            reduce_italic_lsb(bi_subset, text_fonts['bold_italic'],
+                              target_lsb=italic_lsb, em_scale=em_scale,
+                              cp_map=_bold_italic_cp_map)
+            svg_normal.update(bi_subset)
+
     # Report source breakdown
     sources = {}
     for cp, info in svg_normal.items():
@@ -2676,14 +2706,8 @@ def build_all_variants(output_dir, text_fonts, math_font, text_ranges, math_rang
             svg_italic.pop(math_cp, None)
     ensure_width_covers_overhang(svg_italic, text_fonts['italic'])
     if italic_lsb is not None:
-        # Build codepoint map: math-alpha italic codepoints -> basic codepoints
-        italic_cp_map = {}
-        for cp in svg_italic:
-            if 0x1D434 <= cp <= 0x1D467:  # math italic A-Z, a-z
-                italic_cp_map[cp] = cp - 0x1D434 + 0x41 if cp < 0x1D44E else cp - 0x1D44E + 0x61
         reduce_italic_lsb(svg_italic, text_fonts['italic'],
-                          target_lsb=italic_lsb, em_scale=em_scale,
-                          cp_map=italic_cp_map)
+                          target_lsb=italic_lsb, em_scale=em_scale)
     write_svg_variant_file(
         os.path.join(output_dir, "cjs/svg/italic.js"), "italic", svg_italic
     )
@@ -2713,13 +2737,8 @@ def build_all_variants(output_dir, text_fonts, math_font, text_ranges, math_rang
             svg_bold_italic.pop(math_cp, None)
     ensure_width_covers_overhang(svg_bold_italic, text_fonts['bold_italic'])
     if italic_lsb is not None:
-        bi_cp_map = {}
-        for cp in svg_bold_italic:
-            if 0x1D468 <= cp <= 0x1D49B:  # math bold italic A-Z, a-z
-                bi_cp_map[cp] = cp - 0x1D468 + 0x41 if cp < 0x1D482 else cp - 0x1D482 + 0x61
         reduce_italic_lsb(svg_bold_italic, text_fonts['bold_italic'],
-                          target_lsb=italic_lsb, em_scale=em_scale,
-                          cp_map=bi_cp_map)
+                          target_lsb=italic_lsb, em_scale=em_scale)
     write_svg_variant_file(
         os.path.join(output_dir, "cjs/svg/bold-italic.js"), "boldItalic", svg_bold_italic
     )
