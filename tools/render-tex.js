@@ -1,10 +1,11 @@
 #!/usr/bin/env node
 /**
  * Render TeX to SVG/PNG using MathJax server-side with custom fonts.
- * Usage: node render-tex.js <font-package> '<tex>' [output.svg]
+ * Usage: node render-tex.js <font-package> '<tex>' [output.svg] [--inline]
  *
  * IMPORTANT: Use single quotes for the TeX string to preserve backslashes!
  * Example: node render-tex.js mathjax-libertinus '\hat{f}\;\hat{x}\;U\Sigma V^T' test.svg
+ *          node render-tex.js mathjax-libertinus '\int_a^b' test.svg --inline
  */
 const path = require('path');
 const fs = require('fs');
@@ -12,6 +13,7 @@ const fs = require('fs');
 const fontPkg = process.argv[2] || 'mathjax-libertinus';
 const tex = process.argv[3] || '\\hat{f} \\quad \\hat{x} \\quad U\\Sigma V^T';
 const outFile = process.argv[4] || 'output.svg';
+const displayMode = !process.argv.includes('--inline');
 
 // Redirect font module resolution to our custom font package
 const fontCjsDir = path.resolve(__dirname, '..', fontPkg, 'cjs');
@@ -42,7 +44,7 @@ const texInput = new TeX({});
 const svgOutput = new SVG({fontCache: 'local'});
 const html = mathjax.document('', {InputJax: texInput, OutputJax: svgOutput});
 
-const node = html.convert(tex, {display: true});
+const node = html.convert(tex, {display: displayMode});
 const svgString = adaptor.outerHTML(node);
 
 // Extract just the SVG element
@@ -50,7 +52,7 @@ const svgMatch = svgString.match(/<svg[^>]*>[\s\S]*<\/svg>/);
 const svg = svgMatch ? svgMatch[0] : svgString;
 
 fs.writeFileSync(outFile, svg);
-console.log(`SVG: ${outFile} (${svg.length} chars)`);
+console.log(`SVG: ${outFile} (${svg.length} chars)${displayMode ? '' : ' [inline]'}`);
 
 // Also generate PNG via sharp
 const pngFile = outFile.replace(/\.svg$/, '.png');

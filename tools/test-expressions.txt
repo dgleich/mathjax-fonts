@@ -1,19 +1,19 @@
 # Standard test expressions for MathJax font verification
 # One expression per line. Lines starting with # are comments.
-# Categories match the specimen template sections.
+# Sections with "(inline)" render in inline mode; others use display mode.
 
-# === TEXT-MATH HARMONIZATION ===
+# === TEXT-MATH HARMONIZATION (inline) ===
 A $A$ B $B$ C $C$ F $F$ U $U$
 a $a$ b $b$ f $f$ x $x$
 
-# === ACCENTS ===
+# === ACCENTS (inline) ===
 \hat{f} \quad \hat{x} \quad \hat{a} \quad \hat{A} \quad \hat{F}
 \tilde{f} \quad \tilde{x} \quad \tilde{A}
 \bar{x} \quad \bar{A} \quad \dot{x} \quad \ddot{x}
 \hat{\alpha} \quad \hat{\Sigma} \quad \hat{\beta}
 \widehat{abc} \quad \widetilde{abc} \quad \overline{abc}
 
-# === ITALIC SPACING ===
+# === ITALIC SPACING (inline) ===
 f( \quad F( \quad f(x) \quad g(t)
 U \Sigma V^T
 A\Sigma B\Gamma C\Omega
@@ -25,42 +25,48 @@ b\beta \quad p\beta \quad a\beta \quad f\beta
 \int_0^1 g(t)\,dt
 \int_\Omega \nabla u \cdot \nabla v\,dx
 \oint_\gamma f(z)\,dz
+\int_a^b f(x)\,dx = F(b) - F(a)
+\iiint_V \nabla \cdot \mathbf{F}\,dV = \iint_{\partial V} \mathbf{F}\cdot\mathbf{n}\,dS
 
 # === INTEGRALS (display) ===
 \int_0^\infty e^{-x^2}\,dx = \frac{\sqrt{\pi}}{2}
+\int_a^b f(x)\,dx = F(b) - F(a)
+\iiint_V \nabla \cdot \mathbf{F}\,dV = \iint_{\partial V} \mathbf{F}\cdot\mathbf{n}\,dS
 
 # === LARGE OPERATORS (inline) ===
 \sum_{i=1}^n a_i
 \prod_{j=1}^m b_j
+\sum_{i=1}^n a_i = S_n
 
 # === LARGE OPERATORS (display) ===
 \sum_{k=0}^{\infty} \frac{x^k}{k!} = e^x
+\sum_{i=1}^n a_i = S_n
 
-# === FRACTIONS ===
+# === FRACTIONS (display) ===
 \frac{a}{b} \quad \frac{x^2+1}{x-1}
 \frac{\partial f}{\partial x}
 
-# === SUPERSCRIPTS/SUBSCRIPTS ===
+# === SUPERSCRIPTS/SUBSCRIPTS (inline) ===
 x^2 \quad x_i \quad x_i^2 \quad a_{ij}
 e^{i\pi} + 1 = 0
 
-# === CALLIGRAPHIC / SCRIPT ===
+# === CALLIGRAPHIC / SCRIPT (inline) ===
 \mathcal{A} \mathcal{B} \mathcal{F} \mathcal{H} \mathcal{L}
 \mathscr{A} \mathscr{B} \mathscr{F} \mathscr{H} \mathscr{L}
 
-# === OTHER ALPHABETS ===
+# === OTHER ALPHABETS (inline) ===
 \mathfrak{A} \mathfrak{B} \mathfrak{g} \mathfrak{h}
 \mathbb{R} \mathbb{C} \mathbb{Z} \mathbb{N} \mathbb{Q}
 \mathbf{A} \mathbf{x} \quad \boldsymbol{\alpha} \boldsymbol{\Sigma}
 
-# === GREEK ===
+# === GREEK (inline) ===
 \alpha \beta \gamma \delta \epsilon \zeta \eta \theta \kappa \lambda \mu \nu \pi \rho \sigma \tau \phi \chi \psi \omega
 \Gamma \Delta \Theta \Lambda \Xi \Pi \Sigma \Phi \Psi \Omega
 
-# === DELIMITERS ===
+# === DELIMITERS (display) ===
 \left( \frac{a}{b} \right) \quad \left[ \frac{a}{b} \right] \quad \left\{ \frac{a}{b} \right\}
 
-# === EXPRESSIONS ===
+# === EXPRESSIONS (inline) ===
 \mathbb{E}[X_i] = \mu
 \Gamma(n) = (n-1)!
 \|Tx\| \leq K\|x\|
@@ -71,6 +77,6 @@ f: X \to Y
 \hat{f}(\xi) = \int_{-\infty}^{\infty} f(x)\,e^{-2\pi i x \xi}\,dx
 \frac{\bar{X}_n - \mu}{\sigma / \sqrt{n}} \xrightarrow{d} \mathcal{N}(0, 1)
 
-# === TYPOGRAPHY MATRIX ===
+# === TYPOGRAPHY MATRIX (inline) ===
 \mathrm{A\,B\,C} \quad A\,B\,C \quad \mathbf{A\,B\,C} \quad \boldsymbol{A\,B\,C}
 \mathrm{a\,b\,c} \quad a\,b\,c \quad \mathbf{a\,b\,c} \quad \boldsymbol{a\,b\,c}

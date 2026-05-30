@@ -3,6 +3,9 @@
 # Usage: ./render-all.sh [font-package]
 # Example: ./render-all.sh mathjax-libertinus
 #          ./render-all.sh   (renders all fonts)
+#
+# Inline vs display: sections with "(inline)" in the header comment
+# are rendered in inline mode. All others use display mode.
 
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 FONTS_DIR="$(dirname "$SCRIPT_DIR")"
@@ -23,8 +26,18 @@ for font in $FONTS; do
     mkdir -p "$font_dir"
 
     i=0
+    mode="display"
     while IFS= read -r line; do
-        # Skip comments and empty lines
+        # Track inline/display mode from section headers
+        if [[ "$line" =~ ^#.*\(inline\) ]]; then
+            mode="inline"
+            continue
+        elif [[ "$line" =~ ^#.*\(display\) ]] || [[ "$line" =~ ^#.*(DISPLAY|FRACTIONS|DELIMITERS|EXPRESSIONS) ]]; then
+            mode="display"
+            continue
+        fi
+
+        # Skip other comments and empty lines
         [[ "$line" =~ ^# ]] && continue
         [[ -z "$line" ]] && continue
 
@@ -32,11 +45,19 @@ for font in $FONTS; do
         padded=$(printf "%03d" $i)
         outfile="$font_dir/${padded}.svg"
 
+        # Build mode flag
+        mode_flag=""
+        if [ "$mode" = "inline" ]; then
+            mode_flag="--inline"
+        fi
+
         # Run render (suppress output for speed)
-        node "$SCRIPT_DIR/render-tex.js" "$font" "$line" "$outfile" 2>/dev/null
+        node "$SCRIPT_DIR/render-tex.js" "$font" "$line" "$outfile" $mode_flag 2>/dev/null
 
         if [ -f "$outfile" ]; then
-            echo "  $padded: $line"
+            suffix=""
+            [ "$mode" = "inline" ] && suffix=" [inline]"
+            echo "  $padded: $line$suffix"
         else
             echo "  $padded: FAILED: $line"
         fi

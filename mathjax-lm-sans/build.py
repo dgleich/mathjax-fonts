@@ -70,7 +70,8 @@ def main():
     )
 
     # Override math alphanumeric LATIN (not Greek) with CMU Sans text font glyphs.
-    from mathjax_font_lib import get_glyph_metrics_and_path, compute_visual_skews
+    from mathjax_font_lib import get_glyph_metrics_and_path, compute_visual_skews, round3, _shift_svg_path_x, scale_svg_path, round_path_coords
+    from fontTools.pens.boundsPen import BoundsPen
     # Pre-compute sk maps for each text font style
     sk_maps = {}
     for key in ['regular', 'bold', 'italic', 'bold_italic']:
@@ -114,8 +115,30 @@ def main():
                 h, d, w = info['height'], info['depth'], info['width']
                 p = info['path']
                 sk = round(sk_maps.get(font_key, {}).get(basic_cp, 0) * 1.3, 4)
-                # Preserve ic from MATH table if available
-                ic_val = ic_map.get(math_cp, 0)
+                # For italic/bold-italic: shift path left by xMin to remove LSB
+                upm_tf = font['head'].unitsPerEm
+                gn = cmap_tf[basic_cp]
+                gs_tf = font.getGlyphSet()
+                bp = BoundsPen(gs_tf); gs_tf[gn].draw(bp)
+                ic_val = 0
+                if bp.bounds and font_key in ('italic', 'bold_italic'):
+                    xmin = bp.bounds[0]
+                    adv_w = font['hmtx'][gn][0]
+                    if xmin > 0:
+                        # Shift path left, reduce width by LSB
+                        lsb_em = round3(xmin / upm_tf)
+                        p = 'M' + p  # restore leading M for shift
+                        p = _shift_svg_path_x(p, -xmin)
+                        p = round_path_coords(p)
+                        if p.startswith('M'):
+                            p = p[1:]
+                        w = round3(w - lsb_em)
+                    # ic = overhang beyond the (reduced) width
+                    new_xmax_em = round3((bp.bounds[2] - xmin) / upm_tf)
+                    ic_val = round3(max(0, new_xmax_em - w))
+                elif bp.bounds:
+                    adv_w = font['hmtx'][gn][0]
+                    ic_val = round3(max(0, bp.bounds[2] - adv_w) / upm_tf)
                 props = []
                 if ic_val: props.append(f"ic: {ic_val}")
                 if sk: props.append(f"sk: {sk}")
@@ -262,7 +285,7 @@ def main():
     print("  Adjusted overbrace/underbrace label spacing (+0.35em)")
 
     # Adjust integral widths for better subscript tucking
-    adjust_integral_widths(OUTPUT_DIR, smallop_w_ratio=0.75, smallop_ic=0.03, largeop_w_ratio=0.73, largeop_ic=0.25)
+    adjust_integral_widths(OUTPUT_DIR, smallop_w_ratio=0.60, smallop_ic=0.03, largeop_w_ratio=0.73, largeop_ic=0.25)
 
     # Tighten \sum, \prod limits in smallop (reduce width to tuck sub/super closer)
     for js_path in [os.path.join(OUTPUT_DIR, "cjs/svg/smallop.js")]:
