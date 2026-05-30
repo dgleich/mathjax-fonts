@@ -41,7 +41,8 @@ const adaptor = liteAdaptor();
 RegisterHTMLHandler(adaptor);
 
 require('@mathjax/src/cjs/input/tex/ams/AmsConfiguration.js');
-const texInput = new TeX({packages: ['base', 'ams']});
+require('@mathjax/src/cjs/input/tex/boldsymbol/BoldsymbolConfiguration.js');
+const texInput = new TeX({packages: ['base', 'ams', 'boldsymbol']});
 const svgOutput = new SVG({fontCache: 'local'});
 const html = mathjax.document('', {InputJax: texInput, OutputJax: svgOutput});
 
