@@ -40,7 +40,8 @@ const {RegisterHTMLHandler} = require('@mathjax/src/cjs/handlers/html.js');
 const adaptor = liteAdaptor();
 RegisterHTMLHandler(adaptor);
 
-const texInput = new TeX({});
+require('@mathjax/src/cjs/input/tex/ams/AmsConfiguration.js');
+const texInput = new TeX({packages: ['base', 'ams']});
 const svgOutput = new SVG({fontCache: 'local'});
 const html = mathjax.document('', {InputJax: texInput, OutputJax: svgOutput});
 
@@ -59,6 +60,7 @@ const pngFile = outFile.replace(/\.svg$/, '.png');
 try {
     const sharp = require('sharp');
     sharp(Buffer.from(svg))
+        .flatten({background: {r: 255, g: 255, b: 255}})
         .resize({width: 1200})
         .png()
         .toFile(pngFile)

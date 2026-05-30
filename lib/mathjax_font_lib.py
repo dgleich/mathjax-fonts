@@ -25,6 +25,7 @@ from fontTools.ttLib import TTFont
 from fontTools.pens.svgPathPen import SVGPathPen
 from fontTools.pens.recordingPen import RecordingPen
 from fontTools.pens.boundsPen import BoundsPen
+from fontTools.pens.transformPen import TransformPen
 from fontTools.subset import Subsetter
 
 
@@ -779,6 +780,70 @@ def ensure_width_covers_overhang(data, font):
     if adjusted:
         print(f"    Widened {adjusted} glyphs to cover overhang")
     return adjusted
+
+
+def reduce_italic_lsb(data, font, target_lsb=30, em_scale=1.0, cp_map=None):
+    """Reduce large left side bearings in italic glyphs by shifting paths left.
+
+    Italic text fonts often have large LSBs designed for text kerning. In MathJax
+    (which has no kerning), these appear as visible gaps before italic letters.
+    This shifts the SVG path left so that the glyph ink starts closer to the
+    origin, and reduces the advance width accordingly.
+
+    Uses TransformPen to re-extract shifted paths from the font, ensuring
+    correct handling of multi-contour glyphs (e.g., A, B with counter holes).
+
+    target_lsb: desired LSB in font units (default 30 — small but non-zero
+                to avoid ink clipping at the left edge)
+    em_scale: must match the em_scale used during glyph extraction
+    cp_map: optional dict mapping data codepoints to font codepoints. Use when
+            the data dict has math-alphanumeric codepoints (e.g., U+1D434 math
+            italic A) but the font has the glyph at the basic codepoint (U+0041).
+            If None, data codepoints are looked up directly in the font.
+    """
+    cmap = font.getBestCmap()
+    gs = font.getGlyphSet()
+    upm = font['head'].unitsPerEm
+    scale = 1000 / upm * em_scale
+    adjusted = 0
+
+    for cp, info in data.items():
+        font_cp = cp_map.get(cp, cp) if cp_map else cp
+        gn = cmap.get(font_cp)
+        if not gn or gn not in gs:
+            continue
+        if not info.get('path'):
+            continue
+
+        aw, lsb = font['hmtx'].metrics.get(gn, (0, 0))
+        if lsb <= target_lsb:
+            continue
+
+        shift = -(lsb - target_lsb)  # negative = shift left in font units
+
+        # Re-extract the glyph path with a horizontal translation applied
+        svg_pen = SVGPathPen(gs)
+        t_pen = TransformPen(svg_pen, (1, 0, 0, 1, shift, 0))
+        gs[gn].draw(t_pen)
+        path_data = svg_pen.getCommands()
+
+        # Apply same post-processing as get_glyph_metrics_and_path
+        if scale != 1.0:
+            path_data = scale_svg_path(path_data, scale)
+        path_data = round_path_coords(path_data)
+        if path_data.startswith('M'):
+            path_data = path_data[1:]
+
+        # Reduce width by the shift amount (converted to em)
+        shift_em = round3(-shift / upm * em_scale)
+        new_width = round3(info['width'] - shift_em)
+
+        info['path'] = path_data
+        info['width'] = new_width
+        adjusted += 1
+
+    if adjusted:
+        print(f"    Reduced LSB on {adjusted} italic glyphs (target_lsb={target_lsb})")
 
 
 # ========================================================================
@@ -2404,7 +2469,8 @@ def build_all_variants(output_dir, text_fonts, math_font, text_ranges, math_rang
                        em_scale=1.0, font_name="MathJaxFont", font_id="mathjax-font",
                        css_prefix="MJX", x_height=0.500, text_source='text',
                        text_font_paths=None, woff2_slug=None,
-                       greek_from_text=False):
+                       greek_from_text=False,
+                       italic_lsb=None):
     """Build all SVG + CHTML variant files, size variants, delimiters, stretchy parts.
 
     text_fonts: dict with keys 'regular', 'bold', 'italic', 'bold_italic' -> TTFont objects
@@ -2609,6 +2675,15 @@ def build_all_variants(output_dir, text_fonts, math_font, text_ranges, math_rang
         for math_cp, greek_cps, font_key in _MATH_GREEK_VARIANT_SYMBOLS:
             svg_italic.pop(math_cp, None)
     ensure_width_covers_overhang(svg_italic, text_fonts['italic'])
+    if italic_lsb is not None:
+        # Build codepoint map: math-alpha italic codepoints -> basic codepoints
+        italic_cp_map = {}
+        for cp in svg_italic:
+            if 0x1D434 <= cp <= 0x1D467:  # math italic A-Z, a-z
+                italic_cp_map[cp] = cp - 0x1D434 + 0x41 if cp < 0x1D44E else cp - 0x1D44E + 0x61
+        reduce_italic_lsb(svg_italic, text_fonts['italic'],
+                          target_lsb=italic_lsb, em_scale=em_scale,
+                          cp_map=italic_cp_map)
     write_svg_variant_file(
         os.path.join(output_dir, "cjs/svg/italic.js"), "italic", svg_italic
     )
@@ -2637,6 +2712,14 @@ def build_all_variants(output_dir, text_fonts, math_font, text_ranges, math_rang
         for math_cp, greek_cps, font_key in _MATH_GREEK_VARIANT_SYMBOLS:
             svg_bold_italic.pop(math_cp, None)
     ensure_width_covers_overhang(svg_bold_italic, text_fonts['bold_italic'])
+    if italic_lsb is not None:
+        bi_cp_map = {}
+        for cp in svg_bold_italic:
+            if 0x1D468 <= cp <= 0x1D49B:  # math bold italic A-Z, a-z
+                bi_cp_map[cp] = cp - 0x1D468 + 0x41 if cp < 0x1D482 else cp - 0x1D482 + 0x61
+        reduce_italic_lsb(svg_bold_italic, text_fonts['bold_italic'],
+                          target_lsb=italic_lsb, em_scale=em_scale,
+                          cp_map=bi_cp_map)
     write_svg_variant_file(
         os.path.join(output_dir, "cjs/svg/bold-italic.js"), "boldItalic", svg_bold_italic
     )

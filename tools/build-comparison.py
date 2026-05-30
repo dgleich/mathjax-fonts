@@ -101,8 +101,12 @@ for i, (section, expr) in enumerate(labels, 1):
     for f in fonts:
         sn = short_names[f]
         cls = f.replace('-', '')
+        png_path = os.path.join(FONTS_DIR, f'test-renders/{f}/{padded}.png')
         svg_path = os.path.join(FONTS_DIR, f'test-renders/{f}/{padded}.svg')
-        if os.path.exists(svg_path):
+        if os.path.exists(png_path):
+            rel_path = f'test-renders/{f}/{padded}.png'
+            parts.append(f'  <div class="font-row font-{cls}"><span class="font-name">{sn}</span><span class="font-render{display_class}"><img src="{rel_path}" alt="{sn}"></span></div>\n')
+        elif os.path.exists(svg_path):
             rel_path = f'test-renders/{f}/{padded}.svg'
             parts.append(f'  <div class="font-row font-{cls}"><span class="font-name">{sn}</span><span class="font-render{display_class}"><img src="{rel_path}" alt="{sn}"></span></div>\n')
     parts.append('</div>\n')
