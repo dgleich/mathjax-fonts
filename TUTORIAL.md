@@ -868,6 +868,60 @@ Apply to:
 - Math bold italic Greek (U+1D736-1D74E, U+1D71C-1D734) ← slanted bold
 - Sans bold italic Greek (U+1D7AA-1D7C2, U+1D790-1D7A8) ← slanted bold
 
+### 18h. Latin-only override: must remove math-alpha Latin dupes
+
+When using a Latin-only override (section 18b) instead of `greek_from_text`,
+the replacement puts CMU Sans (or other text font) glyphs in `normal.js` at
+math-alphanumeric codepoints (U+1D400-1D66F). But the bold, italic, and
+bold-italic variant files still contain the MATH FONT's glyphs at those same
+codepoints. MathJax checks variant files BEFORE normal.js, so the math font's
+glyphs shadow the text font overrides.
+
+**Fix**: Remove all math-alphanumeric Latin codepoints from bold.js, italic.js,
+and bold-italic.js:
+
+```python
+_MATH_ALPHA_LATIN = (
+    list(range(0x1D400, 0x1D41A)) +  # math bold A-Z
+    list(range(0x1D41A, 0x1D434)) +  # math bold a-z
+    # ... all 14 ranges through sans bold italic a-z
+    list(range(0x1D656, 0x1D670))     # sans bold italic a-z
+)
+for variant in ['bold.js', 'italic.js', 'bold-italic.js']:
+    # Remove entries for all math-alpha Latin codepoints
+```
+
+This is DIFFERENT from removing basic Latin (0x41-0x7A) which controls
+whether MathJax uses text font or smp-redirect for rendering.
+
+Used by: `mathjax-lm-sans` (Latin-only override with CMU Sans + NewCM Math).
+
+### 18i. Regression testing with render-tex.js
+
+Server-side rendering tool for automated visual regression testing:
+
+```bash
+# Render single expression
+node tools/render-tex.js mathjax-libertinus '\hat{f}\;U\Sigma V^T' test.svg
+
+# Render all 41 test expressions for all fonts
+bash tools/render-all.sh
+
+# Compare against baseline (reports changed expressions)
+bash tools/diff-renders.sh
+```
+
+The tool uses MathJax's `liteAdaptor` with module redirect to load custom
+font CJS files. Generates both SVG and PNG (via `sharp`).
+
+**Workflow for changes:**
+1. Make changes to library or build.py
+2. Rebuild affected fonts
+3. `bash tools/render-all.sh mathjax-fontname`
+4. `bash tools/diff-renders.sh` — shows exactly which expressions changed
+5. Inspect before/after PNGs to verify changes are correct
+6. Update baseline: `cp -r test-renders/* test-renders-baseline/`
+
 ### 19. Two-part stretchy assemblies (arrows and vert bars)
 
 Some math fonts use 2-part assemblies for arrows (extender + arrowhead) and
