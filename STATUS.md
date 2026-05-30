@@ -1,243 +1,145 @@
 # MathJax Custom Font Packages — Project Status
 
-## Current State (as of latest commit)
+## Current State (2026-05-30)
+
+All 10 font packages are built, tested, and have self-contained `build.py` scripts
+that produce correct output without manual post-build fixes.
 
 ### Completed Packages
-1. **mathjax-libertinus** — Libertinus Serif + Libertinus Math (R+B+I+BI)
-2. **mathjax-libertinus-sans** — Libertinus Sans + Libertinus Math (R+B+I, BI=I fallback)
-3. **mathjax-lm-sans** — CMU Sans Serif + NewCM Sans Math (R+B+I+BI)
-4. **mathjax-noto-sans** — Noto Sans (variable, pinned wght+wdth) + Noto Sans Math (R+B+I+BI)
 
-### Remaining Packages (planned)
-5. **mathjax-source-sans** — Source Sans 3 (variable) + Latin Modern Math
-6. **mathjax-source-code** — Source Code Pro (variable) + Latin Modern Math
-7. **mathjax-concrete-euler** — CMU Concrete (+ generated slanted) + Euler Math
-8. **mathjax-shantell** — Shantell Sans (variable) + Source Code Pro Greek + LM Math
-9. **mathjax-lato** — Lato (serifed I) + Lete Sans Math (rebuild through new library)
-10. **mathjax-ptsans** — PT Sans (serifed I) + newtxsf Greek + LM Math (rebuild)
+| # | Package | Text Font | Math Font | Weights | Notes |
+|---|---------|-----------|-----------|---------|-------|
+| 1 | mathjax-libertinus | Libertinus Serif | Libertinus Math | R+B+I+BI | Reference implementation |
+| 2 | mathjax-libertinus-sans | Libertinus Sans | Libertinus Math | R+B+I+BI | Synthetic bold-italic (skew+hand-edit) |
+| 3 | mathjax-lm-sans | CMU Sans Serif | NewCM Sans Math | R+B+I+BI | Latin-only override (Greek from NewCM) |
+| 4 | mathjax-noto-sans | Noto Sans (variable) | Noto Sans Math | R+B+I+BI | Lete Sans Math calligraphic donor |
+| 5 | mathjax-source-sans | Source Sans 3 (variable) | Latin Modern Math | R+B+I+BI | |
+| 6 | mathjax-source-code | Source Code Pro (variable) | Latin Modern Math | R+B+I+BI | Custom TEXT_RANGES (no mono brackets) |
+| 7 | mathjax-concrete-euler | CMU Concrete | Euler Math | R+B+I+BI | Synthetic slanted italic, reduced LSB |
+| 8 | mathjax-shantell | Shantell Sans (variable) | Latin Modern Math | R+B+I+BI | 3-layer: SCP Greek middle layer |
+| 9 | mathjax-ptsans | PT Sans | Latin Modern Math | R+B+I+BI | 3-layer: newtxsf Greek (Type 1) |
+| 10 | mathjax-lato | Lato | Lete Sans Math | R+B+I+BI | Patched serifed I |
 
 ### Git Structure
-- **main branch**: Clean working state with completed packages
-- **experimental-horizontal-stretch branch**: Previous experimental work on horizontal stretchy (PUA, stretchv, variant reordering) — preserved for reference, DO NOT merge
+- **main branch**: All 10 packages, clean working state
+- **experimental-horizontal-stretch branch**: Previous experimental work — preserved, DO NOT merge
 
 ## Shared Library: `lib/mathjax_font_lib.py`
 
-Extracted from battle-tested `build_mathjax_ptsans.py`. Key features:
+Key features:
 - Glyph extraction with depth bug fixed (`-yMin/upm` always, never clamped)
-- Italic correction (ic:) extraction and application from MATH table
-- Top accent skew (sk:) computation from text font visual centers
+- Italic correction (ic) from MATH table + computed overhang fallback
+- Accent skew (sk) — angle-based formula: `sk = accent_y * tan(italic_angle) / 2 / upm * 1.3`
+- `ensure_width_covers_overhang()` — extends italic advance width to cover xMax
+- `reduce_italic_lsb()` — shifts italic paths left via TransformPen
+- `adjust_integral_widths()` — reduces integral declared width for subscript tucking
+- `override_integral_ics()` — sets IC on integral codepoints
 - Invisible operator fix (U+2061-2064 forced zero-width)
 - Self-stretching delimiters for U+2015 etc. (\overline fix)
-- PUA codepoint assignment for unmapped horizontal assembly parts
 - Bold Greek removal from bold/bold-italic variants (\boldsymbol fix)
+- Math-alpha Latin dupe removal from bold/italic/bold-italic variants
+- Calligraphic/script separation support
 - Modifier accent ranges (U+02C6-02DC) in DEFAULT_TEXT_RANGES
-- Math alphanumeric (U+1D400-1D7FF) and letterlike (U+2100-214F) ranges
+- `build_all_variants()` high-level helper with `italic_lsb` parameter
 - Parameterized template writers (common.js, svg.js, chtml.js, webpack configs)
-- `build_all_variants()` high-level helper
 
 ## Per-Font Build Pattern
 
-Each package has a `build.py` that:
+Each `build.py` is self-contained:
 1. Imports from `lib/mathjax_font_lib`
 2. Defines font paths, name, ID, CSS prefix
 3. Calls `build_all_variants()` with font-specific config
-4. Applies post-build tweaks (overbrace spacing, etc.)
+4. Applies all post-build fixes inline (ic, sk, svg.js wiring, calligraphic, etc.)
 5. Calls `write_boilerplate()` for webpack configs
 
-## Known Issues / Gotchas (22+ in TUTORIAL.md)
+No manual post-build steps required — everything survives a clean rebuild.
 
-Critical ones to remember:
-- **\overline uses U+2015**, not U+0305 — needs self-stretching delimiter entry
-- **Bold Greek**: remove regular Greek from bold/bold-italic variants
-- **Accent depth**: must be `-yMin/upm` always (never clamp to 0)
-- **Accent skew (sk:)**: compute from text font visual centers, not MATH table
-- **Invisible operators**: U+2061-2064 must be zero-width
-- **Modifier accents**: U+02C6-02DC must be in text font ranges
-- **Bold-italic Latin**: also remove A-Z/a-z from bold-italic variant (same issue as Greek)
-- **Overbrace/underbrace**: HDW values may need +0.35em adjustment
-- **Integral IC**: Set to 0 for Libertinus (LM Math raw values too large). Largeop IC override in library.
+## Regression Testing Tools
 
-## Recent Fixes (session 05-26/27)
+In `tools/`:
+- **render-tex.js** — Server-side MathJax rendering via liteAdaptor + module redirect
+- **render-all.sh** — Batch renders 41 test expressions × 10 fonts to SVG
+- **diff-renders.sh** — Compares SVG renders against a saved baseline
+- **test-expressions.txt** — 41 standard test expressions (algebra, analysis, Greek, accents, etc.)
 
-### Libertinus Sans Bold Italic — RESOLVED
-Synthesized `LibertinusSans-BoldItalic-Synth.otf`: skew bold 12° + hand-edited
-paths for a, e, f, g, l, kappa (Inkscape node editing). Per-glyph sidebearing
-tuning via visual rhythm matching. See `BOLD-ITALIC.md` for full pipeline.
+Workflow: `render-all.sh` → `cp -r test-renders test-renders-baseline` → make changes → `render-all.sh` → `diff-renders.sh`
 
-### Italic Corrections (ic) via smp redirects — ALL FONTS
-MathJax renders `$U$` via U+0055 in italic.js, not U+1D448 in normal.js.
-If italic.js has the entry, ic from MATH table is never used → `U Σ V^T` too close.
-**Fix**: Remove basic Latin A-Z/a-z AND basic Greek from italic.js so MathJax
-follows smp redirects to normal.js (which has ic). Applied to Libertinus Sans
-and CMU Sans; needs applying to all other fonts.
+## Key Patterns & Fixes (consolidated in build.py files)
 
-### Latin-only override (CMU Sans)
-`greek_from_text=True` overrides both Latin AND Greek. CMU Sans needs Latin from
-text font but Greek from NewCM Sans Math. Solution: post-build Latin-only override
-using `get_glyph_metrics_and_path` + `compute_visual_skews` with 1.3× sk factor.
+### Italic Correction (ic) via smp redirects
+Remove basic Latin A-Z/a-z AND basic Greek from italic.js so MathJax follows smp
+redirects to normal.js (which has ic values). Applied to all fonts.
 
-### Accent sk on Greek
-Basic Greek in italic.js blocked smp redirects to normal.js (same as Latin).
-Removing Greek from italic.js + applying angle-based sk to math italic/bold-italic
-Greek ranges fixed `\hat{\alpha}` centering.
+### Accent Skew (sk) — angle-based
+Computed from italic font angle, not MATH table. Formula with 1.3× factor propagated
+to math-alpha italic/bold-italic Greek ranges.
 
-### Calligraphic/Script Separation (Noto Sans) — RESOLVED
-Lete Sans Math calligraphic for `\mathcal`, Noto script for `\mathscr`. Uses
-`tex-calligraphic.js` variant file with Lete glyphs scaled to Noto cap height.
-Script codepoint duplicates removed from bold/italic/bold-italic variants.
-Integer coordinates + no leading M required for paths. See tutorial 18e.
+### Latin-only Override (LM Sans pattern)
+For fonts that need text-font Latin but math-font Greek: post-build replacement of
+only Latin math-alpha entries, with math-alpha Latin dupe removal from bold/italic/
+bold-italic variants.
 
-### NewCM Sans Bold Italic — NO SOLUTION
-NewCM Sans Math's bold-italic glyphs are slanted bold, not true italic.
-GPL3 license prevents synthesis. GitHub issue #1 filed.
+### Calligraphic/Script Separation
+Two patterns:
+- **Pattern A (NewCM)**: Default glyphs → tex-calligraphic.js, ss01 alternates → script.js
+- **Pattern B (Lete/Euler donor)**: Donor font calligraphic → tex-calligraphic.js, math font script in normal.js
 
-## Open Items / Future Improvements
+Both require svg.js wiring for `tex-calligraphic` and `script` variants, plus script
+codepoint dupe removal from bold/italic/bold-italic.
 
-- **Libertinus Sans Bold Italic**: RESOLVED (see above).
-- **Angle bracket scaling (langle/rangle)**: NewCM Sans Math only has 8 size
-  variants (~3em max) and no stretchy assembly for U+27E8/27E9. They don't grow
-  large enough for tall fractions. Fix: synthesize a stretchy assembly by splitting
-  the largest glyph into top/bottom caps + angled line extender. Libertinus Math
-  has 13 sizes (enough in practice) but also lacks assembly. Check each math font.
-- **Integral subscript positioning**: RESOLVED. IC alone doesn't work for sized
-  operators (cancels itself). Fixed by reducing declared glyph width in smallop/
-  largeop (W=0.52/0.63) and using IC (0.22/0.37) for superscript offset only.
-  `adjust_integral_widths()` added to library. Currently applied to Shantell;
-  needs adding to other font build scripts.
-- **Horizontal stretchy arrows**: Arrows render as fixed-size glyphs (no stretchy
-  arrowheads). The experimental-horizontal-stretch branch has PUA-based attempts
-  but they broke overbraces. Needs a different approach — possibly copying newCM's
-  horizontal delimiter entries directly for arrow codepoints.
+### Custom TEXT_RANGES (Source Code Pro)
+Excludes brackets/operators from monospace text font (too wide). Must include modifier
+accents (U+02C6-02DC) or \hat breaks.
 
-- **Lowercase Greek upright (\mathrm{\alpha}) not supported by MathJax**:
-  MathJax's TeX parser hardcodes lowercase Greek to always use MATHVARIANT.ITALIC
-  in the `lcGreek` handler (ParseMethods.js). Unlike `ucGreek`, it does NOT check
-  `parser.stack.env['font']`, so `\mathrm{\alpha}` renders the same as `\alpha`.
-  This matches standard TeX behavior (lowercase Greek is always italic in math).
+### 3-Layer Fonts (Shantell, PT Sans)
+Text font (Latin) → middle layer (Greek from SCP or newtxsf) → math font (operators/delimiters).
 
-  **Consequence**: Our text font's upright lowercase Greek (in the normal variant
-  at U+03B1) is never used by any standard LaTeX command. The italic variant's
-  Greek is always what renders for `\alpha`.
+## Known Issues / Open Items
 
-  **Options to fix**:
-  1. Patch `lcGreek` in our webpack bundle to also check `env['font']` — would
-     make `\mathrm{\alpha}` use the normal variant (upright Greek). Small patch.
-  2. Use MathJax's `mathStyle: 'upright'` option to make ALL Greek upright.
-  3. Use MathJax's `mathStyle: 'ISO'` to make ALL Greek italic (including capitals).
-  4. Accept it — matches standard TeX. Most users won't notice.
+### Active Issues
+1. **NewCM Sans bold italic** — GPL3 prevents synthesis. GitHub issue #1.
+2. **Noto Sans alpha glyph** — Too similar to Latin 'a', needs editing. Issue #2.
+3. **Concrete/Euler italic LSB** — `reduce_italic_lsb` helps but spacing still loose. Issue #5.
+4. **Libertinus calligraphic donor** — Using Euler calligraphic currently. Issue #4.
+5. **Integral subscript positioning** — `adjust_integral_widths()` applied to Shantell; needs adding to other fonts.
+6. **Angle bracket scaling** — NewCM Sans Math has only 8 size variants (~3em max), no stretchy assembly for U+27E8/27E9.
+7. **Horizontal stretchy arrows** — Fixed-size only; experimental branch attempts broke overbraces.
 
-  **Current inconsistency across our fonts**: Libertinus, Libertinus Sans, LM Sans,
-  and Noto Sans show upright Greek capitals + italic lowercase (matching standard
-  TeX/newCM). Source Sans and Source Code Pro also follow this pattern after the
-  `greek_from_text` fix. The upright lowercase Greek data exists in the normal
-  variant but is unused.
-
-- **TODO: Test italic vs upright Greek across all fonts**: The lcGreek patch and
-  `_replace_with_math_italic_greek` fix were applied to all 7 packages. Need to
-  verify the typography matrix shows distinct upright (`\mathrm{\alpha}`) vs italic
-  (`\alpha`) lowercase Greek for each font.
-
-- **Concrete + Euler needs revisiting**: The typography matrix shows issues that
-  need investigation. Euler Math has a distinctive upright style for all math
-  (Knuth's design intent was upright math). Need to check if Euler's Greek
-  is being used correctly and whether concrete-euler should use a different
-  `mathStyle` configuration.
-
-- **Calligraphic/script glyphs**: Noto Sans Math's calligraphic (\mathcal)
-  looks out of place with Source Sans, Source Code, and other fonts that use
-  Noto Sans Math. **TODO**: Override calligraphic glyphs (U+1D49C-1D4B5 +
-  letterlike symbols) with NewCM Sans Math's calligraphic for fonts using
-  Noto Sans Math. NewCM Sans Math has better-looking script letters that
-  match a sans-serif context. Would need a post-build override similar to
-  `greek_from_text` but for the script range in the normal variant.
-
-## Font Files Location
-
-Source fonts in `/work/mathjax-fonts/fonts/` (not in git):
-- `fonts/libertinus/` — LibertinusSerif-*.otf, LibertinusSans-*.otf, LibertinusMath-Regular.otf
-- `fonts/cmu-sans/` — cmunss.otf, cmunsx.otf, cmunsi.otf, cmunso.otf, NewCMSansMath-Regular.otf
-- `fonts/noto-sans/` — NotoSans[wdth,wght].ttf, NotoSans-Italic[wdth,wght].ttf, NotoSansMath-Regular.ttf
-- `fonts/source-sans/` — SourceSans3[wght].ttf, SourceSans3-Italic[wght].ttf
-- `fonts/lm-math/` — latinmodern-math.otf
-- See `fonts/README.md` for download instructions for all fonts
-
-Other fonts already downloaded in workspace:
-- `/work/font-demos/noto-sans/`, `/work/font-demos/source-sans/`, etc.
-- `/work/font-demos/concrete/`, `/work/font-demos/euler-math/`
-- `/work/cmu-sans/` — CMU Sans Serif fonts
-- `/tmp/ncm/newcomputermodern/otf/NewCMSansMath-Regular.otf`
-- `/work/font-demos/shantell-sans/`, `/work/font-demos/source-code-pro/`
-- `/tmp/newtxsf/newtxsf/type1/` — newtxsf Type 1 fonts (for PT Sans)
-- `/work/lato-patched/`, `/work/ptsans-mathjax/` — patched text fonts
-- `/work/lete-sans-math/`, `/work/lm-math/` — math fonts
-
-## Special Handling Notes
-
-### Variable Fonts (Noto Sans, Source Sans, Source Code Pro, Shantell Sans)
-Need `fontTools.instancer.instantiateVariableFont()` to pin wght axis at 400/700.
-Pin wdth=100 if present (Noto Sans). Library needs `instantiate_variable_font()` function — not yet implemented.
-
-### CMU Concrete Slanted
-Already generated at `/work/font-demos/concrete/CMUConcrete-Slanted.otf` via CFF FontMatrix shear at slant=1/6 (9.46°). Use as italic variant.
-
-### Shantell Sans Greek (3-layer)
-Source Code Pro provides Greek (25/25). Use `build_middle_layer_from_otf()` from library. x-heights match well (485 vs 478).
-
-### PT Sans (3-layer with Type 1)
-newtxsf Type 1 fonts provide sans-serif Greek. Library has `load_ntxsf_font()`, `build_ntxsf_layer()`, and the glyph maps.
-
-### Libertinus Sans Bold Italic
-Synthesized from skewed bold + hand-edited italic-shape glyphs. See `BOLD-ITALIC.md`.
+### Design Decisions (accepted)
+- **Lowercase Greek upright (`\mathrm{\alpha}`)**: MathJax hardcodes lowercase Greek to italic. Matches standard TeX. lcGreek patch available but not applied by default.
+- **MathJax SRE issue**: `tex2svgPromise` hangs in Tauri due to SRE blob Worker. Use `-nosre` webpack bundle + lcGreek patch for integration.
 
 ## Build Commands
 
 ```bash
 cd /work/mathjax-fonts
 
-# Build a package
+# Build a package (generates CJS font data files)
 python mathjax-{name}/build.py
 
-# Build webpack bundle (optional, for testing)
+# Build webpack bundle (for browser testing)
 cd mathjax-{name}/build
 npx webpack --config webpack.config.cjs        # full
-npx webpack --config webpack-nosre.config.cjs   # no accessibility
+npx webpack --config webpack-nosre.config.cjs   # no accessibility (for Tauri)
+
+# Run regression tests
+cd /work/mathjax-fonts/tools
+./render-all.sh                    # render all fonts
+./render-all.sh mathjax-shantell   # render one font
+./diff-renders.sh                  # compare against baseline
 ```
 
 ## Specimen Test Pages
 
-Each package should have a `test.html` generated from `lib/specimen-template.html`.
-To generate, build the webpack bundle first, then:
+Each package has a `test.html` generated from `lib/specimen-template.html`.
+Includes: math specimens (linear algebra, analysis, topology, combinatorics,
+probability, abstract algebra, physics), display specimens, and complete glyph
+inventory (accents, alphabets in all 4 styles, Greek, script/decorative, operators,
+delimiters at multiple sizes).
 
-```python
-with open('lib/specimen-template.html') as f:
-    template = f.read()
-result = template.replace('FONT_TITLE', 'Font Name + Math Font')
-result = result.replace('FONT_BUNDLE', 'tex-mml-svg-mathjax-name.js')
-result = result.replace('FONT_CSS', '@font-face { ... }')
-result = result.replace('FONT_FAMILY', '"Font Name", serif')
-with open('mathjax-name/test.html', 'w') as f:
-    f.write(result)
-```
+**Remember:** test.html needs a webpack bundle. Build it first.
 
-The template includes: full math specimens (linear algebra, analysis, topology,
-combinatorics, probability, abstract algebra, physics), display specimens, and
-complete glyph inventory (accents, alphabets in all 4 styles, Greek, script/
-decorative, operators, delimiters at multiple sizes).
+## Font Files Location
 
-**Remember:** test.html needs a webpack bundle to work. Build it first:
-```bash
-cd mathjax-name/build && npx webpack --config webpack.config.cjs
-```
-
-## Workspace Files (outside git repo)
-
-Key files in `/work/` (the original workspace):
-- `build_mathjax_ptsans.py` — Original PT Sans builder (1910 lines)
-- `build_mathjax_lato.py` — Original Lato builder
-- `TUTORIAL-custom-mathjax-font.md` — Full tutorial (also copied into repo)
-- `mathjax-ptsans-font/` — Working PT Sans MathJax package
-- `mathjax-lato-font/` — Working Lato MathJax package
-- `mathjax-ptsans-bundle/` — Distribution bundle for PT Sans
-- `font-demo.html` — Font comparison demo page
-- `specimen-lato.html`, `specimen-ptsans.html` — Specimen pages
-- `patch_lato_serif_i.py`, `patch_ptsans_replace_i.py` — Serifed I patchers
+Source fonts in `/work/mathjax-fonts/fonts/` (not in git). See `fonts/README.md`
+for download instructions.
