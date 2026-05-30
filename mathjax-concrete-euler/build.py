@@ -61,7 +61,6 @@ def main():
         x_height=x_height,
         text_font_paths=TEXT_FONTS,
         greek_from_text=True,
-        italic_lsb=0,
     )
 
     for delim_path in [
