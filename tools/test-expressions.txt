@@ -77,6 +77,7 @@ f: X \to Y
 # === DISPLAY EQUATIONS ===
 \hat{f}(\xi) = \int_{-\infty}^{\infty} f(x)\,e^{-2\pi i x \xi}\,dx
 \frac{\bar{X}_n - \mu}{\sigma / \sqrt{n}} \xrightarrow{d} \mathcal{N}(0, 1)
+\sqrt{1 + \sqrt{1 + \sqrt{1 + \sqrt{1 + \cdots}}}} = \frac{1 + \sqrt{5}}{2} = \varphi
 
 # === TYPOGRAPHY MATRIX ===
 \mathrm{A\,B\,C} \quad A\,B\,C \quad \mathbf{A\,B\,C} \quad \boldsymbol{A\,B\,C}
