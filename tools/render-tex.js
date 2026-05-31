@@ -13,7 +13,7 @@ const fs = require('fs');
 const fontPkg = process.argv[2] || 'mathjax-libertinus';
 const tex = process.argv[3] || '\\hat{f} \\quad \\hat{x} \\quad U\\Sigma V^T';
 const outFile = process.argv[4] || 'output.svg';
-const displayMode = !process.argv.includes('--inline');
+const inlineMode = process.argv.includes('--inline');
 
 // Redirect font module resolution to our custom font package
 const fontCjsDir = path.resolve(__dirname, '..', fontPkg, 'cjs');
@@ -46,7 +46,10 @@ const texInput = new TeX({packages: ['base', 'ams', 'boldsymbol']});
 const svgOutput = new SVG({fontCache: 'local'});
 const html = mathjax.document('', {InputJax: texInput, OutputJax: svgOutput});
 
-const node = html.convert(tex, {display: displayMode});
+// Always use display mode for single-SVG output. For inline-style operators,
+// wrap in \textstyle so integrals/sums use inline limits placement.
+const renderTex = inlineMode ? '{\\textstyle ' + tex + '}' : tex;
+const node = html.convert(renderTex, {display: true});
 const svgString = adaptor.outerHTML(node);
 
 // Extract just the SVG element
@@ -54,7 +57,7 @@ const svgMatch = svgString.match(/<svg[^>]*>[\s\S]*<\/svg>/);
 const svg = svgMatch ? svgMatch[0] : svgString;
 
 fs.writeFileSync(outFile, svg);
-console.log(`SVG: ${outFile} (${svg.length} chars)${displayMode ? '' : ' [inline]'}`);
+console.log(`SVG: ${outFile} (${svg.length} chars)${inlineMode ? ' [inline]' : ''}`);
 
 // Also generate PNG via sharp
 const pngFile = outFile.replace(/\.svg$/, '.png');
