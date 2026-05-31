@@ -4,11 +4,12 @@ import os
 
 FONTS_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
-fonts = ['mathjax-libertinus', 'mathjax-libertinus-sans', 'mathjax-lm-sans',
+fonts = ['mathjax-newcm', 'mathjax-libertinus', 'mathjax-libertinus-sans', 'mathjax-lm-sans',
          'mathjax-noto-sans', 'mathjax-source-sans', 'mathjax-source-code',
          'mathjax-concrete-euler', 'mathjax-shantell', 'mathjax-lato', 'mathjax-ptsans']
 
 short_names = {
+    'mathjax-newcm': 'NewCM (ref)',
     'mathjax-libertinus': 'Libertinus',
     'mathjax-libertinus-sans': 'Lib Sans',
     'mathjax-lm-sans': 'LM Sans',
