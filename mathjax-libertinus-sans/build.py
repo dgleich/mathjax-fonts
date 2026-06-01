@@ -316,11 +316,8 @@ def main():
     text_fonts = {k: load_font(v) for k, v in TEXT_FONTS.items()}
     math_font = load_font(MATH_FONT)
 
-    # Use actual 'x' glyph height, not OS/2 sxHeight (which can differ)
-    from mathjax_font_lib import get_glyph_metrics_and_path
-    x_info = get_glyph_metrics_and_path(text_fonts['regular'], 0x78)
-    x_height = x_info['height'] if x_info else get_x_height(text_fonts['regular'])
-    print(f"  x_height: {x_height} (glyph-based)")
+    x_height = get_x_height(text_fonts['regular'])
+    print(f"  x_height: {x_height}")
 
     ic_map = extract_italic_corrections(math_font)
     override_integral_ics(ic_map, normal_val=0)

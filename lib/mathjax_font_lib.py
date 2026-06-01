@@ -143,7 +143,16 @@ def instantiate_variable_font(path, weight=400, width=None, **extra_axes):
 
 
 def get_x_height(font):
-    """Auto-calculate x_height from OS/2 table."""
+    """Auto-calculate x_height from actual 'x' glyph, falling back to OS/2.
+
+    OS/2.sxHeight can differ from the actual glyph top (e.g. Libertinus Sans:
+    OS/2=460 vs glyph=432). MathJax uses x_height to scale SVG output to match
+    the surrounding text font — the browser uses the actual glyph shape, so we
+    must match that.
+    """
+    info = get_glyph_metrics_and_path(font, 0x78)  # 'x'
+    if info and info['height'] > 0:
+        return info['height']
     return round3(font['OS/2'].sxHeight / font['head'].unitsPerEm)
 
 
