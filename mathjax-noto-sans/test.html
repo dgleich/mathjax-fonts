@@ -4,9 +4,9 @@
 <meta charset="utf-8">
 <title>Math Font Specimen — Noto Sans + Noto Sans Math</title>
 <style>
-  @font-face { font-family: 'NotoSans'; src: url('../fonts/noto-sans/NotoSans[wdth,wght].ttf'); }
-  @font-face { font-family: 'NotoSans'; src: url('../fonts/noto-sans/NotoSans-Italic[wdth,wght].ttf'); font-style: italic; }
-  :root { --font-body: 'NotoSans', 'Noto Sans', sans-serif; --font-label: "Noto Sans + Noto Sans Math"; }
+  @font-face { font-family: 'Noto Sans'; src: url('../fonts/noto-sans/NotoSans[wdth,wght].ttf'); }
+@font-face { font-family: 'Noto Sans'; src: url('../fonts/noto-sans/NotoSans-Italic[wdth,wght].ttf'); font-style: italic; }
+  :root { --font-body: "Noto Sans", sans-serif; --font-label: "Noto Sans + Noto Sans Math"; }
   body {
     font-family: var(--font-body);
     max-width: 850px;
@@ -78,7 +78,7 @@ MathJax = {
       bm: ['\\boldsymbol{#1}', 1],
     }
   },
-  svg: { fontCache: 'global' },
+  svg: { fontCache: 'global', matchFontHeight: false },
   options: {
     enableEnrichment: false,
     enableComplexity: false,

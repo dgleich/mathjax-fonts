@@ -2,29 +2,13 @@
 <html lang="en">
 <head>
 <meta charset="utf-8">
-<title>Math Font Specimen — PT Sans + Lete Sans Math</title>
+<title>Math Font Specimen — PT Sans + Latin Modern Math</title>
 <style>
-  @font-face {
-  font-family: "PT Sans";
-  src: url("chtml/woff2/mjx-ptsans-n.woff2") format("woff2");
-  font-weight: normal; font-style: normal;
-}
-@font-face {
-  font-family: "PT Sans";
-  src: url("chtml/woff2/mjx-ptsans-b.woff2") format("woff2");
-  font-weight: bold; font-style: normal;
-}
-@font-face {
-  font-family: "PT Sans";
-  src: url("chtml/woff2/mjx-ptsans-i.woff2") format("woff2");
-  font-weight: normal; font-style: italic;
-}
-@font-face {
-  font-family: "PT Sans";
-  src: url("chtml/woff2/mjx-ptsans-bi.woff2") format("woff2");
-  font-weight: bold; font-style: italic;
-}
-  :root { --font-body: "PT Sans"; --font-label: "PT Sans + Lete Sans Math"; }
+  @font-face { font-family: 'PT Sans'; src: url('../fonts/ptsans/PTSans-Regular-Patched.otf'); }
+@font-face { font-family: 'PT Sans'; src: url('../fonts/ptsans/PT_Sans-Web-Italic.ttf'); font-style: italic; }
+@font-face { font-family: 'PT Sans'; src: url('../fonts/ptsans/PT_Sans-Web-Bold.ttf'); font-weight: bold; }
+@font-face { font-family: 'PT Sans'; src: url('../fonts/ptsans/PT_Sans-Web-BoldItalic.ttf'); font-weight: bold; font-style: italic; }
+  :root { --font-body: "PT Sans", sans-serif; --font-label: "PT Sans + Latin Modern Math"; }
   body {
     font-family: var(--font-body);
     max-width: 850px;
@@ -96,7 +80,7 @@ MathJax = {
       bm: ['\\boldsymbol{#1}', 1],
     }
   },
-  svg: { fontCache: 'global' },
+  svg: { fontCache: 'global', matchFontHeight: false },
   options: {
     enableEnrichment: false,
     enableComplexity: false,
@@ -124,7 +108,7 @@ MathJax = {
 
 <body>
 
-<h1>Math Font Specimen — PT Sans + Lete Sans Math <span style="font-size:0.5em;color:#999;" id="status">Loading...</span></h1>
+<h1>Math Font Specimen — PT Sans + Latin Modern Math <span style="font-size:0.5em;color:#999;" id="status">Loading...</span></h1>
 
 <nav>
   <a href="#alphabet">Alphabet</a>

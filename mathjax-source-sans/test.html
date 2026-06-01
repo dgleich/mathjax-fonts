@@ -2,11 +2,11 @@
 <html lang="en">
 <head>
 <meta charset="utf-8">
-<title>Math Font Specimen — Source Sans 3 + Noto Sans Math</title>
+<title>Math Font Specimen — Source Sans 3 + Latin Modern Math</title>
 <style>
-  @font-face { font-family: 'SourceSans3'; src: url('../fonts/source-sans/SourceSans3[wght].ttf'); }
-  @font-face { font-family: 'SourceSans3'; src: url('../fonts/source-sans/SourceSans3-Italic[wght].ttf'); font-style: italic; }
-  :root { --font-body: 'SourceSans3', 'Source Sans 3', sans-serif; --font-label: "Source Sans 3 + Noto Sans Math"; }
+  @font-face { font-family: 'Source Sans'; src: url('../fonts/source-sans/SourceSans3[wght].ttf'); }
+@font-face { font-family: 'Source Sans'; src: url('../fonts/source-sans/SourceSans3-Italic[wght].ttf'); font-style: italic; }
+  :root { --font-body: "Source Sans", sans-serif; --font-label: "Source Sans 3 + Latin Modern Math"; }
   body {
     font-family: var(--font-body);
     max-width: 850px;
@@ -78,7 +78,7 @@ MathJax = {
       bm: ['\\boldsymbol{#1}', 1],
     }
   },
-  svg: { fontCache: 'global' },
+  svg: { fontCache: 'global', matchFontHeight: false },
   options: {
     enableEnrichment: false,
     enableComplexity: false,
@@ -106,7 +106,7 @@ MathJax = {
 
 <body>
 
-<h1>Math Font Specimen — Source Sans 3 + Noto Sans Math <span style="font-size:0.5em;color:#999;" id="status">Loading...</span></h1>
+<h1>Math Font Specimen — Source Sans 3 + Latin Modern Math <span style="font-size:0.5em;color:#999;" id="status">Loading...</span></h1>
 
 <nav>
   <a href="#alphabet">Alphabet</a>

@@ -5,9 +5,10 @@
 <title>Math Font Specimen — Libertinus Serif + Libertinus Math</title>
 <style>
   @font-face { font-family: 'Libertinus'; src: url('../fonts/libertinus/LibertinusSerif-Regular.otf'); }
-  @font-face { font-family: 'Libertinus'; src: url('../fonts/libertinus/LibertinusSerif-Italic.otf'); font-style: italic; }
-  @font-face { font-family: 'Libertinus'; src: url('../fonts/libertinus/LibertinusSerif-Bold.otf'); font-weight: bold; }
-  :root { --font-body: 'Libertinus', 'Libertinus Serif', serif; --font-label: "Libertinus Serif + Libertinus Math"; }
+@font-face { font-family: 'Libertinus'; src: url('../fonts/libertinus/LibertinusSerif-Italic.otf'); font-style: italic; }
+@font-face { font-family: 'Libertinus'; src: url('../fonts/libertinus/LibertinusSerif-Bold.otf'); font-weight: bold; }
+@font-face { font-family: 'Libertinus'; src: url('../fonts/libertinus/LibertinusSerif-BoldItalic.otf'); font-weight: bold; font-style: italic; }
+  :root { --font-body: "Libertinus", serif; --font-label: "Libertinus Serif + Libertinus Math"; }
   body {
     font-family: var(--font-body);
     max-width: 850px;
@@ -79,7 +80,7 @@ MathJax = {
       bm: ['\\boldsymbol{#1}', 1],
     }
   },
-  svg: { fontCache: 'global' },
+  svg: { fontCache: 'global', matchFontHeight: false },
   options: {
     enableEnrichment: false,
     enableComplexity: false,

@@ -2,29 +2,11 @@
 <html lang="en">
 <head>
 <meta charset="utf-8">
-<title>Math Font Specimen — Shantell Sans + Noto Sans Math</title>
+<title>Math Font Specimen — Shantell Sans + Latin Modern Math</title>
 <style>
-  @font-face {
-  font-family: "Shantell Sans";
-  src: url("chtml/woff2/mjx-shantell-n.woff2") format("woff2");
-  font-weight: normal; font-style: normal;
-}
-@font-face {
-  font-family: "Shantell Sans";
-  src: url("chtml/woff2/mjx-shantell-b.woff2") format("woff2");
-  font-weight: bold; font-style: normal;
-}
-@font-face {
-  font-family: "Shantell Sans";
-  src: url("chtml/woff2/mjx-shantell-i.woff2") format("woff2");
-  font-weight: normal; font-style: italic;
-}
-@font-face {
-  font-family: "Shantell Sans";
-  src: url("chtml/woff2/mjx-shantell-bi.woff2") format("woff2");
-  font-weight: bold; font-style: italic;
-}
-  :root { --font-body: "Shantell Sans"; --font-label: "Shantell Sans + Noto Sans Math"; }
+  @font-face { font-family: 'Shantell Sans'; src: url('../fonts/shantell/ShantellSans[BNCE,INFM,SPAC,wght].ttf'); }
+@font-face { font-family: 'Shantell Sans'; src: url('../fonts/shantell/ShantellSans-Italic[BNCE,INFM,SPAC,wght].ttf'); font-style: italic; }
+  :root { --font-body: "Shantell Sans", cursive; --font-label: "Shantell Sans + Latin Modern Math"; }
   body {
     font-family: var(--font-body);
     max-width: 850px;
@@ -96,7 +78,7 @@ MathJax = {
       bm: ['\\boldsymbol{#1}', 1],
     }
   },
-  svg: { fontCache: 'global' },
+  svg: { fontCache: 'global', matchFontHeight: false },
   options: {
     enableEnrichment: false,
     enableComplexity: false,
@@ -124,7 +106,7 @@ MathJax = {
 
 <body>
 
-<h1>Math Font Specimen — Shantell Sans + Noto Sans Math <span style="font-size:0.5em;color:#999;" id="status">Loading...</span></h1>
+<h1>Math Font Specimen — Shantell Sans + Latin Modern Math <span style="font-size:0.5em;color:#999;" id="status">Loading...</span></h1>
 
 <nav>
   <a href="#alphabet">Alphabet</a>

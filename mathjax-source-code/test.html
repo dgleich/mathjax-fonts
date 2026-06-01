@@ -2,29 +2,11 @@
 <html lang="en">
 <head>
 <meta charset="utf-8">
-<title>Math Font Specimen — Source Code Pro + Noto Sans Math</title>
+<title>Math Font Specimen — Source Code Pro + Latin Modern Math</title>
 <style>
-  @font-face {
-  font-family: "Source Code Pro";
-  src: url("chtml/woff2/mjx-source-code-n.woff2") format("woff2");
-  font-weight: normal; font-style: normal;
-}
-@font-face {
-  font-family: "Source Code Pro";
-  src: url("chtml/woff2/mjx-source-code-b.woff2") format("woff2");
-  font-weight: bold; font-style: normal;
-}
-@font-face {
-  font-family: "Source Code Pro";
-  src: url("chtml/woff2/mjx-source-code-i.woff2") format("woff2");
-  font-weight: normal; font-style: italic;
-}
-@font-face {
-  font-family: "Source Code Pro";
-  src: url("chtml/woff2/mjx-source-code-bi.woff2") format("woff2");
-  font-weight: bold; font-style: italic;
-}
-  :root { --font-body: "Source Code Pro"; --font-label: "Source Code Pro + Noto Sans Math"; }
+  @font-face { font-family: 'Source Code Pro'; src: url('../fonts/source-code/SourceCodePro[wght].ttf'); }
+@font-face { font-family: 'Source Code Pro'; src: url('../fonts/source-code/SourceCodePro-Italic[wght].ttf'); font-style: italic; }
+  :root { --font-body: "Source Code Pro", monospace; --font-label: "Source Code Pro + Latin Modern Math"; }
   body {
     font-family: var(--font-body);
     max-width: 850px;
@@ -96,7 +78,7 @@ MathJax = {
       bm: ['\\boldsymbol{#1}', 1],
     }
   },
-  svg: { fontCache: 'global' },
+  svg: { fontCache: 'global', matchFontHeight: false },
   options: {
     enableEnrichment: false,
     enableComplexity: false,
@@ -124,7 +106,7 @@ MathJax = {
 
 <body>
 
-<h1>Math Font Specimen — Source Code Pro + Noto Sans Math <span style="font-size:0.5em;color:#999;" id="status">Loading...</span></h1>
+<h1>Math Font Specimen — Source Code Pro + Latin Modern Math <span style="font-size:0.5em;color:#999;" id="status">Loading...</span></h1>
 
 <nav>
   <a href="#alphabet">Alphabet</a>

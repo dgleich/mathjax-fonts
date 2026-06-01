@@ -4,27 +4,11 @@
 <meta charset="utf-8">
 <title>Math Font Specimen — Lato + Lete Sans Math</title>
 <style>
-  @font-face {
-  font-family: "Lato";
-  src: url("chtml/woff2/mjx-lato-n.woff2") format("woff2");
-  font-weight: normal; font-style: normal;
-}
-@font-face {
-  font-family: "Lato";
-  src: url("chtml/woff2/mjx-lato-b.woff2") format("woff2");
-  font-weight: bold; font-style: normal;
-}
-@font-face {
-  font-family: "Lato";
-  src: url("chtml/woff2/mjx-lato-i.woff2") format("woff2");
-  font-weight: normal; font-style: italic;
-}
-@font-face {
-  font-family: "Lato";
-  src: url("chtml/woff2/mjx-lato-bi.woff2") format("woff2");
-  font-weight: bold; font-style: italic;
-}
-  :root { --font-body: "Lato"; --font-label: "Lato + Lete Sans Math"; }
+  @font-face { font-family: 'Lato'; src: url('../fonts/lato/Lato-Regular-Patched.otf'); }
+@font-face { font-family: 'Lato'; src: url('../fonts/lato/Lato-Italic.ttf'); font-style: italic; }
+@font-face { font-family: 'Lato'; src: url('../fonts/lato/Lato-Bold.ttf'); font-weight: bold; }
+@font-face { font-family: 'Lato'; src: url('../fonts/lato/Lato-BoldItalic.ttf'); font-weight: bold; font-style: italic; }
+  :root { --font-body: "Lato", sans-serif; --font-label: "Lato + Lete Sans Math"; }
   body {
     font-family: var(--font-body);
     max-width: 850px;
@@ -96,7 +80,7 @@ MathJax = {
       bm: ['\\boldsymbol{#1}', 1],
     }
   },
-  svg: { fontCache: 'global' },
+  svg: { fontCache: 'global', matchFontHeight: false },
   options: {
     enableEnrichment: false,
     enableComplexity: false,
