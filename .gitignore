@@ -23,3 +23,5 @@ __pycache__/
 **/ShantellSans-w*.woff2
 **/SourceSans3-*.woff2
 **/NotoSansMath-Regular.woff2
+mathjax-newcm/
+test-renders-baseline/
