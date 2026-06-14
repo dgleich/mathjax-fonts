@@ -101,7 +101,7 @@ SPECIMENS = [
         'dir': None,  # goes to repo root
         'outfile': 'specimen-default-mathjax.html',
         'title': 'Default MathJax (newCM)',
-        'bundle': 'https://cdn.jsdelivr.net/npm/mathjax@4/tex-mml-svg.js',
+        'bundle': 'https://cdn.jsdelivr.net/npm/mathjax@4.1.2/tex-mml-svg.js',
         'css': '/* default MathJax — no custom CSS */',
         'family': 'serif',
     },
@@ -117,9 +117,6 @@ def main():
         result = result.replace('FONT_BUNDLE', spec['bundle'])
         result = result.replace('FONT_CSS', spec['css'])
         result = result.replace('FONT_FAMILY', spec['family'])
-        # CDN MathJax doesn't support matchFontHeight — only our custom bundles do
-        if spec.get('bundle', '').startswith('http'):
-            result = result.replace(', matchFontHeight: false', '')
 
         if spec.get('outfile'):
             outpath = os.path.join(FONTS_DIR, spec['outfile'])
