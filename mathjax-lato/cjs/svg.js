@@ -68,6 +68,8 @@ var up_js_1 = require("./svg/up.js");
 var dup_js_1 = require("./svg/dup.js");
 var tex_calligraphic_js_1 = require("./svg/tex-calligraphic.js");
 var tex_calligraphic_bold_js_1 = require("./svg/tex-calligraphic-bold.js");
+var script_js_1 = require("./svg/script.js");
+var script_bold_js_1 = require("./svg/script-bold.js");
 var delimiters_js_1 = require("./svg/delimiters.js");
 var Base = (0, common_js_1.CommonMathJaxLatoMixin)(FontData_js_1.SvgFontData);
 var MathJaxLato = (function (_super) {
@@ -123,7 +125,9 @@ var MathJaxLato = (function (_super) {
         '-up': up_js_1.up,
         '-dup': dup_js_1.dup,
         '-tex-calligraphic': tex_calligraphic_js_1.texCalligraphic,
-        '-tex-bold-calligraphic': tex_calligraphic_bold_js_1.texCalligraphicBold
+        '-tex-bold-calligraphic': tex_calligraphic_bold_js_1.texCalligraphicBold,
+        'script': script_js_1.script,
+        'bold-script': script_bold_js_1.scriptBold
     };
     MathJaxLato.variantCacheIds = {
         'normal': 'N',
@@ -153,7 +157,9 @@ var MathJaxLato = (function (_super) {
         '-up': 'U',
         '-dup': 'D',
         '-tex-calligraphic': 'TC',
-        '-tex-bold-calligraphic': 'TBC'
+        '-tex-bold-calligraphic': 'TBC',
+        'script': 'SC',
+        'bold-script': 'BSC'
     };
     return MathJaxLato;
 }(Base));

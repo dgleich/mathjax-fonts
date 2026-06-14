@@ -168,7 +168,9 @@ def main():
     # Adjust integral widths for better subscript tucking
     adjust_integral_widths(OUTPUT_DIR, smallop_w_ratio=0.89, largeop_w_ratio=0.68)
 
-    # Wire calligraphic in svg.js (Lete calligraphic in tex-calligraphic.js)
+    # Wire calligraphic AND script in svg.js
+    # tex-calligraphic.js = empty (mathcal uses Lete defaults from normal.js)
+    # script.js = NewCM ss01 alternates (for mathscr)
     svg_js = os.path.join(OUTPUT_DIR, 'cjs/svg.js')
     with open(svg_js) as f: sjs = f.read()
     if 'tex_calligraphic' not in sjs:
@@ -176,21 +178,27 @@ def main():
             'var delimiters_js_1 = require("./svg/delimiters.js");',
             'var tex_calligraphic_js_1 = require("./svg/tex-calligraphic.js");\n'
             'var tex_calligraphic_bold_js_1 = require("./svg/tex-calligraphic-bold.js");\n'
+            'var script_js_1 = require("./svg/script.js");\n'
+            'var script_bold_js_1 = require("./svg/script-bold.js");\n'
             'var delimiters_js_1 = require("./svg/delimiters.js");')
         sjs = sjs.replace(
             "'-dup': dup_js_1.dup\n    };",
             "'-dup': dup_js_1.dup,\n"
             "        '-tex-calligraphic': tex_calligraphic_js_1.texCalligraphic,\n"
-            "        '-tex-bold-calligraphic': tex_calligraphic_bold_js_1.texCalligraphicBold\n"
+            "        '-tex-bold-calligraphic': tex_calligraphic_bold_js_1.texCalligraphicBold,\n"
+            "        'script': script_js_1.script,\n"
+            "        'bold-script': script_bold_js_1.scriptBold\n"
             "    };")
         sjs = sjs.replace(
             "'-dup': 'D'\n    };",
             "'-dup': 'D',\n"
             "        '-tex-calligraphic': 'TC',\n"
-            "        '-tex-bold-calligraphic': 'TBC'\n"
+            "        '-tex-bold-calligraphic': 'TBC',\n"
+            "        'script': 'SC',\n"
+            "        'bold-script': 'BSC'\n"
             "    };")
         with open(svg_js, 'w') as f: f.write(sjs)
-        print("  Wired calligraphic in svg.js")
+        print("  Wired calligraphic+script in svg.js")
 
     # Script dupe removal from bold/italic/bold-italic
     _SCRIPT_CPS = list(range(0x1D49C, 0x1D504))
