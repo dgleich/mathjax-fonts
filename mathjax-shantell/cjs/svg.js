@@ -66,6 +66,10 @@ var ext_js_1 = require("./svg/ext.js");
 var mid_js_1 = require("./svg/mid.js");
 var up_js_1 = require("./svg/up.js");
 var dup_js_1 = require("./svg/dup.js");
+var tex_calligraphic_js_1 = require("./svg/tex-calligraphic.js");
+var tex_calligraphic_bold_js_1 = require("./svg/tex-calligraphic-bold.js");
+var script_js_1 = require("./svg/script.js");
+var script_bold_js_1 = require("./svg/script-bold.js");
 var delimiters_js_1 = require("./svg/delimiters.js");
 var Base = (0, common_js_1.CommonMathJaxShantellMixin)(FontData_js_1.SvgFontData);
 var MathJaxShantell = (function (_super) {
@@ -119,7 +123,11 @@ var MathJaxShantell = (function (_super) {
         '-ext': ext_js_1.ext,
         '-mid': mid_js_1.mid,
         '-up': up_js_1.up,
-        '-dup': dup_js_1.dup
+        '-dup': dup_js_1.dup,
+        '-tex-calligraphic': tex_calligraphic_js_1.texCalligraphic,
+        '-tex-bold-calligraphic': tex_calligraphic_bold_js_1.texCalligraphicBold,
+        'script': script_js_1.script,
+        'bold-script': script_bold_js_1.scriptBold
     };
     MathJaxShantell.variantCacheIds = {
         'normal': 'N',
@@ -147,7 +155,11 @@ var MathJaxShantell = (function (_super) {
         '-ext': 'E',
         '-mid': 'MD',
         '-up': 'U',
-        '-dup': 'D'
+        '-dup': 'D',
+        '-tex-calligraphic': 'TC',
+        '-tex-bold-calligraphic': 'TBC',
+        'script': 'SC',
+        'bold-script': 'BSC'
     };
     return MathJaxShantell;
 }(Base));
