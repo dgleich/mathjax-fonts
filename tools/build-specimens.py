@@ -101,7 +101,7 @@ SPECIMENS = [
         'dir': None,  # goes to repo root
         'outfile': 'specimen-default-mathjax.html',
         'title': 'Default MathJax (newCM)',
-        'bundle': 'https://cdn.jsdelivr.net/npm/mathjax@4/es5/tex-mml-svg.js',
+        'bundle': 'https://cdn.jsdelivr.net/npm/mathjax@4/tex-mml-svg.js',
         'css': '/* default MathJax — no custom CSS */',
         'family': 'serif',
     },
