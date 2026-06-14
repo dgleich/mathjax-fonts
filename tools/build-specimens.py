@@ -117,6 +117,9 @@ def main():
         result = result.replace('FONT_BUNDLE', spec['bundle'])
         result = result.replace('FONT_CSS', spec['css'])
         result = result.replace('FONT_FAMILY', spec['family'])
+        # CDN MathJax doesn't support matchFontHeight — only our custom bundles do
+        if spec.get('bundle', '').startswith('http'):
+            result = result.replace(', matchFontHeight: false', '')
 
         if spec.get('outfile'):
             outpath = os.path.join(FONTS_DIR, spec['outfile'])
