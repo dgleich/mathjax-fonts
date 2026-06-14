@@ -168,6 +168,42 @@ def main():
     # Adjust integral widths for better subscript tucking
     adjust_integral_widths(OUTPUT_DIR, smallop_w_ratio=0.89, largeop_w_ratio=0.68)
 
+    # Wire calligraphic in svg.js (Lete calligraphic in tex-calligraphic.js)
+    svg_js = os.path.join(OUTPUT_DIR, 'cjs/svg.js')
+    with open(svg_js) as f: sjs = f.read()
+    if 'tex_calligraphic' not in sjs:
+        sjs = sjs.replace(
+            'var delimiters_js_1 = require("./svg/delimiters.js");',
+            'var tex_calligraphic_js_1 = require("./svg/tex-calligraphic.js");\n'
+            'var tex_calligraphic_bold_js_1 = require("./svg/tex-calligraphic-bold.js");\n'
+            'var delimiters_js_1 = require("./svg/delimiters.js");')
+        sjs = sjs.replace(
+            "'-dup': dup_js_1.dup\n    };",
+            "'-dup': dup_js_1.dup,\n"
+            "        '-tex-calligraphic': tex_calligraphic_js_1.texCalligraphic,\n"
+            "        '-tex-bold-calligraphic': tex_calligraphic_bold_js_1.texCalligraphicBold\n"
+            "    };")
+        sjs = sjs.replace(
+            "'-dup': 'D'\n    };",
+            "'-dup': 'D',\n"
+            "        '-tex-calligraphic': 'TC',\n"
+            "        '-tex-bold-calligraphic': 'TBC'\n"
+            "    };")
+        with open(svg_js, 'w') as f: f.write(sjs)
+        print("  Wired calligraphic in svg.js")
+
+    # Script dupe removal from bold/italic/bold-italic
+    _SCRIPT_CPS = list(range(0x1D49C, 0x1D504))
+    _LETTERLIKE = [0x212C, 0x2130, 0x2131, 0x210B, 0x2110, 0x2112, 0x2133, 0x211B, 0x212F, 0x210A, 0x2134]
+    for variant in ['bold.js', 'italic.js', 'bold-italic.js']:
+        for js_subdir in ['cjs/svg', 'cjs/chtml']:
+            fpath = os.path.join(OUTPUT_DIR, js_subdir, variant)
+            if not os.path.exists(fpath): continue
+            with open(fpath) as f: content = f.read()
+            for cp in _SCRIPT_CPS + _LETTERLIKE:
+                content = re.sub(rf'    0x{cp:X}: \[[^\]]+\],?\n', '', content)
+            with open(fpath, 'w') as f: f.write(content)
+
     print(f"Done! Output in {OUTPUT_DIR}")
 
     # Scale uppercase Greek caps (must be last — after all other post-build steps)
