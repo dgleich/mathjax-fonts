@@ -110,6 +110,11 @@ MathJax = {
 
 <h1>Math Font Specimen — CMU Sans Serif + NewCM Sans Math <span style="font-size:0.5em;color:#999;" id="status">Loading...</span></h1>
 
+<div style="background:#f5f5f5; padding:8px 12px; border-radius:6px; margin:0.5em 0; display:flex; align-items:center; gap:12px;">
+  <label style="font-size:13px; white-space:nowrap;">Font size: <span id="sizeVal">17</span>px</label>
+  <input type="range" min="10" max="36" value="17" step="1" style="flex:1;" oninput="document.body.style.fontSize=this.value+'px'; document.getElementById('sizeVal').textContent=this.value;">
+</div>
+
 <nav>
   <a href="#alphabet">Alphabet</a>
   <a href="#typmatrix">Typography Matrix</a>
