@@ -1,5 +1,12 @@
 # MathJax Fonts — Development Rules
 
+## GOLDEN RULE
+
+**No hand tweaks to output files.** Everything must be reproducible from
+`build.py` scripts and automated tools. If a fix is needed, put it in
+`build.py` FIRST, then rebuild. Any manually patched CJS/JS file WILL
+be overwritten on the next rebuild.
+
 ## Working Notes
 
 All working notes, plans, and scratch files go in `~/.claude/projects/-work/notes/`,
