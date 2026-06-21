@@ -79,13 +79,19 @@ MathJax = {
     }
   },
   svg: { fontCache: 'global' },
+  options: {
+    enableEnrichment: false,
+  },
   startup: {
     ready() {
       MathJax.startup.defaultReady();
-      // Our custom bundles' startup.promise may never resolve,
-      // so just mark rendered after defaultReady completes.
-      document.getElementById('status').textContent = 'Rendered.';
-      document.getElementById('status').style.opacity = '0.4';
+      MathJax.startup.promise.then(function() {
+        document.getElementById('status').textContent = 'Rendered.';
+        document.getElementById('status').style.opacity = '0.4';
+      }).catch(function() {
+        document.getElementById('status').textContent = 'Rendered (with warnings).';
+        document.getElementById('status').style.opacity = '0.4';
+      });
     }
   }
 };
