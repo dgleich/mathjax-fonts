@@ -8,7 +8,7 @@
 @font-face { font-family: 'CMU Sans'; src: url('../fonts/cmu-sans/cmunsi.otf'); font-style: italic; }
 @font-face { font-family: 'CMU Sans'; src: url('../fonts/cmu-sans/cmunsx.otf'); font-weight: bold; }
 @font-face { font-family: 'CMU Sans'; src: url('../fonts/cmu-sans/cmunso.otf'); font-weight: bold; font-style: italic; }
-  :root { --font-body: "CMU Sans", sans-serif; --font-label: "CMU Sans Serif + NewCM Sans Math"; }
+  :root { --font-body: "CMU Sans", "Computer Modern Sans", sans-serif; --font-label: "CMU Sans Serif + NewCM Sans Math"; }
   body {
     font-family: var(--font-body);
     max-width: 850px;
@@ -104,6 +104,7 @@ MathJax = {
 };
 </script>
 <script id="MathJax-script" async src="tex-mml-svg-mathjax-lm-sans.js"></script>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/aaaakshat/cm-web-fonts@latest/font/Sans/cmun-sans.css">
 </head>
 
 <body>

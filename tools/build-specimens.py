@@ -35,8 +35,8 @@ SPECIMENS = [
 @font-face { font-family: 'CMU Sans'; src: url('../fonts/cmu-sans/cmunsi.otf'); font-style: italic; }
 @font-face { font-family: 'CMU Sans'; src: url('../fonts/cmu-sans/cmunsx.otf'); font-weight: bold; }
 @font-face { font-family: 'CMU Sans'; src: url('../fonts/cmu-sans/cmunso.otf'); font-weight: bold; font-style: italic; }""",
-        'family': '"CMU Sans", sans-serif',
-        # CMU Sans not on Google Fonts
+        'family': '"CMU Sans", "Computer Modern Sans", sans-serif',
+        'webfont_css': 'https://cdn.jsdelivr.net/gh/aaaakshat/cm-web-fonts@latest/font/Sans/cmun-sans.css',
     },
     {
         'dir': 'mathjax-noto-sans',
@@ -72,8 +72,8 @@ SPECIMENS = [
         'css': """@font-face { font-family: 'Concrete'; src: url('../fonts/concrete/CMUConcrete-Roman.otf'); }
 @font-face { font-family: 'Concrete'; src: url('../fonts/concrete/CMUConcrete-Italic.otf'); font-style: italic; }
 @font-face { font-family: 'Concrete'; src: url('../fonts/concrete/CMUConcrete-Bold.otf'); font-weight: bold; }""",
-        'family': '"Concrete", serif',
-        # CMU Concrete not on Google Fonts
+        'family': '"Concrete", "Computer Modern Concrete", serif',
+        'webfont_css': 'https://cdn.jsdelivr.net/gh/aaaakshat/cm-web-fonts@latest/font/Concrete/cmun-concrete.css',
     },
     {
         'dir': 'mathjax-shantell',
@@ -128,10 +128,13 @@ def main():
         result = result.replace('FONT_CSS', spec['css'])
         result = result.replace('FONT_FAMILY', spec['family'])
 
-        # Add Google Fonts link as fallback (loads when local fonts aren't available)
+        # Add webfont fallback (loads when local fonts aren't available)
         if spec.get('google_fonts'):
             gf_link = f'<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family={spec["google_fonts"]}&display=swap">'
             result = result.replace('</head>', f'{gf_link}\n</head>')
+        if spec.get('webfont_css'):
+            wf_link = f'<link rel="stylesheet" href="{spec["webfont_css"]}">'
+            result = result.replace('</head>', f'{wf_link}\n</head>')
 
         if spec.get('outfile'):
             outpath = os.path.join(FONTS_DIR, spec['outfile'])

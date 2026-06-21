@@ -7,7 +7,7 @@
   @font-face { font-family: 'Concrete'; src: url('../fonts/concrete/CMUConcrete-Roman.otf'); }
 @font-face { font-family: 'Concrete'; src: url('../fonts/concrete/CMUConcrete-Italic.otf'); font-style: italic; }
 @font-face { font-family: 'Concrete'; src: url('../fonts/concrete/CMUConcrete-Bold.otf'); font-weight: bold; }
-  :root { --font-body: "Concrete", serif; --font-label: "CMU Concrete + Euler Math"; }
+  :root { --font-body: "Concrete", "Computer Modern Concrete", serif; --font-label: "CMU Concrete + Euler Math"; }
   body {
     font-family: var(--font-body);
     max-width: 850px;
@@ -103,6 +103,7 @@ MathJax = {
 };
 </script>
 <script id="MathJax-script" async src="tex-mml-svg-mathjax-concrete-euler.js"></script>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/aaaakshat/cm-web-fonts@latest/font/Concrete/cmun-concrete.css">
 </head>
 
 <body>
