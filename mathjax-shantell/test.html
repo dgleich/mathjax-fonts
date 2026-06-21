@@ -2,11 +2,11 @@
 <html lang="en">
 <head>
 <meta charset="utf-8">
-<title>Math Font Specimen — Shantell Sans + Latin Modern Math</title>
+<title>Math Font Specimen — Shantell Sans + Noto Sans Math + SCP Greek</title>
 <style>
   @font-face { font-family: 'Shantell Sans'; src: url('../fonts/shantell/ShantellSans[BNCE,INFM,SPAC,wght].ttf'); }
 @font-face { font-family: 'Shantell Sans'; src: url('../fonts/shantell/ShantellSans-Italic[BNCE,INFM,SPAC,wght].ttf'); font-style: italic; }
-  :root { --font-body: "Shantell Sans", cursive; --font-label: "Shantell Sans + Latin Modern Math"; }
+  :root { --font-body: "Shantell Sans", cursive; --font-label: "Shantell Sans + Noto Sans Math + SCP Greek"; }
   body {
     font-family: var(--font-body);
     max-width: 850px;
@@ -102,11 +102,12 @@ MathJax = {
 };
 </script>
 <script id="MathJax-script" async src="tex-mml-svg-mathjax-shantell.js"></script>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Shantell+Sans:ital,wght@0,400;0,700;1,400;1,700&display=swap">
 </head>
 
 <body>
 
-<h1>Math Font Specimen — Shantell Sans + Latin Modern Math <span style="font-size:0.5em;color:#999;" id="status">Loading...</span></h1>
+<h1>Math Font Specimen — Shantell Sans + Noto Sans Math + SCP Greek <span style="font-size:0.5em;color:#999;" id="status">Loading...</span></h1>
 
 <div style="background:#f5f5f5; padding:8px 12px; border-radius:6px; margin:0.5em 0; display:flex; align-items:center; gap:12px;">
   <label style="font-size:13px; white-space:nowrap;">Font size: <span id="sizeVal">17</span>px</label>

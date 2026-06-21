@@ -8,7 +8,7 @@
 @font-face { font-family: 'Libertinus'; src: url('../fonts/libertinus/LibertinusSerif-Italic.otf'); font-style: italic; }
 @font-face { font-family: 'Libertinus'; src: url('../fonts/libertinus/LibertinusSerif-Bold.otf'); font-weight: bold; }
 @font-face { font-family: 'Libertinus'; src: url('../fonts/libertinus/LibertinusSerif-BoldItalic.otf'); font-weight: bold; font-style: italic; }
-  :root { --font-body: "Libertinus", serif; --font-label: "Libertinus Serif + Libertinus Math"; }
+  :root { --font-body: "Libertinus", "Libertinus Serif", serif; --font-label: "Libertinus Serif + Libertinus Math"; }
   body {
     font-family: var(--font-body);
     max-width: 850px;
@@ -104,6 +104,7 @@ MathJax = {
 };
 </script>
 <script id="MathJax-script" async src="tex-mml-svg-mathjax-libertinus.js"></script>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Libertinus+Serif:ital,wght@0,400;0,700;1,400;1,700&display=swap">
 </head>
 
 <body>
