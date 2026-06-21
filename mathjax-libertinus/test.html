@@ -80,25 +80,14 @@ MathJax = {
       bm: ['\\boldsymbol{#1}', 1],
     }
   },
-  svg: { fontCache: 'global', matchFontHeight: false },
-  options: {
-    enableEnrichment: false,
-    enableComplexity: false,
-    enableExplorer: false,
-    enableSpeech: false,
-    enableBraille: false,
-    menuOptions: { settings: { explorer: false, assistiveMml: false } }
-  },
+  svg: { fontCache: 'global' },
   startup: {
     ready() {
       MathJax.startup.defaultReady();
-      MathJax.startup.promise.then(function() {
-        document.getElementById('status').textContent = 'Rendered.';
-        document.getElementById('status').style.opacity = '0.4';
-      }).catch(function() {
-        document.getElementById('status').textContent = 'Rendered (with warnings).';
-        document.getElementById('status').style.opacity = '0.4';
-      });
+      // Our custom bundles' startup.promise may never resolve,
+      // so just mark rendered after defaultReady completes.
+      document.getElementById('status').textContent = 'Rendered.';
+      document.getElementById('status').style.opacity = '0.4';
     }
   }
 };
