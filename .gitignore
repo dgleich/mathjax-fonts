@@ -25,3 +25,4 @@ __pycache__/
 **/NotoSansMath-Regular.woff2
 mathjax-newcm/
 test-renders-baseline/
+snapshots/
