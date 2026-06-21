@@ -108,7 +108,7 @@ def main():
         x_height=x_height,
         text_font_paths=text_font_paths,
         greek_from_text=True,
-        italic_lsb=0,
+        italic_lsb=40,  # monospace font has large LSBs; 0 is too aggressive (V overlaps integrals)
     )
 
     for delim_path in [
@@ -132,7 +132,7 @@ def main():
     print("  Adjusted overbrace/underbrace label spacing (+0.35em)")
     
     # Adjust integral widths for better subscript tucking
-    adjust_integral_widths(OUTPUT_DIR, smallop_w_ratio=0.75, smallop_ic=0.15, largeop_w_ratio=0.64, largeop_ic=0.37)
+    adjust_integral_widths(OUTPUT_DIR, smallop_w_ratio=0.70, smallop_ic=0.15, largeop_w_ratio=0.64, largeop_ic=0.37)
 
     shutil.rmtree(tmpdir, ignore_errors=True)
 

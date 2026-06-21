@@ -162,7 +162,7 @@ def main():
             print(f"  Applied angle-based sk to {gcount} Greek in {js_subdir}/normal.js")
 
     # Adjust integral widths for better subscript tucking
-    adjust_integral_widths(OUTPUT_DIR, smallop_w_ratio=0.80, smallop_ic=0.15, largeop_w_ratio=0.64, largeop_ic=0.37)
+    adjust_integral_widths(OUTPUT_DIR, smallop_w_ratio=0.70, smallop_ic=0.15, largeop_w_ratio=0.64, largeop_ic=0.37)
 
     # Clean up temp files
     import shutil

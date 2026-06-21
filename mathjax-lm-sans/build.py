@@ -285,7 +285,7 @@ def main():
     print("  Adjusted overbrace/underbrace label spacing (+0.35em)")
 
     # Adjust integral widths for better subscript tucking
-    adjust_integral_widths(OUTPUT_DIR, smallop_w_ratio=0.70, smallop_ic=0.03, largeop_w_ratio=0.73, largeop_ic=0.25)
+    adjust_integral_widths(OUTPUT_DIR, smallop_w_ratio=0.75, smallop_ic=0.03, largeop_w_ratio=0.73, largeop_ic=0.25)
 
     # Tighten \sum, \prod limits in smallop (reduce width to tuck sub/super closer)
     for js_path in [os.path.join(OUTPUT_DIR, "cjs/svg/smallop.js")]:
