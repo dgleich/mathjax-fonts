@@ -4,7 +4,7 @@ const TerserPlugin = require('terser-webpack-plugin');
 module.exports = {
   name: 'tex-mml-svg-mathjax-concrete-euler-nosre',
   entry: path.resolve(__dirname, 'tex-mml-svg-mathjax-concrete-euler-nosre.js'),
-  output: { path: path.resolve(__dirname, '..'), filename: 'tex-mml-svg-mathjax-concrete-euler-nosre.js' },
+  output: { path: path.resolve(__dirname, '..', '..'), filename: 'tex-mml-svg-mathjax-concrete-euler-nosre.js' },
   target: ['web', 'es5'],
   plugins: [
     new webpack.NormalModuleReplacementPlugin(/#default-font/, function(r) { r.request = r.request.replace(/#default-font/, path.resolve(__dirname, '..', 'cjs')); }),

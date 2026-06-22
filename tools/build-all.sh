@@ -53,7 +53,7 @@ for font in $FONTS; do
     if [ -f "$font_dir/build/webpack-nosre.config.cjs" ]; then
         echo "  Building nosre bundle..."
         (cd "$font_dir/build" && npx webpack --config webpack-nosre.config.cjs 2>&1 | tail -1)
-        nosre=$(ls "$font_dir"/tex-mml-svg-*-nosre.js 2>/dev/null | head -1)
+        nosre=$(ls "$FONTS_DIR"/tex-mml-svg-*${font#mathjax-}*-nosre.js 2>/dev/null | head -1)
         if [ -n "$nosre" ]; then
             sz=$(stat -c%s "$nosre" | numfmt --to=iec 2>/dev/null || stat -c%s "$nosre")
             echo "  OK: $(basename "$nosre") ($sz)"
